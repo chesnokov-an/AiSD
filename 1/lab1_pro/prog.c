@@ -16,14 +16,21 @@ int main(){
 
 	char *s_input_file = readline("Введите входной файл: ");
 	FILE *input_file = fopen(s_input_file, "rb");
+	free(s_input_file);
+
+	if(!input_file){
+		fprintf(stderr, "Неизвестный файл.\n");
+		free(meta);
+		return 0;
+	}
 
 	err flag = input_meta(input_file, meta);
-	free(s_input_file);
 
 	if(flag != ERR_OK){
 		if(flag == ERR_MEM){
 			fprintf(stderr, "Ошибка выделения памяти.\n");
 		}
+		free(meta);
 		fclose(input_file);
 		return (int)flag;
 	}
@@ -40,6 +47,8 @@ int main(){
 		else{
 			fprintf(stderr, "Некорректное значение в файле.");
 		}
+		clear_meta(meta);
+		free(meta);
 		fclose(input_file);
 		fclose(output_file);
 		return (int)flag;

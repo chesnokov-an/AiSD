@@ -9,9 +9,9 @@ typedef struct Meta{
 	unsigned int *offset;
 } Meta;
 
-err input_meta(Meta *);
-void output_meta(const char *, Meta *);
-void output_matrix(const char *, Meta *);
+err input_meta(FILE *, Meta *);
+void output_meta(FILE *, Meta *);
+err output_matrix(FILE *, FILE *, Meta *);
 void clear_meta(Meta *);
 
 #endif

@@ -6,13 +6,19 @@ int main(){
 	Matrix *matrix = NULL;
 	matrix = calloc(1, sizeof(Matrix));
 
+	if(!matrix){
+		fprintf(stderr, "Ошибка выделения памяти.\n");
+		return (int)ERR_MEM;
+	}
+
 	err flag = input_matrix(matrix);
 
 	if(flag != ERR_OK){
 		if(flag == ERR_MEM){
 			fprintf(stderr, "Ошибка выделения памяти.\n");
 		}
-		return (int)ERR_EOF;
+		free(matrix);
+		return (int)flag;
 	}
 	
 	Line *line = ind_task(matrix);

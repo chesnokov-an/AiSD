@@ -1,7 +1,7 @@
 CC = cc
-CFLAGS = -c -Wall -Wextra -Werror -g
+CFLAGS = -c -Wall -Wextra -Werror -g -lreadline
 TARGET = prog
-
+LDFLAGS = -lreadline
 OBJDIR = build
 OBJ = $(addprefix $(OBJDIR)/, $(patsubst %.c, %.o, $(wildcard *.c)))
 
@@ -14,7 +14,7 @@ $(OBJDIR)/%.o: %.c
 	$(CC) $(CFLAGS) $< -o $@
 
 $(TARGET): $(OBJ)
-	$(CC) -o $@ $^
+	$(CC) $(LDFLAGS) -o $@ $^
 
 clean:
 	rm -Rf $(OBJDIR)

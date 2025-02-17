@@ -30,7 +30,6 @@ int main(){
 		if(flag == ERR_MEM){
 			fprintf(stderr, "Ошибка выделения памяти.\n");
 		}
-		free(meta);
 		fclose(input_file);
 		return (int)flag;
 	}

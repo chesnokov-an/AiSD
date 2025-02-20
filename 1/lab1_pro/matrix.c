@@ -76,6 +76,11 @@ err get_elem(FILE *file, unsigned int offset, int *data){
 	return flag;
 }
 
+void out_elem(FILE *file, unsigned int offset, int *data){
+	fseek(file, offset, SEEK_SET);
+	fwrite(data, 1, sizeof(int), file);
+}
+
 err output_matrix(FILE *input_file, FILE *output_file, Meta *meta){
 	err flag = ERR_OK;
 
@@ -108,41 +113,30 @@ err output_matrix(FILE *input_file, FILE *output_file, Meta *meta){
 	for(unsigned int i = 0; i < meta->m; i++){
 		int first_elem = 0;
 		flag = get_elem(input_file, *(meta->offset + i), &first_elem);
-		if(flag != ERR_OK){
-			if(flag == ERR_MEM){
-				fprintf(stderr, "Не удалось выделить память.");
-			}
-			else{
-				fprintf(stderr, "Некорректное значение в файле.");
-			}
-			return flag;
-		}
+		if(flag != ERR_OK){ goto clear_and_return; }
 
 		int first_sum = sum_of_digits(first_elem);
 		int res_sum = 0;
 		for(unsigned int j = 0; j < *(meta->n + i); j++){
 			int current = 0;
 			flag = get_elem(input_file, *(meta->offset + i) + j*sizeof(int), &current);
-			if(flag != ERR_OK){
-				if(flag == ERR_MEM){
-					fprintf(stderr, "Не удалось выделить память.");
-				}
-				else{
-					fprintf(stderr, "Некорректное значение в файле.");
-				}
-				return flag;
-			}
+			if(flag != ERR_OK){ goto clear_and_return; }
 
 			if(sum_of_digits(current) == first_sum){
 				res_sum += current;
 			}
-			fseek(output_file, *(res->offset) + i*sizeof(int), SEEK_SET);
-			fwrite(&res_sum, 1, sizeof(int), output_file);
+			out_elem(output_file, *(res->offset) + i*sizeof(int), &res_sum);
 		}
 	}
 	goto clear_and_return;
 
 clear_and_return:
+	if(flag == ERR_MEM){
+		fprintf(stderr, "Не удалось выделить память.");
+	}
+	else{
+		fprintf(stderr, "Некорректное значение в файле.");
+	}
 	clear_meta(res);
 	free(res);
 	return flag;

@@ -17,7 +17,6 @@ int main(){
 		if(flag == ERR_MEM){
 			fprintf(stderr, "Ошибка выделения памяти.\n");
 		}
-		//free(matrix);
 		return (int)flag;
 	}
 	
@@ -32,3 +31,4 @@ int main(){
 
 	return 0;
 }
+

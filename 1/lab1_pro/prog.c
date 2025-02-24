@@ -30,6 +30,9 @@ int main(){
 		if(flag == ERR_MEM){
 			fprintf(stderr, "Ошибка выделения памяти.\n");
 		}
+		if(flag == ERR_VAL){
+			fprintf(stderr, "Файл не подходит под критерии.\n");
+		}
 		fclose(input_file);
 		return (int)flag;
 	}

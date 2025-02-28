@@ -1,38 +1,50 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <stdbool.h>
 #include "err.h"
+#include "stack.h"
 
 typedef struct Stack{
-	unsigned top;
-	unsigned capacity;
-	int *array;
+	size_t top;
+	size_t capacity;
+	char **array;
 } Stack;
 
 
 Stack *stack_new(){
-	return (Stack *) calloc(1, sizeof(Stack));
+	Stack *stack = (Stack *)calloc(1, sizeof(Stack));
+	stack->capacity = 100;
+	stack->array = calloc(100, sizeof(char*));
+	return stack;
 }
 
 void clear_stack(Stack *stack){
+
 	if(!stack){
 		return;
 	}
 	if(stack->array){
+		for(size_t i = stack->top-1; i > 0; i--){
+			if(stack->array[i] != NULL){
+				free(stack->array[i]);
+			}
+		}
+		if(stack->array[0] != NULL){
+			free(stack->array[0]);
+		}
 		free(stack->array);
 	}
 	free(stack);
 }
 
-bool is_full(Stack *stack){
+char is_full(Stack *stack){
 	return (stack->top == stack->capacity);
 }
 
-bool is_empty(Stack *stack){
+char is_empty(Stack *stack){
 	return (stack->top == 0);
 }
 
-err stack_push(Stack *stack, int input){
+err push(Stack *stack, char *input){
 	if(!stack || !stack->array){
 		return ERR_NULL;
 	}
@@ -44,30 +56,33 @@ err stack_push(Stack *stack, int input){
 	return ERR_OK;
 }
 
-err stack_pop(Stack *stack, int *output){
+err peek(Stack *stack, char **output){
 	if(!stack || !stack->array){
 		return ERR_NULL;
 	}
 	if(is_empty(stack)){
 		return ERR_VAL;
 	}
-	stack->top -= 1;
-	*output = stack->array[stack->top];
+	*output = stack->array[stack->top - 1];
 	return ERR_OK;
+}
 
+err pop(Stack *stack, char **output){
+	err flag = peek(stack, output);
+	if(flag != ERR_OK){
+		return flag;
+	}
+	stack->top -= 1;
+	return ERR_OK;
 }
 
 void stack_print(const Stack *stack){
-	for(unsigned i = stack->top - 1; i > 0; --i){
-		printf("%d ", stack->array[stack->top]);
+	if(!stack){
+		return;
 	}
-	printf("%d\n", stack->array[stack->top]);
+	for(size_t i = stack->top-1; i > 0; i--){
+		printf("%s ", stack->array[i]);
+	}
+	printf("%s\n", stack->array[0]);
 }
-
-
-
-
-
-
-
 

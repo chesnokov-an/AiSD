@@ -1,10 +1,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "err.h"
+#include "stack.h"
 
 typedef struct Item{
-	int data;
-	Item *next;
+	char *data;
+	struct Item *next;
 } Item;
 
 typedef struct Stack{
@@ -20,16 +21,17 @@ void clear_stack(Stack *stack){
 	if(!stack){
 		return;
 	}
-	Item *item = stack->top, prev_item = NULL;
+	Item *item = stack->top, *prev_item = NULL;
 	while(item){
 		prev_item = item;
 		item = item->next;
+		free(prev_item->data);
 		free(prev_item);
 	}
 	free(stack);
 }
 
-err stack_push(Stack *stack, int input){
+err push(Stack *stack, char *input){
 	if(!stack){
 		return ERR_NULL;
 	}
@@ -44,7 +46,7 @@ err stack_push(Stack *stack, int input){
 	return ERR_OK;
 }
 
-err stack_pop(Stack *stack, int *output){
+err peek(Stack *stack, char **output){
 	if(!stack){
 		return ERR_NULL;
 	}
@@ -52,6 +54,14 @@ err stack_pop(Stack *stack, int *output){
 		return ERR_VAL;
 	}
 	*output = stack->top->data;
+	return ERR_OK;
+}
+
+err pop(Stack *stack, char **output){
+	err flag = peek(stack, output);
+	if(flag != ERR_OK){
+		return flag;
+	}
 	Item *item = stack->top;
 	stack->top = item->next;
 	free(item);
@@ -64,16 +74,9 @@ void stack_print(const Stack *stack){
 	}
 	Item *item = stack->top;
 	while(item){
-		printf("%d ", item->data);
+		printf("%s", item->data);
 		item = item->next;
 	}
 	printf("\n");
 }
-
-
-
-
-
-
-
 

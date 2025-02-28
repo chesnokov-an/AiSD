@@ -7,8 +7,11 @@ typedef struct Stack Stack;
 
 Stack *stack_new();
 void clear_stack(Stack *stack);
-err stack_push(Stack *stack, int input);
-err stack_pop(Stack *stack, int *output);
+err push(Stack *stack, char *input);
+err pop(Stack *stack, char **output);
+err peek(Stack *stack, char **output);
 void stack_print(const Stack *stack);
+char is_empty(Stack *stack);
+char is_full(Stack *stack);
 
 #endif

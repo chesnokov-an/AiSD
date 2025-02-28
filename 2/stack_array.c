@@ -12,6 +12,7 @@ typedef struct Stack{
 
 Stack *stack_new(){
 	Stack *stack = (Stack *)calloc(1, sizeof(Stack));
+	stack->top = 0;
 	stack->capacity = 100;
 	stack->array = calloc(100, sizeof(char*));
 	return stack;
@@ -23,13 +24,10 @@ void clear_stack(Stack *stack){
 		return;
 	}
 	if(stack->array){
-		for(size_t i = stack->top-1; i > 0; i--){
-			if(stack->array[i] != NULL){
-				free(stack->array[i]);
+		for(size_t i = stack->top; i > 0; i--){
+			if(stack->array[i-1] != NULL){
+				free(stack->array[i-1]);
 			}
-		}
-		if(stack->array[0] != NULL){
-			free(stack->array[0]);
 		}
 		free(stack->array);
 	}
@@ -77,12 +75,12 @@ err pop(Stack *stack, char **output){
 }
 
 void stack_print(const Stack *stack){
-	if(!stack){
+	if(!stack || !stack->array){
 		return;
 	}
-	for(size_t i = stack->top-1; i > 0; i--){
-		printf("%s ", stack->array[i]);
+	for(size_t i = stack->top; i > 0; i--){
+		printf("%s ", stack->array[i-1]);
 	}
-	printf("%s\n", stack->array[0]);
+	printf("\n");
 }
 

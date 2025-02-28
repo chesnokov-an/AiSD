@@ -4,17 +4,15 @@
 #include <string.h>
 #include "err.h"
 #include "stack.h"
-/*
-char is_operand(char data){
-	printf("%c", (char)(isalpha(data) != 0));
-	return (char)(isalpha(data) != 0);
+
+int is_operand(char data){
+	return isalpha(data);
 }
 
-char is_operator(char data){
-	printf("%c", (char)(strchr("+-*", data) == NULL));
-	return (char)(strchr("+-*", data) != NULL);
+int is_operator(char data){
+	return (strchr("+-*/", data) != NULL);
 }
-*/
+
 
 int main(){
 	Stack *stack = stack_new();
@@ -25,11 +23,11 @@ int main(){
 			data = getchar();
 			continue;
 		}
-		if(!(isalpha(data) || strchr("+-/*", data))){
+		if(!(is_operand(data) || is_operator(data))){
 			flag = ERR_VAL;
 			break;
 		}
-		if(isalpha(data)){
+		if(is_operand(data)){
 			char *operand = calloc(2, sizeof(char));
 			operand[0] = data;
 			flag = push(stack, operand);

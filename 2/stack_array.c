@@ -19,7 +19,6 @@ Stack *stack_new(){
 }
 
 void clear_stack(Stack *stack){
-
 	if(!stack){
 		return;
 	}
@@ -34,12 +33,12 @@ void clear_stack(Stack *stack){
 	free(stack);
 }
 
-char is_full(Stack *stack){
-	return (stack->top == stack->capacity);
+err is_full(Stack *stack){
+	return (stack->top == stack->capacity) ? ERR_EMPTY : ERR_OK;
 }
 
-char is_empty(Stack *stack){
-	return (stack->top == 0);
+err is_empty(Stack *stack){
+	return (stack->top == 0) ? ERR_FULL : ERR_OK;
 }
 
 err push(Stack *stack, char *input){
@@ -47,31 +46,29 @@ err push(Stack *stack, char *input){
 		return ERR_NULL;
 	}
 	if(is_full(stack)){
-		return ERR_VAL;
+		return ERR_FULL;
 	}
 	stack->array[stack->top] = input;
 	stack->top += 1;
 	return ERR_OK;
 }
 
-err peek(Stack *stack, char **output){
-	if(!stack || !stack->array){
-		return ERR_NULL;
+char *peek(Stack *stack){
+	char *output = NULL;
+	if(!stack || !stack->array || is_empty(stack)){
+		return NULL;
 	}
-	if(is_empty(stack)){
-		return ERR_VAL;
-	}
-	*output = stack->array[stack->top - 1];
-	return ERR_OK;
+	output = stack->array[stack->top - 1];
+	return output;
 }
 
-err pop(Stack *stack, char **output){
-	err flag = peek(stack, output);
-	if(flag != ERR_OK){
-		return flag;
+char *pop(Stack *stack){
+	char *output = peek(stack);
+	if(!output){
+		return NULL;
 	}
 	stack->top -= 1;
-	return ERR_OK;
+	return output;
 }
 
 void stack_print(const Stack *stack){

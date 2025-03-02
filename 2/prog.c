@@ -38,12 +38,13 @@ int main(){
 			continue;
 		}
 		char *operand1 = NULL, *operand2 = NULL;
-		flag = pop(stack, &operand1);
-		if(flag != ERR_OK){
+		operand1 = pop(stack);
+		if(!operand1){
 			break;
 		}
-		flag = pop(stack, &operand2);
-		if(flag != ERR_OK){
+		operand2 = pop(stack);
+		if(!operand2){
+			free(operand1);
 			break;
 		}
 		char *res = calloc(strlen(operand1) + strlen(operand2) + 4, sizeof(char));

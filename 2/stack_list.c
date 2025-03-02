@@ -46,26 +46,24 @@ err push(Stack *stack, char *input){
 	return ERR_OK;
 }
 
-err peek(Stack *stack, char **output){
-	if(!stack){
-		return ERR_NULL;
+char *peek(Stack *stack){
+	char *output = NULL;
+	if(!stack || !stack->top){
+		return NULL;
 	}
-	if(!stack->top){
-		return ERR_VAL;
-	}
-	*output = stack->top->data;
-	return ERR_OK;
+	output = stack->top->data;
+	return output;
 }
 
-err pop(Stack *stack, char **output){
-	err flag = peek(stack, output);
-	if(flag != ERR_OK){
-		return flag;
+char *pop(Stack *stack){
+	char *output = peek(stack);
+	if(!output){
+		return NULL;
 	}
 	Item *item = stack->top;
 	stack->top = item->next;
 	free(item);
-	return ERR_OK;
+	return output;
 }
 
 void stack_print(const Stack *stack){

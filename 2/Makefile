@@ -1,4 +1,4 @@
 array:
-	cc -o prog prog.c stack_array.c -g -Wall -Wextra -Werror
+	cc -o prog prog.c stack_array.c -lreadline -g -Wall -Wextra -Werror
 list:
-	cc -o prog prog.c stack_list.c -g -Wall -Wextra -Werror
+	cc -o prog prog.c stack_list.c -lreadline -g -Wall -Wextra -Werror

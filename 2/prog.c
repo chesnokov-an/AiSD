@@ -5,9 +5,10 @@
 #include <readline/readline.h>
 #include "err.h"
 #include "stack.h"
+#include "expression.h"
 
 #define PROMPT "> "
-
+/*
 int is_operand(char *data){
 	for(size_t i = 0; i < strlen(data); i++){
 		if(!isalpha(data[i])){
@@ -21,7 +22,7 @@ int is_operator(char *data){
 	if(strlen(data) != 1){
 		return 0;
 	}
-	return (strchr("+-*/", data[0]) != NULL);
+	return (strchr("+-*", data[0]) != NULL);
 }
 
 char *expression(char *operand1, char *operand2, char operator){
@@ -39,52 +40,7 @@ char *expression(char *operand1, char *operand2, char operator){
 	free(operand2);
 	return res;
 }
-
-err show_infix(const char *input){
-	char *s = strdup(input);
-	Stack *stack = stack_new();
-	err flag = ERR_OK;
-	char *data = strtok(s, "\t ");
-	while(data != NULL){
-		if(!(is_operand(data) || is_operator(data))){
-			flag = ERR_VAL;
-			break;
-		}
-		if(is_operand(data)){
-			char *operand = calloc(strlen(data) + 1, sizeof(char));
-			memcpy(operand, data, strlen(data) * sizeof(char));
-			flag = push(stack, operand);
-			if(flag != ERR_OK){
-				break;
-			}
-			data = strtok(NULL, "\t ");
-			continue;
-		}
-		char *operand1 = NULL, *operand2 = NULL;
-		operand1 = pop(stack);
-		if(!operand1){
-			break;
-		}
-		operand2 = pop(stack);
-		if(!operand2){
-			free(operand1);
-			break;
-		}
-		char *res = expression(operand1, operand2, data[0]);
-		if(!res){
-			break;
-		}
-		flag = push(stack, res);
-		if(flag != ERR_OK){
-			break;
-		}
-		data = strtok(NULL, "\t ");
-	}
-	free(s);
-	stack_print(stack);
-	clear_stack(stack);
-	return flag;
-}
+*/
 
 int main(){
 	rl_inhibit_completion = 1;

@@ -13,10 +13,13 @@ int main(){
 	rl_inhibit_completion = 1;
 	char *input = readline(PROMPT);
 	err flag = ERR_OK;
-	while((input != NULL) && (flag == ERR_OK)){
+	while(input != NULL){
 		flag = show_infix(input);
 		free(input);
 		input = readline(PROMPT);
+	}
+	if(flag != ERR_OK){
+		free(input);
 	}
 
 	return 0;

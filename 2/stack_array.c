@@ -13,8 +13,8 @@ typedef struct Stack{
 Stack *stack_new(){
 	Stack *stack = (Stack *)calloc(1, sizeof(Stack));
 	stack->top = 0;
-	stack->capacity = 100;
-	stack->array = calloc(100, sizeof(char*));
+	stack->capacity = 3;
+	stack->array = calloc(3, sizeof(char*));
 	return stack;
 }
 

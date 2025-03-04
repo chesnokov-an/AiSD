@@ -7,7 +7,7 @@ TARGET_2 = list
 OBJDIR = build
 OBJ = $(addprefix $(OBJDIR)/, $(patsubst %.c, %.o, $(filter-out stack_%, $(wildcard *.c))))
 
-all: $(OBJDIR) $(TARGET_1) $(TARGET_2)
+all: $(TARGET_1) $(TARGET_2)
 
 $(OBJDIR):
 	mkdir $(OBJDIR)
@@ -21,11 +21,11 @@ $(OBJDIR)/$(TARGET_1).o: stack_$(TARGET_1).c
 $(OBJDIR)/$(TARGET_2).o: stack_$(TARGET_2).c
 	$(CC) $(CFLAGS) $< -o $@
 
-$(TARGET_1): $(OBJ) $(OBJDIR)/$(TARGET_1).o
-	$(CC) -o $@ $^ $(LDFLAGS)
+$(TARGET_1): $(OBJDIR) $(OBJ) $(OBJDIR)/$(TARGET_1).o
+	$(CC) -o $@ $(filter %.o,$^) $(LDFLAGS)
 
-$(TARGET_2): $(OBJ) $(OBJDIR)/$(TARGET_2).o
-	$(CC) -o $@ $^ $(LDFLAGS)
+$(TARGET_2): $(OBJDIR) $(OBJ) $(OBJDIR)/$(TARGET_2).o
+	$(CC) -o $@ $(filter %.o,$^) $(LDFLAGS)
 
 clean:
 	rm -Rf $(OBJDIR)

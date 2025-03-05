@@ -17,6 +17,10 @@ Stack *stack_new(){
 	return (Stack *) calloc(1, sizeof(Stack));
 }
 
+Stack *stack_new_dialog(){
+	return stack_new();
+}
+
 void clear_stack(Stack *stack){
 	if(!stack){
 		return;
@@ -77,4 +81,3 @@ void stack_print(const Stack *stack){
 	}
 	printf("\n");
 }
-

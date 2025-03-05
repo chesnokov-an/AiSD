@@ -2,8 +2,10 @@
 #include <ctype.h>
 #include <string.h>
 #include <stdlib.h>
+#include "input_int.h"
 #include "err.h"
 #include "stack.h"
+
 int is_operand(char *data){
 	for(size_t i = 0; i < strlen(data); i++){
 		if(!isalpha(data[i])){
@@ -37,9 +39,9 @@ char *post_to_inf(char *operand1, char *operand2, char operator){
 }
 
 err show_infix(const char *input){
-	char *s = strdup(input);
-	Stack *stack = stack_new();
 	err flag = ERR_OK;
+	Stack *stack = stack_new_dialog();
+	char *s = strdup(input);
 	char *data = strtok(s, "\t ");
 	while(data != NULL){
 		if(!(is_operand(data) || is_operator(data))){
@@ -51,6 +53,7 @@ err show_infix(const char *input){
 			memcpy(operand, data, strlen(data) * sizeof(char));
 			flag = push(stack, operand);
 			if(flag != ERR_OK){
+				free(operand);
 				break;
 			}
 			data = strtok(NULL, "\t ");
@@ -81,4 +84,3 @@ err show_infix(const char *input){
 	clear_stack(stack);
 	return flag;
 }
-

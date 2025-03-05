@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <limits.h>
 #include "err.h"
+#include "input_int.h"
 #include "stack.h"
 
 typedef struct Stack{
@@ -10,12 +12,24 @@ typedef struct Stack{
 } Stack;
 
 
-Stack *stack_new(){
+Stack *stack_new(int capacity){
+	if(capacity <= 0){
+		return NULL;
+	}
 	Stack *stack = (Stack *)calloc(1, sizeof(Stack));
 	stack->top = 0;
-	stack->capacity = 3;
-	stack->array = calloc(3, sizeof(char*));
+	stack->capacity = capacity;
+	stack->array = calloc(capacity, sizeof(char*));
 	return stack;
+}
+
+Stack *stack_new_dialog(){
+	int capacity = 0;
+	err flag = input_int(&capacity, 1, INT_MAX);
+	if(flag != ERR_OK){
+		return NULL;
+	}
+	return stack_new(capacity);
 }
 
 void clear_stack(Stack *stack){
@@ -80,4 +94,3 @@ void stack_print(const Stack *stack){
 	}
 	printf("\n");
 }
-

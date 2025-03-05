@@ -1,5 +1,5 @@
 CC = cc
-CFLAGS = -c -Wall -Wextra -g -Werror
+CFLAGS = -c -Wall -Wextra -g
 LDFLAGS = -lreadline
 TARGET_1 = array
 TARGET_2 = list

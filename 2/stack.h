@@ -5,7 +5,7 @@
 
 typedef struct Stack Stack;
 
-Stack *stack_new();
+Stack *stack_new_dialog();
 void clear_stack(Stack *stack);
 err push(Stack *stack, char *input);
 char *pop(Stack *stack);

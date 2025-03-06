@@ -1,0 +1,9 @@
+# Object files
+*.o
+
+# Build directory
+build/
+
+# executable files
+array
+list

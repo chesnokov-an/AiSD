@@ -25,6 +25,7 @@ Stack *stack_new(int capacity){
 
 Stack *stack_new_dialog(){
 	int capacity = 0;
+	printf("Введите размер стека: ");
 	err flag = input_int(&capacity, 1, INT_MAX);
 	if(flag != ERR_OK){
 		return NULL;

@@ -24,6 +24,9 @@ int is_operator(char *data){
 
 char *post_to_inf(char *operand1, char *operand2, char operator){
 	char *res = calloc(strlen(operand1) + strlen(operand2) + 8, sizeof(char));
+	if(!res){
+		return NULL;
+	}
 	res[0] = '(';
 	res[1] = ' ';
 	memcpy(res + 2, operand2, strlen(operand2) * sizeof(char));
@@ -46,6 +49,7 @@ err show_infix(const char *input){
 	while(data != NULL){
 		if(!(is_operand(data) || is_operator(data))){
 			flag = ERR_VAL;
+			printf("Некорректное значение\n");
 			break;
 		}
 		if(is_operand(data)){
@@ -53,6 +57,7 @@ err show_infix(const char *input){
 			memcpy(operand, data, strlen(data) * sizeof(char));
 			flag = push(stack, operand);
 			if(flag != ERR_OK){
+				printf("Ошибка памяти\n");
 				free(operand);
 				break;
 			}
@@ -62,25 +67,31 @@ err show_infix(const char *input){
 		char *operand1 = NULL, *operand2 = NULL;
 		operand1 = pop(stack);
 		if(!operand1){
+			printf("Ошибка памяти\n");
 			break;
 		}
 		operand2 = pop(stack);
 		if(!operand2){
+			printf("Ошибка памяти\n");
 			free(operand1);
 			break;
 		}
 		char *res = post_to_inf(operand1, operand2, data[0]);
 		if(!res){
+			printf("Ошибка памяти\n");
 			break;
 		}
 		flag = push(stack, res);
 		if(flag != ERR_OK){
+			printf("Ошибка памяти\n");
 			break;
 		}
 		data = strtok(NULL, "\t ");
 	}
 	free(s);
-	stack_print(stack);
+	if(flag == ERR_OK){
+		stack_print(stack);
+	}
 	clear_stack(stack);
 	return flag;
 }

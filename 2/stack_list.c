@@ -13,12 +13,8 @@ typedef struct Stack{
 } Stack;
 
 
-Stack *stack_new(){
+Stack *stack_new(int capacity){
 	return (Stack *) calloc(1, sizeof(Stack));
-}
-
-Stack *stack_new_dialog(){
-	return stack_new();
 }
 
 void clear_stack(Stack *stack){

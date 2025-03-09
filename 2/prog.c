@@ -5,7 +5,6 @@
 #include <readline/readline.h>
 #include "err.h"
 #include "stack.h"
-#include "input_int.h"
 
 #define PROMPT "> "
 
@@ -44,11 +43,11 @@ char *post_to_inf(char *operand1, char *operand2, char operator){
 	return res;
 }
 
-err show_infix(const char *input){
+err show_infix(const char *input, int capacity){
 	int count_operand = 0;
 	int count_operator = 0;
 	err flag = ERR_OK;
-	Stack *stack = stack_new_dialog();
+	Stack *stack = stack_new(capacity);
 	char *s = strdup(input);
 	char *data = strtok(s, "\t ");
 	while(data != NULL){
@@ -74,17 +73,20 @@ err show_infix(const char *input){
 		char *operand1 = NULL, *operand2 = NULL;
 		operand1 = pop(stack);
 		if(!operand1){
+			flag = ERR_MEM;
 			printf("Ошибка памяти\n");
 			break;
 		}
 		operand2 = pop(stack);
 		if(!operand2){
+			flag = ERR_MEM;
 			printf("Ошибка памяти\n");
 			free(operand1);
 			break;
 		}
 		char *res = post_to_inf(operand1, operand2, data[0]);
 		if(!res){
+			flag = ERR_MEM;
 			printf("Ошибка памяти\n");
 			break;
 		}
@@ -96,7 +98,7 @@ err show_infix(const char *input){
 		data = strtok(NULL, "\t ");
 	}
 	free(s);
-	if(!(((count_operator + 1) == count_operand) || ((count_operator == 0) && (count_operand == 0)))){
+	if(flag == ERR_OK && !(((count_operator + 1) == count_operand) || ((count_operator == 0) && (count_operand == 0)))){
 		printf("Некорректное выражение\n");
 		flag = ERR_VAL;
 	}
@@ -107,12 +109,16 @@ err show_infix(const char *input){
 	return flag;
 }
 
-int main(){
+int main(int argc, char **argv){
+	int capacity = 0;
+	if(argc > 1){
+		capacity = atoi(argv[1]);
+	}
 	rl_inhibit_completion = 1;
 	char *input = readline(PROMPT);
 	err flag = ERR_OK;
 	while(input != NULL){
-		flag = show_infix(input);
+		flag = show_infix(input, capacity);
 		free(input);
 		input = readline(PROMPT);
 	}

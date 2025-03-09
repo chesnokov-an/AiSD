@@ -2,7 +2,6 @@
 #include <stdlib.h>
 #include <limits.h>
 #include "err.h"
-#include "input_int.h"
 #include "stack.h"
 
 typedef struct Stack{
@@ -21,16 +20,6 @@ Stack *stack_new(int capacity){
 	stack->capacity = capacity;
 	stack->array = calloc(capacity, sizeof(char*));
 	return stack;
-}
-
-Stack *stack_new_dialog(){
-	int capacity = 0;
-	printf("Введите размер стека: ");
-	err flag = input_int(&capacity, 1, INT_MAX);
-	if(flag != ERR_OK){
-		return NULL;
-	}
-	return stack_new(capacity);
 }
 
 void clear_stack(Stack *stack){

@@ -45,6 +45,8 @@ char *post_to_inf(char *operand1, char *operand2, char operator){
 }
 
 err show_infix(const char *input){
+	int count_operand = 0;
+	int count_operator = 0;
 	err flag = ERR_OK;
 	Stack *stack = stack_new_dialog();
 	char *s = strdup(input);
@@ -52,10 +54,11 @@ err show_infix(const char *input){
 	while(data != NULL){
 		if(!(is_operand(data) || is_operator(data))){
 			flag = ERR_VAL;
-			printf("Некорректное значение\n");
+			printf("Некорректное выражение\n");
 			break;
 		}
 		if(is_operand(data)){
+			count_operand += 1;
 			char *operand = calloc(strlen(data) + 1, sizeof(char));
 			memcpy(operand, data, strlen(data) * sizeof(char));
 			flag = push(stack, operand);
@@ -67,6 +70,7 @@ err show_infix(const char *input){
 			data = strtok(NULL, "\t ");
 			continue;
 		}
+		count_operator += 1;
 		char *operand1 = NULL, *operand2 = NULL;
 		operand1 = pop(stack);
 		if(!operand1){
@@ -92,6 +96,10 @@ err show_infix(const char *input){
 		data = strtok(NULL, "\t ");
 	}
 	free(s);
+	if(!(((count_operator + 1) == count_operand) || ((count_operator == 0) && (count_operand == 0)))){
+		printf("Некорректное выражение\n");
+		flag = ERR_VAL;
+	}
 	if(flag == ERR_OK){
 		stack_print(stack);
 	}

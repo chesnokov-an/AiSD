@@ -1,7 +1,7 @@
 CC = cc
 CFLAGS = -c -Wall -Wextra -g
 LDFLAGS = -lreadline
-TARGET = array
+TARGET ?= array
 
 OBJDIR = build
 OBJ = $(addprefix $(OBJDIR)/, $(patsubst %.c, %.o, $(filter-out stack_%, $(wildcard *.c))))

@@ -1,6 +1,9 @@
 # Object files
 *.o
 
+# Libraries
+*.a
+
 # Build directory
 build/
 

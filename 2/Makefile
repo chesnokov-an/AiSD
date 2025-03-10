@@ -16,10 +16,13 @@ $(OBJDIR)/%.o: %.c
 	$(CC) $(CFLAGS) $< -o $@
 
 $(OBJDIR)/$(TARGET).o: stack_$(TARGET).c
-	$(CC) $(CFLAGS) $< -o $@
+	$(CC) -fpic $(CFLAGS) $< -o $@
 
 static: $(OBJDIR)/$(TARGET).o
-	ar cr lib$(TARGET).a $<
+	ar rcs lib$(TARGET).a $<
+
+dinamic: $(OBJDIR)/$(TARGET).o
+	$(CC) -shared $(OBJDIR)/$(TARGET).o -o lib$(TARGET).so
 
 $(TARGET): $(OBJ) $(OBJDIR)/$(TARGET).o
 	$(CC) -o $@ $^ $(LDFLAGS) -L$(LIBDIR) -l$(TARGET)

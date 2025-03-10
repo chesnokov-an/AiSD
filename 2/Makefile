@@ -25,9 +25,11 @@ dinamic: $(OBJDIR)/$(TARGET).o
 	$(CC) -shared $(OBJDIR)/$(TARGET).o -o lib$(TARGET).so
 
 $(TARGET): $(OBJ) $(OBJDIR)/$(TARGET).o
-	$(CC) -o $@ $^ $(LDFLAGS) -L$(LIBDIR) -l$(TARGET)
+	$(CC) -o $@ $^ $(LDFLAGS) -L$(LIBDIR) -l$(TARGET) -Wl,-rpath=$(LIBDIR)
 
 clean:
 	rm -Rf $(OBJDIR)
 	rm -f array
 	rm -f list
+	rm -f *.so
+	rm -f *.a

@@ -3,6 +3,7 @@
 
 # Libraries
 *.a
+*.so
 
 # Build directory
 build/

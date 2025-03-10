@@ -3,8 +3,8 @@ CFLAGS = -c -Wall -Wextra -g
 LDFLAGS = -lreadline
 TARGET ?= array
 LIBTYPE ?= static
-LIBDIR = .
 OBJDIR = build
+LIBDIR = ./build/
 OBJ = $(addprefix $(OBJDIR)/, $(patsubst %.c, %.o, $(filter-out stack_%, $(wildcard *.c))))
 
 all: $(OBJDIR) $(LIBTYPE) $(TARGET)
@@ -19,10 +19,10 @@ $(OBJDIR)/$(TARGET).o: stack_$(TARGET).c
 	$(CC) -fpic $(CFLAGS) $< -o $@
 
 static: $(OBJDIR)/$(TARGET).o
-	ar rcs lib$(TARGET).a $<
+	ar rcs $(OBJDIR)/lib$(TARGET).a $<
 
 dinamic: $(OBJDIR)/$(TARGET).o
-	$(CC) -shared $(OBJDIR)/$(TARGET).o -o lib$(TARGET).so
+	$(CC) -shared $(OBJDIR)/$(TARGET).o -o $(OBJDIR)/lib$(TARGET).so
 
 $(TARGET): $(OBJ) $(OBJDIR)/$(TARGET).o
 	$(CC) -o $@ $^ $(LDFLAGS) -L$(LIBDIR) -l$(TARGET) -Wl,-rpath=$(LIBDIR)
@@ -31,5 +31,3 @@ clean:
 	rm -Rf $(OBJDIR)
 	rm -f array
 	rm -f list
-	rm -f *.so
-	rm -f *.a

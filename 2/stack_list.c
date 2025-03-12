@@ -13,7 +13,7 @@ typedef struct Stack{
 } Stack;
 
 
-Stack *stack_new(int capacity){
+Stack *stack_new(__attribute__((unused)) int capacity){
 	return (Stack *)calloc(1, sizeof(Stack));
 }
 

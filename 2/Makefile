@@ -21,7 +21,7 @@ $(OBJDIR)/$(TARGET).o: stack_$(TARGET).c
 static: $(OBJDIR)/$(TARGET).o
 	ar rcs $(OBJDIR)/libstack.a $<
 
-dinamic: $(OBJDIR)/$(TARGET).o
+dynamic: $(OBJDIR)/$(TARGET).o
 	$(CC) -shared $(OBJDIR)/$(TARGET).o -o $(OBJDIR)/libstack.so
 
 $(TARGET): $(OBJ) $(OBJDIR)/$(TARGET).o

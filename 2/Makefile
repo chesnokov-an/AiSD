@@ -4,7 +4,7 @@ LDFLAGS = -lreadline
 TARGET ?= array
 LIBTYPE ?= static
 OBJDIR = build
-LIBDIR = ./build/
+LIBDIR = build
 OBJ = $(addprefix $(OBJDIR)/, $(patsubst %.c, %.o, $(filter-out stack_%, $(wildcard *.c))))
 
 all: $(OBJDIR) $(LIBTYPE) $(TARGET)
@@ -19,15 +19,14 @@ $(OBJDIR)/$(TARGET).o: stack_$(TARGET).c
 	$(CC) -fpic $(CFLAGS) $< -o $@
 
 static: $(OBJDIR)/$(TARGET).o
-	ar rcs $(OBJDIR)/lib$(TARGET).a $<
+	ar rcs $(OBJDIR)/libstack.a $<
 
 dinamic: $(OBJDIR)/$(TARGET).o
-	$(CC) -shared $(OBJDIR)/$(TARGET).o -o $(OBJDIR)/lib$(TARGET).so
+	$(CC) -shared $(OBJDIR)/$(TARGET).o -o $(OBJDIR)/libstack.so
 
 $(TARGET): $(OBJ) $(OBJDIR)/$(TARGET).o
-	$(CC) -o $@ $^ $(LDFLAGS) -L$(LIBDIR) -l$(TARGET) -Wl,-rpath=$(LIBDIR)
+	$(CC) -o prog $^ $(LDFLAGS) -L$(LIBDIR) -lstack -Wl,-rpath=$(LIBDIR)
 
 clean:
 	rm -Rf $(OBJDIR)
-	rm -f array
-	rm -f list
+	rm -f prog

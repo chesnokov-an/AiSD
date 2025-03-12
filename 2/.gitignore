@@ -1,13 +1,5 @@
-# Object files
-*.o
-
-# Libraries
-*.a
-*.so
-
 # Build directory
 build/
 
 # executable files
-array
-list
+prog

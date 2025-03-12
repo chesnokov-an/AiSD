@@ -14,7 +14,7 @@ typedef struct Stack{
 
 
 Stack *stack_new(int capacity){
-	return (Stack *) calloc(1, sizeof(Stack));
+	return (Stack *)calloc(1, sizeof(Stack));
 }
 
 void clear_stack(Stack *stack){
@@ -36,7 +36,7 @@ err push(Stack *stack, char *input){
 		return ERR_NULL;
 	}
 
-	Item *item = calloc(1, sizeof(Item));
+	Item *item = (Item *)calloc(1, sizeof(Item));
 	if(!item){
 		return ERR_MEM;
 	}

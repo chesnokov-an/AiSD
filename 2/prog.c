@@ -25,7 +25,7 @@ int is_operator(char *data){
 }
 
 char *post_to_inf(char *operand1, char *operand2, char operator){
-	char *res = calloc(strlen(operand1) + strlen(operand2) + 8, sizeof(char));
+	char *res = (char *)calloc(strlen(operand1) + strlen(operand2) + 8, sizeof(char));
 	if(!res){
 		return NULL;
 	}
@@ -58,7 +58,7 @@ err show_infix(const char *input, int capacity){
 		}
 		if(is_operand(data)){
 			count_operand += 1;
-			char *operand = calloc(strlen(data) + 1, sizeof(char));
+			char *operand = (char *)calloc(strlen(data) + 1, sizeof(char));
 			memcpy(operand, data, strlen(data) * sizeof(char));
 			flag = push(stack, operand);
 			if(flag != ERR_OK){

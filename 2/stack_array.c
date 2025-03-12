@@ -18,7 +18,7 @@ Stack *stack_new(int capacity){
 	Stack *stack = (Stack *)calloc(1, sizeof(Stack));
 	stack->top = 0;
 	stack->capacity = capacity;
-	stack->array = calloc(capacity, sizeof(char*));
+	stack->array = (char **)calloc(capacity, sizeof(char*));
 	return stack;
 }
 

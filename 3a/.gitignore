@@ -1,0 +1,5 @@
+# Build directory
+build/
+
+# executable files
+prog

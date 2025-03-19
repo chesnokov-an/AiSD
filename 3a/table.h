@@ -4,15 +4,15 @@
 #include "err.h"
 
 typedef struct KeySpace{
-	unsigned int key;
-	unsigned int release;
+	unsigned key;
+	unsigned release;
 	char *info;
 } KeySpace;
 
 typedef struct Table{
 	KeySpace *ks;
-	unsigned int msize;
-	unsigned int csize;
+	unsigned msize;
+	unsigned csize;
 } Table;
 
 Table *create_table(unsigned msize);
@@ -24,5 +24,6 @@ char find_last_release(Table *table, unsigned key, unsigned *release);
 void show_table(Table *table);
 err load_from_txt(Table *table, FILE *file);
 err reorganize_table(Table *table);
+void clear_table(Table *table);
 
 #endif

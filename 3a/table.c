@@ -36,7 +36,7 @@ err insert_elem(Table *table, unsigned key, char *elem){
 		return ERR_NULL;
 	}
 	if(table->csize == table->msize){
-		return ERR_MEM;
+		return ERR_FULL;
 	}
 	unsigned last_release = 0;
 	char flag = find_last_release(table, key, &last_release);
@@ -50,6 +50,40 @@ err insert_elem(Table *table, unsigned key, char *elem){
 	(table->ks)[table->csize].info = elem;
 	table->csize += 1;
 	return ERR_OK;
+}
+
+err delete_elem(Table *table, unsigned key, unsigned release){
+	if(table == NULL){
+		return ERR_NULL;
+	}
+	if(table->csize == 0){
+		return ERR_EMPTY;
+	}
+	for(unsigned i = 0; i < table->csize; i++){
+		if((table->ks[i].key == key) && (table->ks[i].release == release)){
+			free(table->ks[i].info);
+			table->csize -= 1;
+			table->ks[i].key = table->ks[table->csize].key;
+			table->ks[i].release = table->ks[table->csize].release;
+			table->ks[i].info = table->ks[table->csize].info;
+			return ERR_OK;
+		}
+	}
+	return ERR_VAL;
+}
+
+void clear_table(Table *table){
+	if((table == NULL) || (table->ks == NULL)){
+		return;
+	}
+	for(unsigned i = 0; i < table->csize; i++){
+		if(table->ks[i].info){
+			free(table->ks[i].info);
+		}
+	}
+	free(table->ks);
+	table->csize = 0;
+	return;
 }
 
 void show_table(Table *table){

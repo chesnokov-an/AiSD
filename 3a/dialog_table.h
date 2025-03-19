@@ -4,7 +4,6 @@
 #include "err.h"
 #include "table.h"
 
-err D_create(Table *);
 err D_insert(Table *);
 err D_delete(Table *);
 err D_show(Table *);

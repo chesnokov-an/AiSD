@@ -16,7 +16,7 @@ typedef struct Table{
 } Table;
 
 Table *create_table(unsigned msize);
-err insert_elem(Table *table, unsigned key, char *elem);
+err insert_elem(Table *table, unsigned key, const char *elem);
 err delete_elem(Table *table, unsigned key, unsigned release);
 Table *find_by_key(Table *table, unsigned key);
 Table *find_by_release(Table *table, unsigned key, unsigned release);

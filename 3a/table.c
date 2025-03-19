@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include "err.h"
 #include "table.h"
 
@@ -31,7 +32,7 @@ char find_last_release(Table *table, unsigned key, unsigned *release){
 	return flag;
 }
 
-err insert_elem(Table *table, unsigned key, char *elem){
+err insert_elem(Table *table, unsigned key, const char *elem){
 	if(table == NULL){
 		return ERR_NULL;
 	}
@@ -47,7 +48,8 @@ err insert_elem(Table *table, unsigned key, char *elem){
 		(table->ks)[table->csize].release = last_release + 1;
 	}
 	(table->ks)[table->csize].key = key;
-	(table->ks)[table->csize].info = elem;
+	char *info = strdup(elem);
+	(table->ks)[table->csize].info = info;
 	table->csize += 1;
 	return ERR_OK;
 }

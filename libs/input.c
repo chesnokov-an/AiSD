@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include "err.h"
 
-err input_int(unsigned *data, unsigned start, unsigned end){
+err input_uint(unsigned *data, unsigned start, unsigned end){
     char end_of_scanf = ' ';
     int flag_scanf = scanf("%9u%c", data, &end_of_scanf);
 

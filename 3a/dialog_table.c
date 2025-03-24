@@ -3,7 +3,7 @@
 #include <readline/readline.h>
 #include <limits.h>
 #include "err.h"
-#include "input_uint.h"
+#include "input.h"
 #include "table.h"
 #include "dialog_table.h"
 

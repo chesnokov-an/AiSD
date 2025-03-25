@@ -5,6 +5,7 @@ TARGET ?= input
 OBJDIR = build
 LIBDIR = ld
 OBJ = $(addprefix $(OBJDIR)/, $(patsubst %.c, %.o, $(wildcard *.c)))
+LIB = $(addprefix $(LIBDIR)/, $(patsubst %.c, lib%.so, $(wildcard *.c)))
 
 all: $(OBJDIR) $(LIBDIR) dynamic
 
@@ -22,4 +23,4 @@ dynamic: $(OBJDIR)/$(TARGET).o
 
 clean:
 	rm -Rf $(OBJDIR)
-	rm -Rf $(LIBDIR)
+	rm $(LIB)

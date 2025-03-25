@@ -9,10 +9,13 @@ LDFLAGS = -l$(LIB) -lreadline -linput
 OBJ = $(addprefix $(OBJDIR)/, $(patsubst %.c, %.o, $(filter-out $(LIB).c, $(wildcard *.c))))
 HDIR = ../libs
 
-all: $(OBJDIR) $(LIBTYPE) $(TARGET)
+all: $(MAKE) $(OBJDIR) $(LIBTYPE) $(TARGET)
 
 $(OBJDIR):
 	mkdir $(OBJDIR)
+
+$(MAKE):
+	cd $(HDIR) && make
 
 $(OBJDIR)/%.o: %.c
 	$(CC) -I$(HDIR) $(CFLAGS) $< -o $@
@@ -32,3 +35,4 @@ $(TARGET): $(OBJ)
 clean:
 	rm -Rf $(OBJDIR)
 	rm -f prog
+	rm $(LIBDIR)/lib$(LIB).so

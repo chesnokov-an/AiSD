@@ -12,11 +12,16 @@ int main(){
 	flag = insert_elem(table, 6, elem1);
 	delete_elem(table, 2, 0);
 
+	Table *nn = find_by_release(table, 6, 1);
+	show_table(nn);
 	show_table(table);
 	free(elem);
 	free(elem1);
 	clear_table(table);
 	free(table);
+	clear_table(nn);
+	free(nn);
+
 
 	return 0;
 }

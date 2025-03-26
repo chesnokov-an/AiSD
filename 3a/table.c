@@ -98,3 +98,48 @@ void show_table(Table *table){
 		printf("%10u | %10u | \"%s\"\n", table->ks[i].key, table->ks[i].release, table->ks[i].info);
 	}
 }
+
+Table *find_by_key(Table *table, unsigned key){
+	if(table == NULL || table->ks == NULL){
+		return NULL;
+	}
+	unsigned count = 0;
+	for(unsigned i = 0; i < table->csize; i++){
+		if(table->ks[i].key == key){
+			count += 1;
+		}
+	}
+	Table *new_table = (Table *)calloc(1, sizeof(Table));
+	new_table->ks = (KeySpace *)calloc(count, sizeof(KeySpace));
+	new_table->msize = count;
+	new_table->csize = count;
+	count = 0;
+	for(unsigned i = 0; i < table->csize; i++){
+		if(table->ks[i].key == key){
+			new_table->ks[count].key = key;
+			new_table->ks[count].release = table->ks[i].release;
+			new_table->ks[count].info = strdup(table->ks[i].info);
+			count++;
+		}
+	}
+	return new_table;
+}
+
+Table *find_by_release(Table *table, unsigned key, unsigned release){
+	if(table == NULL || table->ks == NULL){
+		return NULL;
+	}
+	Table *new_table = NULL;
+	for(unsigned i = 0; i < table->csize; i++){
+		if((table->ks[i].key == key) && (table->ks[i].release == release)){
+			new_table = (Table *)calloc(1, sizeof(Table));
+			new_table->ks = (KeySpace *)calloc(1, sizeof(KeySpace));
+			new_table->msize = 1;
+			new_table->csize = 1;
+			new_table->ks[0].key = key;
+			new_table->ks[0].release = release;
+			new_table->ks[0].info = strdup(table->ks[i].info);
+		}
+	}
+	return new_table;
+}

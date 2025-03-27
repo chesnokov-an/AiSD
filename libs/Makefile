@@ -23,4 +23,4 @@ dynamic: $(OBJDIR)/$(TARGET).o
 
 clean:
 	rm -Rf $(OBJDIR)
-	rm $(LIB)
+	rm -f $(LIB)

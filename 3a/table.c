@@ -148,17 +148,17 @@ Table *find_by_release(Table *table, unsigned key, unsigned release){
 }
 
 err load_from_txt(Table *table, FILE *file){
-	clear_table(table);
+	Table *new_table = (Table *)calloc(1, sizeof(Table));
 	unsigned msize = 0;
 	err flag = txt_input_uint(file, &msize, 0, UINT_MAX);
 	if(flag != ERR_OK || msize == 0){ goto clean_and_return; }
 	unsigned csize = 0;
 	flag = txt_input_uint(file, &csize, 0, msize);
 	if(flag != ERR_OK){ goto clean_and_return; }
-	table->msize = msize;
-	table->csize = csize;
-	table->ks = (KeySpace *)calloc(msize, sizeof(KeySpace));
-	if(table->ks == NULL){
+	new_table->msize = msize;
+	new_table->csize = csize;
+	new_table->ks = (KeySpace *)calloc(msize, sizeof(KeySpace));
+	if(new_table->ks == NULL){
 		flag = ERR_MEM;
 		goto clean_and_return;
 	}
@@ -166,21 +166,25 @@ err load_from_txt(Table *table, FILE *file){
 		unsigned key = 0;
 		flag = txt_input_uint(file, &key, 0, UINT_MAX);
 		if(flag != ERR_OK){ goto clean_and_return; }
-		table->ks[i].key = key;
+		new_table->ks[i].key = key;
 		unsigned release = 0;
 		flag = txt_input_uint(file, &release, 0, UINT_MAX);
 		if(flag != ERR_OK){ goto clean_and_return; }
-		table->ks[i].release = release;
-		table->ks[i].info = txt_readline(file);
-		if(table->ks[i].info == NULL){
+		new_table->ks[i].release = release;
+		new_table->ks[i].info = txt_readline(file);
+		if(new_table->ks[i].info == NULL){
 			flag = ERR_MEM;
 			goto clean_and_return;
 		}
 	}
+	clear_table(table);
+	*table = *new_table;
+	free(new_table);
 	return ERR_OK;
 
 clean_and_return:
-	clear_table(table);
+	clear_table(new_table);
+	free(new_table);
 	return flag;
 }
 
@@ -188,7 +192,7 @@ err reorganize_table(Table *table){
 	err flag = ERR_OK;
 	Table *new_table = (Table *)calloc(1, sizeof(Table));
 	new_table->ks = (KeySpace *)calloc(table->msize, sizeof(KeySpace));
-	new_table->msize = table->msize;\
+	new_table->msize = table->msize;
 	new_table->csize = 0;
 	for(unsigned i = 0; i < table->csize; i++){
 		unsigned last_release = 0;
@@ -205,7 +209,6 @@ err reorganize_table(Table *table){
 		else{
 		}
 	}
-	show_table(new_table);
 	clear_table(table);
 	*table = *new_table;
 	free(new_table);

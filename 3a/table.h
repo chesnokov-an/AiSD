@@ -24,5 +24,6 @@ char find_last_release(Table *table, unsigned key, unsigned *release);
 void show_table(Table *table);
 err reorganize_table(Table *table);
 void clear_table(Table *table);
+err load_from_txt(Table *table, FILE *file);
 
 #endif

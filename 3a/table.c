@@ -1,8 +1,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <limits.h>
 #include "err.h"
 #include "table.h"
+#include "input.h"
+#include "my_readline.h"
 
 Table *create_table(unsigned msize){
 	Table *table = (Table *)calloc(1, sizeof(Table));
@@ -142,4 +145,41 @@ Table *find_by_release(Table *table, unsigned key, unsigned release){
 		}
 	}
 	return new_table;
+}
+
+err load_from_txt(Table *table, FILE *file){
+	clear_table(table);
+	unsigned msize = 0;
+	err flag = txt_input_uint(file, &msize, 0, UINT_MAX);
+	if(flag != ERR_OK || msize == 0){ goto clean_and_return; }
+	unsigned csize = 0;
+	flag = txt_input_uint(file, &csize, 0, msize);
+	if(flag != ERR_OK){ goto clean_and_return; }
+	table->msize = msize;
+	table->csize = csize;
+	table->ks = (KeySpace *)calloc(msize, sizeof(KeySpace));
+	if(table->ks == NULL){
+		flag = ERR_MEM;
+		goto clean_and_return;
+	}
+	for(unsigned i = 0; i < csize; i++){
+		unsigned key = 0;
+		flag = txt_input_uint(file, &key, 0, UINT_MAX);
+		if(flag != ERR_OK){ goto clean_and_return; }
+		table->ks[i].key = key;
+		unsigned release = 0;
+		flag = txt_input_uint(file, &release, 0, UINT_MAX);
+		if(flag != ERR_OK){ goto clean_and_return; }
+		table->ks[i].release = release;
+		table->ks[i].info = txt_readline(file);
+		if(table->ks[i].info == NULL){
+			flag = ERR_MEM;
+			goto clean_and_return;
+		}
+	}
+	return ERR_OK;
+
+clean_and_return:
+	clear_table(table);
+	return flag;
 }

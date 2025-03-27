@@ -40,3 +40,15 @@ err bin_input_int(FILE* file_name, int *data, int start, int end){
 	}
 	return ERR_OK;
 }
+
+err txt_input_uint(FILE* file_name, unsigned *data, unsigned start, unsigned end){
+    char end_of_scanf = ' ';
+    int flag_scanf = fscanf(file_name, "%9u%c", data, &end_of_scanf);
+	if(flag_scanf == EOF){
+		return ERR_EOF;
+	}
+	if((flag_scanf != 2) || (end_of_scanf != '\n') || (*data < start) || (*data > end)){
+		return ERR_VAL;
+	}
+    return ERR_OK;
+}

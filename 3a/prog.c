@@ -18,6 +18,10 @@ int main(){
 	show_table(table);
 	//free(elem);
 	//free(elem1);
+	//
+	flag = reorganize_table(table);
+	show_table(table);
+	//
 	clear_table(table);
 	free(table);
 	clear_table(nn);

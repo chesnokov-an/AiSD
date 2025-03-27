@@ -183,3 +183,31 @@ clean_and_return:
 	clear_table(table);
 	return flag;
 }
+
+err reorganize_table(Table *table){
+	err flag = ERR_OK;
+	Table *new_table = (Table *)calloc(1, sizeof(Table));
+	new_table->ks = (KeySpace *)calloc(table->msize, sizeof(KeySpace));
+	new_table->msize = table->msize;\
+	new_table->csize = 0;
+	for(unsigned i = 0; i < table->csize; i++){
+		unsigned last_release = 0;
+		find_last_release(table, table->ks[i].key, &last_release);
+		if(table->ks[i].release == last_release){
+			flag = insert_elem(new_table, table->ks[i].key, table->ks[i].info);
+
+			if(flag != ERR_OK){
+				clear_table(new_table);
+				free(new_table);
+				return flag;
+			}
+		}
+		else{
+		}
+	}
+	show_table(new_table);
+	clear_table(table);
+	*table = *new_table;
+	free(new_table);
+	return ERR_OK;
+}

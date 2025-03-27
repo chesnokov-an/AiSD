@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <readline/readline.h>
 #include <limits.h>
 #include "err.h"
@@ -92,7 +93,42 @@ clean_and_return:
 	free(new_table);
 	return flag;
 }
-/*
-err D_reorganize(Table *);
-err D_find(Table *);
-err D_clear(Table *);*/
+
+err D_reorganize(Table *table){
+	err flag = reorganize_table(table);
+	return flag;
+}
+
+err D_find(Table *table){
+	err flag = ERR_OK;
+	int option = 0;
+	printf("Опции:\n\t1: поиск по ключу\n\t2: поиск по ключу и версии\nВведиет опцию: ");
+	flag = input_int(&option, 1, 2);
+	if(flag != ERR_OK){ return flag; }
+	Table *new_table = NULL;
+	if(option == 1){
+		unsigned key = 0;
+		flag = input_uint(&key, 0, UINT_MAX);
+		if(flag != ERR_OK){ return flag; }
+		new_table = find_by_key(table, key);
+	}
+	else if(option == 2){
+		unsigned key = 0;
+		flag = input_uint(&key, 0, UINT_MAX);
+		if(flag != ERR_OK){ return flag; }
+		unsigned release = 0;
+		flag = input_uint(&release, 0, UINT_MAX);
+		if(flag != ERR_OK){ return flag; }
+		new_table = find_by_release(table, key, release);
+	}
+	show_table(new_table);
+	if(new_table != NULL){
+		clear_table(new_table);
+		free(new_table);
+	}
+	return ERR_OK;
+}
+err D_clear(Table *table){
+	clear_table(table);
+	return ERR_OK;
+}

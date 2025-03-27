@@ -156,7 +156,6 @@ err load_from_txt(Table *table, FILE *file){
 	flag = txt_input_uint(file, &csize, 0, msize);
 	if(flag != ERR_OK){ goto clean_and_return; }
 	new_table->msize = msize;
-	new_table->csize = csize;
 	new_table->ks = (KeySpace *)calloc(msize, sizeof(KeySpace));
 	if(new_table->ks == NULL){
 		flag = ERR_MEM;
@@ -166,16 +165,14 @@ err load_from_txt(Table *table, FILE *file){
 		unsigned key = 0;
 		flag = txt_input_uint(file, &key, 0, UINT_MAX);
 		if(flag != ERR_OK){ goto clean_and_return; }
-		new_table->ks[i].key = key;
-		unsigned release = 0;
-		flag = txt_input_uint(file, &release, 0, UINT_MAX);
-		if(flag != ERR_OK){ goto clean_and_return; }
-		new_table->ks[i].release = release;
-		new_table->ks[i].info = txt_readline(file);
-		if(new_table->ks[i].info == NULL){
+		char *info = txt_readline(file);
+		if(info == NULL){
 			flag = ERR_MEM;
 			goto clean_and_return;
 		}
+		flag = insert_elem(new_table, key, info);
+		free(info);
+		if(flag != ERR_OK){ goto clean_and_return; }
 	}
 	clear_table(table);
 	*table = *new_table;

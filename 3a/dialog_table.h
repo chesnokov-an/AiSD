@@ -4,12 +4,13 @@
 #include "err.h"
 #include "table.h"
 
+void Dialog();
 err D_insert(Table *);
 err D_delete(Table *);
 err D_show(Table *);
 err D_input(Table *);
 err D_reorganize(Table *);
 err D_find(Table *);
-err D_clear(Table *);
+err D_load(Table *table);
 
 #endif

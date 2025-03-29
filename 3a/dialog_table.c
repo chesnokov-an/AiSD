@@ -108,6 +108,7 @@ err D_show(Table *table){
 
 err D_input(Table *table){
 	Table *new_table = (Table *)calloc(1, sizeof(Table));
+	if(new_table == NULL){ return ERR_MEM; }
 	unsigned msize = 0;
 	printf("Введите максимальное число элементов: ");
 	err flag = input_uint(&msize, 0, UINT_MAX);
@@ -116,12 +117,12 @@ err D_input(Table *table){
 	printf("Введите число элементов: ");
 	flag = input_uint(&csize, 0, msize);
 	if(flag != ERR_OK){ goto clean_and_return; }
-	new_table->msize = msize;
 	new_table->ks = (KeySpace *)calloc(msize, sizeof(KeySpace));
 	if(new_table->ks == NULL){
 		flag = ERR_MEM;
 		goto clean_and_return;
 	}
+	new_table->msize = msize;
 	for(unsigned i = 0; i < csize; i++){
 		unsigned key = 0;
 		printf("Введите ключ: ");

@@ -16,9 +16,16 @@ Table *create_table(unsigned msize){
 	table->msize = msize;
 	table->ks = (KeySpace *)calloc(msize, sizeof(KeySpace));
 	if(table->ks == NULL){
+		free(table);
 		return NULL;
 	}
 	return table;
+}
+
+void setter_keyspase(KeySpace *ks, unsigned key, unsigned release, char *info){
+		ks->key = key;
+		ks->release = release;
+		ks->info = strdup(info);
 }
 
 char find_last_release(Table *table, unsigned key, unsigned *release){
@@ -139,9 +146,7 @@ Table *find_by_release(Table *table, unsigned key, unsigned release){
 			new_table->ks = (KeySpace *)calloc(1, sizeof(KeySpace));
 			new_table->msize = 1;
 			new_table->csize = 1;
-			new_table->ks[0].key = key;
-			new_table->ks[0].release = release;
-			new_table->ks[0].info = strdup(table->ks[i].info);
+			setter_keyspase(&(new_table->ks[0]), key, release, table->ks[i].info);
 		}
 	}
 	return new_table;
@@ -149,18 +154,19 @@ Table *find_by_release(Table *table, unsigned key, unsigned release){
 
 err load_from_txt(Table *table, FILE *file){
 	Table *new_table = (Table *)calloc(1, sizeof(Table));
+	if(new_table == NULL){ return ERR_MEM; }
 	unsigned msize = 0;
 	err flag = txt_input_uint(file, &msize, 0, UINT_MAX);
 	if(flag != ERR_OK || msize == 0){ goto clean_and_return; }
 	unsigned csize = 0;
 	flag = txt_input_uint(file, &csize, 0, msize);
 	if(flag != ERR_OK){ goto clean_and_return; }
-	new_table->msize = msize;
 	new_table->ks = (KeySpace *)calloc(msize, sizeof(KeySpace));
 	if(new_table->ks == NULL){
 		flag = ERR_MEM;
 		goto clean_and_return;
 	}
+	new_table->msize = msize;
 	for(unsigned i = 0; i < csize; i++){
 		unsigned key = 0;
 		flag = txt_input_uint(file, &key, 0, UINT_MAX);
@@ -188,7 +194,12 @@ clean_and_return:
 err reorganize_table(Table *table){
 	err flag = ERR_OK;
 	Table *new_table = (Table *)calloc(1, sizeof(Table));
+	if(new_table == NULL){ return ERR_MEM; }
 	new_table->ks = (KeySpace *)calloc(table->msize, sizeof(KeySpace));
+	if(new_table->ks == NULL){
+		free(new_table);
+		return ERR_MEM;
+	}
 	new_table->msize = table->msize;
 	new_table->csize = 0;
 	for(unsigned i = 0; i < table->csize; i++){
@@ -196,14 +207,11 @@ err reorganize_table(Table *table){
 		find_last_release(table, table->ks[i].key, &last_release);
 		if(table->ks[i].release == last_release){
 			flag = insert_elem(new_table, table->ks[i].key, table->ks[i].info);
-
 			if(flag != ERR_OK){
 				clear_table(new_table);
 				free(new_table);
 				return flag;
 			}
-		}
-		else{
 		}
 	}
 	clear_table(table);

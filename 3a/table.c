@@ -75,9 +75,9 @@ err delete_elem(Table *table, unsigned key, unsigned release){
 		if((table->ks[i].key == key) && (table->ks[i].release == release)){
 			free(table->ks[i].info);
 			table->csize -= 1;
-			table->ks[i].key = table->ks[table->csize].key;
-			table->ks[i].release = table->ks[table->csize].release;
-			table->ks[i].info = table->ks[table->csize].info;
+			KeySpace last = table->ks[table->csize];
+			setter_keyspase(&(table->ks[i]), last.key, last.release, last.info);
+			free(last.info);
 			return ERR_OK;
 		}
 	}
@@ -119,16 +119,16 @@ Table *find_by_key(Table *table, unsigned key){
 			count += 1;
 		}
 	}
-	Table *new_table = (Table *)calloc(1, sizeof(Table));
-	new_table->ks = (KeySpace *)calloc(count, sizeof(KeySpace));
-	new_table->msize = count;
+
+	Table *new_table = create_table(count);
+	if(new_table == NULL || new_table->ks == NULL){
+		return NULL;
+	}
 	new_table->csize = count;
 	count = 0;
 	for(unsigned i = 0; i < table->csize; i++){
 		if(table->ks[i].key == key){
-			new_table->ks[count].key = key;
-			new_table->ks[count].release = table->ks[i].release;
-			new_table->ks[count].info = strdup(table->ks[i].info);
+			setter_keyspase(&(new_table->ks[count]), key, table->ks[i].release, table->ks[i].info);
 			count++;
 		}
 	}

@@ -170,7 +170,10 @@ err D_reorganize(Table *table){
 	return flag;
 }
 
-char str_isdigit(char *s){
+char str_isunsigned(char *s){
+	if(strlen(s) == 0 || strlen(s) > 9){
+		return 0;
+	}
 	for(size_t i = 0; i < strlen(s); i++){
 		if(!isdigit(s[i])){
 			return 0;
@@ -190,12 +193,8 @@ err D_find(Table *table){
 	if(strlen(str_release) == 0){
 		new_table = find_by_key(table, key);
 	}
-	else if((str_isdigit(str_release)) && (strlen(str_release) <= 9)){
+	else if(str_isunsigned(str_release)){
 		unsigned release = strtoul(str_release, NULL, 0);
-		if(flag != ERR_OK){
-			free(str_release);
-			return flag;
-		}
 		new_table = find_by_release(table, key, release);
 	}
 	else{

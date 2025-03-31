@@ -3,6 +3,7 @@
 #include <string.h>
 #include <readline/readline.h>
 #include <limits.h>
+#include <ctype.h>
 #include "err.h"
 #include "input.h"
 #include "table.h"
@@ -152,7 +153,13 @@ err D_load(Table *table){
 	char *str_file = readline("Введите название файла: ");
 	FILE *file = fopen(str_file, "r");
 	free(str_file);
-	err flag = load_from_txt(table, file);
+	err flag = ERR_OK;
+	if(!file){
+		printf("Unknown file\n");
+		flag = ERR_VAL;
+		return flag;
+	}
+	flag = load_from_txt(table, file);
 	fclose(file);
 	return flag;
 }
@@ -163,28 +170,40 @@ err D_reorganize(Table *table){
 	return flag;
 }
 
+char str_isdigit(char *s){
+	for(size_t i = 0; i < strlen(s); i++){
+		if(!isdigit(s[i])){
+			return 0;
+		}
+	}
+	return 1;
+}
+
 err D_find(Table *table){
 	err flag = ERR_OK;
-	int option = 0;
-	printf("Опции:\n\t1: поиск по ключу\n\t2: поиск по ключу и версии\nВведиет опцию: ");
-	flag = input_int(&option, 1, 2);
+	unsigned key = 0;
+	printf("Введите ключ: ");
+	flag = input_uint(&key, 1, 2);
 	if(flag != ERR_OK){ return flag; }
+	char *str_release = readline("Введите версию ( enter, если нужно получить все значения по ключу ): ");
 	Table *new_table = NULL;
-	if(option == 1){
-		unsigned key = 0;
-		flag = input_uint(&key, 0, UINT_MAX);
-		if(flag != ERR_OK){ return flag; }
+	if(strlen(str_release) == 0){
 		new_table = find_by_key(table, key);
 	}
-	else if(option == 2){
-		unsigned key = 0;
-		flag = input_uint(&key, 0, UINT_MAX);
-		if(flag != ERR_OK){ return flag; }
-		unsigned release = 0;
-		flag = input_uint(&release, 0, UINT_MAX);
-		if(flag != ERR_OK){ return flag; }
+	else if((str_isdigit(str_release)) && (strlen(str_release) <= 9)){
+		unsigned release = strtoul(str_release, NULL, 0);
+		if(flag != ERR_OK){
+			free(str_release);
+			return flag;
+		}
 		new_table = find_by_release(table, key, release);
 	}
+	else{
+		free(str_release);
+		flag = ERR_VAL;
+		return flag;
+	}
+	free(str_release);
 	show_table(new_table);
 	if(new_table != NULL){
 		clear_table(new_table);

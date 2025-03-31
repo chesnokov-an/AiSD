@@ -183,7 +183,7 @@ err D_find(Table *table){
 	err flag = ERR_OK;
 	unsigned key = 0;
 	printf("Введите ключ: ");
-	flag = input_uint(&key, 1, 2);
+	flag = input_uint(&key, 0, UINT_MAX);
 	if(flag != ERR_OK){ return flag; }
 	char *str_release = readline("Введите версию ( enter, если нужно получить все значения по ключу ): ");
 	Table *new_table = NULL;

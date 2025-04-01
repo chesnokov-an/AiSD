@@ -27,12 +27,12 @@ static: $(OBJDIR)/$(LIB).o
 	ar rcs $(OBJDIR)/lib$(LIB).a $<
 
 dynamic: $(OBJDIR)/$(LIB).o
-	$(CC) -shared $(OBJDIR)/$(LIB).o -o $(LIBDIR)/lib$(LIB).so
+	$(CC) -shared $(OBJDIR)/$(LIB).o -o $(OBJDIR)/lib$(LIB).so
 
 $(TARGET): $(OBJ)
-	$(CC) -o prog -I$(HDIR) $^ $(LDFLAGS) -L$(LIBDIR) -Wl,-rpath=$(LIBDIR)
+	$(CC) -o prog -I$(HDIR) $^ $(LDFLAGS) -L$(LIBDIR) -L$(OBJDIR) -Wl,-rpath=$(LIBDIR),-rpath=$(OBJDIR)
 
 clean:
 	rm -Rf $(OBJDIR)
 	rm -f prog
-	rm -f $(LIBDIR)/lib$(LIB).so
+	rm -f $(OBJDIR)/lib$(LIB).so

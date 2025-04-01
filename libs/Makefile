@@ -1,13 +1,11 @@
 CC = cc
 CFLAGS = -c -Wall -Wextra -g
 LDFLAGS = -lreadline
-TARGET ?= input
 OBJDIR = build
 LIBDIR = ld
 OBJ = $(addprefix $(OBJDIR)/, $(patsubst %.c, %.o, $(wildcard *.c)))
-LIB = $(addprefix $(LIBDIR)/, $(patsubst %.c, lib%.so, $(wildcard *.c)))
-
-all: $(OBJDIR) $(LIBDIR) dynamic
+LIB = $(addprefix $(LIBDIR)/lib, $(patsubst %.c, %.so, $(wildcard *.c)))
+all: $(OBJDIR) $(LIBDIR) $(LIB)
 
 $(OBJDIR):
 	mkdir $(OBJDIR)
@@ -15,12 +13,12 @@ $(OBJDIR):
 $(LIBDIR):
 	mkdir $(LIBDIR)
 
-$(OBJDIR)/$(TARGET).o: $(TARGET).c
+$(OBJDIR)/%.o: %.c
 	$(CC) -fpic $(CFLAGS) $< -o $@
 
-dynamic: $(OBJDIR)/$(TARGET).o
-	$(CC) -shared $(OBJDIR)/$(TARGET).o -o $(LIBDIR)/lib$(TARGET).so
+$(LIBDIR)/lib%.so: $(OBJDIR)/%.o
+	$(CC) -shared $< -o $@
 
 clean:
 	rm -Rf $(OBJDIR)
-	rm -f $(LIB)
+	rm -Rf $(LIBDIR)

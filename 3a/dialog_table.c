@@ -149,10 +149,32 @@ clean_and_return:
 	return flag;
 }
 
+char *my_strip(char const * const s){
+	if(s == NULL){
+		return NULL;
+	}
+	size_t i = 0;
+	while((i < strlen(s)) && ((s[i] == ' ') || (s[i] == '\t'))){
+		i++;
+	}
+	size_t count = 0;
+	while(((i + count) < strlen(s)) && ((s[i + count] != ' ') && (s[i + count] != '\t'))){
+		count++;
+	}
+	char *new_s = (char *)calloc(count + 1, sizeof(char));
+	if(!new_s){
+		return NULL;
+	}
+	memcpy(new_s, s + i, count * sizeof(char));
+	return new_s;
+}
+
 err D_load(Table *table){
 	char *str_file = readline("Введите название файла: ");
-	FILE *file = fopen(str_file, "r");
+	char *clear_s_file = my_strip(str_file);
+	FILE *file = fopen(clear_s_file, "r");
 	free(str_file);
+	free(clear_s_file);
 	err flag = ERR_OK;
 	if(!file){
 		printf("Unknown file\n");

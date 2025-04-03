@@ -1,0 +1,51 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include "table.h"
+#include "iterator.h"
+
+typedef struct Iterator{
+	Table *table;
+	unsigned ptr;
+} Iterator;
+
+
+Iterator *create_iterator(Table *table, unsigned ptr){
+	Iterator *iter = (Iterator *)calloc(1, sizeof(Iterator));
+	iter->table = table;
+	iter->ptr = ptr;
+	return iter;
+}
+
+void delete_iterator(Iterator *iter){
+	free(iter);
+}
+
+char cmp_iterator(Iterator *iter1, Iterator *iter2){
+	char *s1 = iter1->table->ks[iter1->ptr].info;
+	char *s2 = iter2->table->ks[iter2->ptr].info;
+	if(&s1 == &s2){
+		return 1;
+	}
+	return 0;
+}
+
+char next(Iterator *iter){
+	if(iter->table->csize > iter->ptr){
+		iter->ptr += 1;
+		return 1;
+	}
+	return 0;
+}
+
+char prev(Iterator *iter){
+	if(0 < iter->ptr){
+		iter->ptr -= 1;
+		return 1;
+	}
+	return 0;
+}
+
+KeySpace *peek(Iterator *iter){
+	return (iter->table->ks + iter->ptr);
+}

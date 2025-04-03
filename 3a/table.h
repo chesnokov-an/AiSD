@@ -15,15 +15,15 @@ typedef struct Table{
 	unsigned csize;
 } Table;
 
-Table *create_table(unsigned msize);
-err insert_elem(Table *table, unsigned key, const char *elem);
-err delete_elem(Table *table, unsigned key, unsigned release);
-Table *find_by_key(Table *table, unsigned key);
-Table *find_by_release(Table *table, unsigned key, unsigned release);
-char find_last_release(Table *table, unsigned key, unsigned *release);
-void show_table(Table *table);
+Table *create_table(const unsigned msize);
+err insert_elem(Table * const table, const unsigned key, const char * const elem);
+err delete_elem(Table * const table, const unsigned key, const unsigned release);
+Table *find_by_key(const Table * const table, const unsigned key);
+Table *find_by_release(const Table * const table, const unsigned key, const unsigned release);
+char find_last_release(const Table * const table, const unsigned key, unsigned * const release);
+void show_table(const Table * const table);
 err reorganize_table(Table *table);
-void clear_table(Table *table);
+void clear_table(Table * const table);
 err load_from_txt(Table *table, FILE *file);
 
 #endif

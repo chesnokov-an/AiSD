@@ -7,7 +7,7 @@
 #include "input.h"
 #include "my_readline.h"
 
-Table *create_table(unsigned msize){
+Table *create_table(const unsigned msize){
 	Table *table = (Table *)calloc(1, sizeof(Table));
 	if(table == NULL){
 		return NULL;
@@ -22,13 +22,13 @@ Table *create_table(unsigned msize){
 	return table;
 }
 
-void setter_keyspase(KeySpace *ks, unsigned key, unsigned release, char *info){
+void setter_keyspase(KeySpace * const ks, const unsigned key, const unsigned release, const char * const info){
 		ks->key = key;
 		ks->release = release;
 		ks->info = strdup(info);
 }
 
-char find_last_release(Table *table, unsigned key, unsigned *release){
+char find_last_release(const Table * const table, const unsigned key, unsigned * const release){
 	if(table == NULL){
 		return 0;
 	}
@@ -42,7 +42,7 @@ char find_last_release(Table *table, unsigned key, unsigned *release){
 	return flag;
 }
 
-err insert_elem(Table *table, unsigned key, const char *elem){
+err insert_elem(Table * const table, const unsigned key, const char * const elem){
 	if(table == NULL){
 		return ERR_NULL;
 	}
@@ -64,7 +64,7 @@ err insert_elem(Table *table, unsigned key, const char *elem){
 	return ERR_OK;
 }
 
-err delete_elem(Table *table, unsigned key, unsigned release){
+err delete_elem(Table * const table, const unsigned key, const unsigned release){
 	if(table == NULL){
 		return ERR_NULL;
 	}
@@ -84,7 +84,7 @@ err delete_elem(Table *table, unsigned key, unsigned release){
 	return ERR_VAL;
 }
 
-void clear_table(Table *table){
+void clear_table(Table * const table){
 	if((table == NULL) || (table->ks == NULL)){
 		return;
 	}
@@ -98,7 +98,7 @@ void clear_table(Table *table){
 	return;
 }
 
-void show_table(Table *table){
+void show_table(const Table * const table){
 	if(table == NULL){
 		return;
 	}
@@ -109,7 +109,7 @@ void show_table(Table *table){
 	}
 }
 
-Table *find_by_key(Table *table, unsigned key){
+Table *find_by_key(const Table * const table, const unsigned key){
 	if(table == NULL || table->ks == NULL){
 		return NULL;
 	}
@@ -135,7 +135,7 @@ Table *find_by_key(Table *table, unsigned key){
 	return new_table;
 }
 
-Table *find_by_release(Table *table, unsigned key, unsigned release){
+Table *find_by_release(const Table * const table, const unsigned key, const unsigned release){
 	if(table == NULL || table->ks == NULL){
 		return NULL;
 	}

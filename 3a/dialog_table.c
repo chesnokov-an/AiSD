@@ -35,15 +35,11 @@ void message(err flag){
 	}
 }
 
-void Dialog(){
+void Dialog(unsigned capacity){
 	err (*func_array[])(Table *) = {D_input, D_load, D_insert, D_delete, D_find, D_show, D_reorganize};
-
-	unsigned msize = 0;
-	printf("Введите количество ячеек памяти, которые нужно выделить под таблицу: ");
-	err flag = input_uint(&msize, 0, UINT_MAX);
-	if(flag == ERR_EOF){ goto end_program; }
-	Table *table = create_table(msize);
+	Table *table = create_table(capacity);
 	int option = -1;
+	err flag = ERR_OK;
 	do{
 		printf("\n\n---------- МЕНЮ ----------\nВозможные команды:\n\n");
 		printf("0: Завершение программы.\n1: Ввод таблицы с клавиатуры.\n2: Импорт таблицы из файла.\n3: Вставка нового элемента.\n4: Удаление элемента.\n5: Поиск элемента.\n6: Вывод содержимого массива.\n7: Реорганизация таблицы.\n\n");

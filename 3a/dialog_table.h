@@ -4,7 +4,7 @@
 #include "err.h"
 #include "table.h"
 
-void Dialog();
+void Dialog(unsigned);
 err D_insert(Table *);
 err D_delete(Table *);
 err D_show(Table *);

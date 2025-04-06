@@ -98,11 +98,6 @@ err D_delete(Table *table){
 	return flag;
 }
 
-err D_show(Table *table){
-	show_table(table);
-	return ERR_OK;
-}
-
 err D_input(Table *table){
 	Table *new_table = (Table *)calloc(1, sizeof(Table));
 	if(new_table == NULL){ return ERR_MEM; }
@@ -227,4 +222,17 @@ err D_find(Table *table){
 		free(new_table);
 	}
 	return ERR_OK;
+}
+
+err D_show(Table *table){
+#ifdef ITER
+	Iterator *iter = iter_begin(table);
+	if(iter == NULL){ return ERR_MEM; }
+	show_by_iter(iter);
+	delete_iterator(iter);
+	return ERR_OK;
+#else
+	show_table(table);
+	return ERR_OK;
+#endif
 }

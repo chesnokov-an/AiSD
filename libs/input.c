@@ -58,6 +58,18 @@ err bin_input_int(FILE* file_name, int *data, int start, int end){
 	return ERR_OK;
 }
 
+err bin_input_uint(FILE* file_name, unsigned *data, unsigned start, unsigned end){
+	fread(data, sizeof(unsigned), 1, file_name);
+	if(feof(file_name)){
+		return ERR_EOF;
+	}
+	if((ferror(file_name)) || (*data < start) || (*data > end)){
+		return ERR_VAL;
+	}
+	return ERR_OK;
+}
+
+
 err txt_input_uint(FILE* file_name, unsigned *data, unsigned start, unsigned end){
     char end_of_scanf = ' ';
     int flag_scanf = fscanf(file_name, "%9u%c", data, &end_of_scanf);

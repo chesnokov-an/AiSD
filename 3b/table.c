@@ -63,6 +63,9 @@ unsigned step_hash(const char * const str, unsigned msize){
 	for(size_t i = 0; i < strlen(str); i++){
 		res = (res * SEED + str[i]) % msize;
 	}
+	if(res == 0){
+		return msize / 2;
+	}
 	return res;
 
 }

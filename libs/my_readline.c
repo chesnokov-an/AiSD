@@ -38,9 +38,12 @@ char *txt_readline(FILE* file_name){
 	return res;
 }
 
-char *bin_read_n_symbols(FILE* file_name, int n){
+char *bin_read_n_symbols(FILE* file_name, unsigned n){
 	char *res = NULL;
-	res = calloc(n+1, sizeof(char));
+	res = (char *)calloc(n+1, sizeof(char));
+	if(res == NULL){
+		return NULL;
+	}
 	fread(res, sizeof(char), n, file_name);
 	if(feof(file_name)){
 		return NULL;
@@ -50,8 +53,8 @@ char *bin_read_n_symbols(FILE* file_name, int n){
 
 char *bin_readline(FILE* file_name){
 	char *res = NULL;
-	int count;
-	err flag = bin_input_int(file_name, &count, 0, INT_MAX);
+	unsigned count;
+	err flag = bin_input_uint(file_name, &count, 0, UINT_MAX-1);
 	if(flag != ERR_OK){
 		return NULL;
 	}

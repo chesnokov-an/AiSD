@@ -7,7 +7,7 @@
 #include "input.h"
 #include "my_readline.h"
 
-#define SEED 37
+#define SEED 31
 
 Table *create_table(const unsigned msize){
 	Table *table = (Table *)calloc(1, sizeof(Table));
@@ -29,7 +29,7 @@ void clear_table(Table * const table){
 		return;
 	}
 	for(unsigned i = 0; i < table->msize; i++){
-		tble->ks[i].busy = 0;
+		table->ks[i].busy = 0;
 		if(table->ks[i].key){
 			free(table->ks[i].key);
 		}
@@ -52,7 +52,7 @@ unsigned hash(const char * const str, unsigned msize){
 	unsigned res = 0;
 	unsigned pow = 1;
 	for(size_t i = 0; i < strlen(str); i++){
-		res = (res + s[i] * pow) % msize;
+		res = (res + str[i] * pow) % msize;
 		pow = (pow * SEED) % msize;
 	}
 	return res;
@@ -61,24 +61,28 @@ unsigned hash(const char * const str, unsigned msize){
 unsigned step_hash(const char * const str, unsigned msize){
 	unsigned res = 0;
 	for(size_t i = 0; i < strlen(str); i++){
-		res = (res * SEED + s[i]) % msize;
+		res = (res * SEED + str[i]) % msize;
 	}
 	return res;
 
 }
 
 err insert_elem(Table * const table, const char * const key, const char * const info){
-	if(find(table, key) != NULL){
+	Table *find_table = find(table, key);
+	if(find_table != NULL){
+		clear_table(find_table);
+		free(find_table);
 		return ERR_VAL;
 	}
 	unsigned index = hash(key, table->msize);
 	unsigned step = step_hash(key, table->msize);
+	printf("hash: %u\n step_hash: %u\n\n", index, step);
 	unsigned seen = 0;
 	while((table->ks[index].busy == 1) && (seen < table->csize)){
 		index = (index + step) % table->msize;
 		seen += 1;
 	}
-	if(seen >= table->csize){
+	if(seen >= table->msize){
 		return ERR_FULL;
 	}
 	setter_keyspase(&(table->ks[index]), key, info);
@@ -87,18 +91,24 @@ err insert_elem(Table * const table, const char * const key, const char * const 
 }
 
 err delete_elem(Table * const table, const char * const key){
-	if(find(table, key) == NULL){
+	Table *find_table = find(table, key);
+	if(find_table == NULL){
 		return ERR_VAL;
 	}
+	clear_table(find_table);
+	free(find_table);
 	unsigned index = hash(key, table->msize);
 	unsigned step = step_hash(key, table->msize);
 	unsigned seen = 0;
 	while((table->ks[index].busy == 1) && (seen < table->csize)){
+		if(strcmp(table->ks[index].key, key) == 0){
+			table->csize -= 1;
+			table->ks[index].busy = 0;
+			return ERR_OK;
+		}
 		index = (index + step) % table->msize;
 		seen += 1;
 	}
-	table->ks[index].busy = 0;
-	table->csize -= 1;
 	return ERR_OK;
 }
 
@@ -107,12 +117,13 @@ Table *find(const Table * const table, const char * const key){
 	unsigned step = step_hash(key, table->msize);
 	unsigned seen = 0;
 	while((table->ks[index].busy == 1) && (seen < table->csize)){
-		if(strcmp() == 0){
+		if(strcmp(table->ks[index].key, key) == 0){
 			Table *res = create_table(1);
 			if(res == NULL){ return NULL; }
 			res->msize = 1;
 			res->csize = 1;
 			setter_keyspase(&(res->ks[0]), key, table->ks[index].info);
+			return res;
 		}
 		index = (index + step) % table->msize;
 		seen += 1;
@@ -124,10 +135,12 @@ void show_table(const Table * const table){
 	printf("Размер таблицы: %u\nЗаполнено ячеек: %u\n\n", table->msize, table->csize);
 	printf("  ------------Ключ------------ | ----Значение----\n");
 	unsigned i = 0;
-	while(i < table->csize){
+	unsigned count = 0;
+	while(count < table->csize){
 		if(table->ks[i].busy == 1){
 			printf("%30s | \"%s\"\n", table->ks[i].key, table->ks[i].info);
-			i++;
+			count++;
 		}
+		i++;
 	}
 }

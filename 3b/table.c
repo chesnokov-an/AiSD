@@ -78,6 +78,13 @@ err insert_elem(Table * const table, const char * const key, const char * const 
 	unsigned step = step_hash(key, table->msize);
 	unsigned seen = 0;
 	while((table->ks[index].key != NULL) && (seen < table->msize)){
+		if(strcmp(table->ks[index].key, key) == 0){
+			free(table->ks[index].info);
+			table->ks[index].info = strdup(info);
+			table->ks[index].busy = 1;
+			table->csize += 1;
+			return ERR_OK;
+		}
 		index = (index + step) % table->msize;
 		seen += 1;
 	}

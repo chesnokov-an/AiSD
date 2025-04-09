@@ -88,7 +88,14 @@ err insert_elem(Table * const table, const char * const key, const char * const 
 		index = (index + step) % table->msize;
 		seen += 1;
 	}
+	err flag = ERR_OK;
 	if(seen >= table->msize){
+		if(table->csize < table->msize){
+			flag = rehash(table);
+			if(flag != ERR_OK){ return flag; }
+			flag = insert_elem(table, key, info);
+			return flag;
+		}
 		return ERR_FULL;
 	}
 	setter_keyspase(&(table->ks[index]), key, info);
@@ -237,4 +244,27 @@ err output_bin(const Table * const table, FILE * const file){
 	}
 	free(lens);
 	return ERR_OK;
+}
+
+err rehash(Table * const table){
+	Table *new_table = create_table(table->msize);
+	if(new_table == NULL){ return ERR_NULL; }
+	err flag = ERR_OK;
+	for(unsigned i = 0; i < table->msize; i++){
+		if(table->ks[i].key == NULL){ continue; }
+		if(table->ks[i].busy == 0){ continue; }
+		flag = insert_elem(new_table, table->ks[i].key, table->ks[i].info);
+		if(flag != ERR_OK){
+			goto clean_and_return;
+		}
+	}
+	clear_table(table);
+	*table = *new_table;
+	free(new_table);
+	return ERR_OK;
+
+clean_and_return:
+	clear_table(new_table);
+	free(new_table);
+	return flag;
 }

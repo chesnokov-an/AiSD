@@ -151,62 +151,6 @@ void show_table(const Table * const table){
 		i++;
 	}
 }
-/*
-err input_bin(Table *table, FILE * const file){
-	unsigned msize = 0;
-	err flag = bin_input_uint(file, &msize, 0, UINT_MAX);
-	if(flag != ERR_OK || msize == 0){ goto clean_and_return; }
-	Table *new_table = create_table(msize);
-	unsigned csize = 0;
-	flag = bin_input_uint(file, &csize, 0, UINT_MAX);
-	if(flag != ERR_OK){ goto clean_and_return; }
-	for(unsigned i = 0; i < csize; i++){
-		char *key = bin_readline(file);
-		if(key == NULL){
-			flag = ERR_MEM;
-			goto clean_and_return;
-		}
-		char *info = bin_readline(file);
-		if(info == NULL){
-			free(key);
-			flag = ERR_MEM;
-			goto clean_and_return;
-		}
-		flag = insert_elem(new_table, key, info);
-		free(key);
-		free(info);
-		if(flag != ERR_OK){ goto clean_and_return; }
-	}
-	clear_table(table);
-	*table = *new_table;
-	free(new_table);
-	return ERR_OK;
-
-clean_and_return:
-	clear_table(new_table);
-	free(new_table);
-	return flag;
-}*/
-
-/*
-void output_bin(const Table * const table, FILE * const file){
-	fwrite(&(table->msize), 1, sizeof(unsigned), file);
-	fwrite(&(table->csize), 1, sizeof(unsigned), file);
-	unsigned i = 0;
-	unsigned count = 0;
-	while(count < table->csize){
-		if(table->ks[i].busy == 1){
-			size_t key_len = strlen(table->ks[i].key);
-			size_t info_len = strlen(table->ks[i].info);
-			fwrite(&key_len, 1, sizeof(unsigned), file);
-			fwrite(table->ks[i].key, key_len, sizeof(char), file);
-			fwrite(&info_len, 1, sizeof(unsigned), file);
-			fwrite(table->ks[i].info, info_len, sizeof(char), file);
-			count++;
-		}
-		i++;
-	}
-}*/
 
 err input_bin(Table *table, FILE * const file){
 	unsigned msize = 0;

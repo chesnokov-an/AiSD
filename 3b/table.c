@@ -267,7 +267,6 @@ err output_bin(const Table * const table, FILE * const file){
 	fwrite(&(table->csize), 1, sizeof(unsigned), file);
 	unsigned total_len = 0;
 	unsigned *lens = (unsigned *)calloc(2 * table->csize, sizeof(unsigned));
-	unsigned count = 0;
 	if(lens == NULL){ return ERR_MEM; }
 	for(unsigned i = 0; i < table->msize; i++){
 		if(table->ks[i].busy == 0){
@@ -283,21 +282,14 @@ err output_bin(const Table * const table, FILE * const file){
 		fwrite(&key_len, 1, sizeof(unsigned), file);
 		fwrite(&info_len, 1, sizeof(unsigned), file);
 		fwrite(&offset, 1, sizeof(unsigned), file);
-		total_len += key_len + info_len;
 
-		lens[2 * count] = key_len;
-		lens[2 * count + 1] = info_len;
-		count++;
-	}
-	unsigned i = 0;
-	count = 0;
-	while(count < table->csize){
-		if(table->ks[i].busy == 1){
-			fwrite(table->ks[i].key, lens[2 * count], sizeof(char), file);
-			fwrite(table->ks[i].info, lens[2 * count + 1], sizeof(char), file);
-			count++;
-		}
-		i++;
+		unsigned tmp_seek = ftell(file);
+		fseek(file, offset, SEEK_SET);
+		fwrite(table->ks[i].key, key_len, sizeof(char), file);
+		fwrite(table->ks[i].info, info_len, sizeof(char), file);
+		fseek(file, tmp_seek, SEEK_SET);
+
+		total_len += key_len + info_len;
 	}
 	free(lens);
 	return ERR_OK;

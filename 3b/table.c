@@ -77,7 +77,7 @@ err insert_elem(Table * const table, const char * const key, const char * const 
 	unsigned index = hash(key, table->msize);
 	unsigned step = step_hash(key, table->msize);
 	unsigned seen = 0;
-	while((table->ks[index].busy == 1) && (seen < table->csize)){
+	while((table->ks[index].key != NULL) && (seen < table->msize)){
 		index = (index + step) % table->msize;
 		seen += 1;
 	}
@@ -99,7 +99,7 @@ err delete_elem(Table * const table, const char * const key){
 	unsigned index = hash(key, table->msize);
 	unsigned step = step_hash(key, table->msize);
 	unsigned seen = 0;
-	while((table->ks[index].busy == 1) && (seen < table->csize)){
+	while((table->ks[index].key != NULL) && (seen < table->msize)){
 		if(strcmp(table->ks[index].key, key) == 0){
 			table->csize -= 1;
 			table->ks[index].busy = 0;
@@ -115,8 +115,9 @@ Table *find(const Table * const table, const char * const key){
 	unsigned index = hash(key, table->msize);
 	unsigned step = step_hash(key, table->msize);
 	unsigned seen = 0;
-	while((table->ks[index].busy == 1) && (seen < table->csize)){
+	while((table->ks[index].key != NULL) && (seen < table->msize)){
 		if(strcmp(table->ks[index].key, key) == 0){
+			if(table->ks[index].busy == 0){ return NULL; }
 			Table *res = create_table(1);
 			if(res == NULL){ return NULL; }
 			res->msize = 1;

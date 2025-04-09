@@ -151,7 +151,7 @@ void show_table(const Table * const table){
 		i++;
 	}
 }
-
+/*
 err input_bin(Table *table, FILE * const file){
 	unsigned msize = 0;
 	err flag = bin_input_uint(file, &msize, 0, UINT_MAX);
@@ -186,8 +186,9 @@ clean_and_return:
 	clear_table(new_table);
 	free(new_table);
 	return flag;
-}
+}*/
 
+/*
 void output_bin(const Table * const table, FILE * const file){
 	fwrite(&(table->msize), 1, sizeof(unsigned), file);
 	fwrite(&(table->csize), 1, sizeof(unsigned), file);
@@ -205,4 +206,99 @@ void output_bin(const Table * const table, FILE * const file){
 		}
 		i++;
 	}
+}*/
+
+err input_bin(Table *table, FILE * const file){
+	unsigned msize = 0;
+	err flag = bin_input_uint(file, &msize, 0, UINT_MAX);
+	if(flag != ERR_OK || msize == 0){ goto clean_and_return; }
+	Table *new_table = create_table(msize);
+	unsigned csize = 0;
+	flag = bin_input_uint(file, &csize, 0, UINT_MAX);
+	if(flag != ERR_OK){ goto clean_and_return; }
+	for(unsigned i = 0; i < msize; i++){
+		unsigned key_len = 0;
+		unsigned info_len = 0;
+		unsigned offset = 0;
+		flag = bin_input_uint(file, &key_len, 0, UINT_MAX);
+		if(flag != ERR_OK){ goto clean_and_return; }
+		flag = bin_input_uint(file, &info_len, 0, UINT_MAX);
+		if(flag != ERR_OK){ goto clean_and_return; }
+		flag = bin_input_uint(file, &offset, 0, UINT_MAX);
+		if(flag != ERR_OK){ goto clean_and_return; }
+		if(offset == 0){ continue; }
+		unsigned tmp_seek = ftell(file);
+		fseek(file, offset, SEEK_SET);
+
+		char *key = bin_read_n_symbols(file, key_len);
+		if(key == NULL){
+			flag = ERR_MEM;
+			goto clean_and_return;
+		}
+		char *info = bin_read_n_symbols(file, info_len);
+		if(info == NULL){
+			free(key);
+			flag = ERR_MEM;
+			goto clean_and_return;
+		}
+
+		fseek(file, tmp_seek, SEEK_SET);
+		flag = insert_elem(new_table, key, info);
+		free(key);
+		free(info);
+		if(flag != ERR_OK){ goto clean_and_return; }
+	}
+	clear_table(table);
+	*table = *new_table;
+	free(new_table);
+	return ERR_OK;
+
+clean_and_return:
+	clear_table(new_table);
+	free(new_table);
+	return flag;
+}
+
+
+err output_bin(const Table * const table, FILE * const file){
+	if(table == NULL){ return ERR_NULL; }
+	if(table->msize == 0 || table->csize == 0){ return ERR_EMPTY; }
+	fwrite(&(table->msize), 1, sizeof(unsigned), file);
+	fwrite(&(table->csize), 1, sizeof(unsigned), file);
+	unsigned total_len = 0;
+	unsigned *lens = (unsigned *)calloc(2 * table->csize, sizeof(unsigned));
+	unsigned count = 0;
+	if(lens == NULL){ return ERR_MEM; }
+	for(unsigned i = 0; i < table->msize; i++){
+		if(table->ks[i].busy == 0){
+			unsigned tmp = 0;
+			fwrite(&tmp, 1, sizeof(unsigned), file);
+			fwrite(&tmp, 1, sizeof(unsigned), file);
+			fwrite(&tmp, 1, sizeof(unsigned), file);
+			continue;
+		}
+		unsigned key_len = strlen(table->ks[i].key);
+		unsigned info_len = strlen(table->ks[i].info);
+		unsigned offset = sizeof(unsigned) * (2 + 3 * table->msize) + sizeof(char) * total_len;
+		fwrite(&key_len, 1, sizeof(unsigned), file);
+		fwrite(&info_len, 1, sizeof(unsigned), file);
+		fwrite(&offset, 1, sizeof(unsigned), file);
+		total_len += key_len + info_len;
+
+		lens[2 * count] = key_len;
+		lens[2 * count + 1] = info_len;
+		count++;
+	}
+	unsigned i = 0;
+	count = 0;
+	while(count < table->csize){
+		if(table->ks[i].busy == 1){
+			fwrite(table->ks[i].key, lens[2 * count], sizeof(char), file);
+			fwrite(table->ks[i].info, lens[2 * count + 1], sizeof(char), file);
+			count++;
+		}
+		i++;
+	}
+	free(lens);
+	return ERR_OK;
 }

@@ -52,15 +52,11 @@ char *bin_read_n_symbols(FILE* file_name, unsigned n){
 }
 
 char *bin_readline(FILE* file_name){
-	char *res = NULL;
 	unsigned count;
 	err flag = bin_input_uint(file_name, &count, 0, UINT_MAX-1);
 	if(flag != ERR_OK){
 		return NULL;
 	}
-	res = bin_read_n_symbols(file_name, count);
-	if(res == NULL){
-		return NULL;
-	}
+	char *res = bin_read_n_symbols(file_name, count);
 	return res;
 }

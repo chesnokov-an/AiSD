@@ -23,7 +23,7 @@ err delete_elem(Table * const table, const char * const key);
 Table *find(const Table * const table, const char * const key);
 void show_table(const Table * const table);
 err input_bin(Table *table, FILE * const file);
-err output_bin(const Table * const table, FILE * const file);
+void output_bin(const Table * const table, FILE * const file);
 
 // err resize(Table *table);
 // err rehash(Table * const table);

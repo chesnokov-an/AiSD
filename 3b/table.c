@@ -61,12 +61,9 @@ unsigned hash(const char * const str, unsigned msize){
 unsigned step_hash(const char * const str, unsigned msize){
 	unsigned res = 0;
 	for(size_t i = 0; i < strlen(str); i++){
-		res = (res * SEED + str[i]) % msize;
+		res = (res * SEED + str[i]) % (msize - 1);
 	}
-	if(res == 0){
-		return msize / 2;
-	}
-	return res;
+	return (res + 1);
 
 }
 
@@ -79,7 +76,6 @@ err insert_elem(Table * const table, const char * const key, const char * const 
 	}
 	unsigned index = hash(key, table->msize);
 	unsigned step = step_hash(key, table->msize);
-	printf("hash: %u\n step_hash: %u\n\n", index, step);
 	unsigned seen = 0;
 	while((table->ks[index].busy == 1) && (seen < table->csize)){
 		index = (index + step) % table->msize;
@@ -149,11 +145,10 @@ void show_table(const Table * const table){
 }
 
 err input_bin(Table *table, FILE * const file){
-	Table *new_table = create_table(1);
-	if(new_table == NULL){ return ERR_MEM; }
 	unsigned msize = 0;
 	err flag = bin_input_uint(file, &msize, 0, UINT_MAX);
 	if(flag != ERR_OK || msize == 0){ goto clean_and_return; }
+	Table *new_table = create_table(msize);
 	unsigned csize = 0;
 	flag = bin_input_uint(file, &csize, 0, UINT_MAX);
 	if(flag != ERR_OK){ goto clean_and_return; }
@@ -183,4 +178,23 @@ clean_and_return:
 	clear_table(new_table);
 	free(new_table);
 	return flag;
+}
+
+void output_bin(const Table * const table, FILE * const file){
+	fwrite(&(table->msize), 1, sizeof(unsigned), file);
+	fwrite(&(table->csize), 1, sizeof(unsigned), file);
+	unsigned i = 0;
+	unsigned count = 0;
+	while(count < table->csize){
+		if(table->ks[i].busy == 1){
+			size_t key_len = strlen(table->ks[i].key);
+			size_t info_len = strlen(table->ks[i].info);
+			fwrite(&key_len, 1, sizeof(unsigned), file);
+			fwrite(table->ks[i].key, key_len, sizeof(char), file);
+			fwrite(&info_len, 1, sizeof(unsigned), file);
+			fwrite(table->ks[i].info, info_len, sizeof(char), file);
+			count++;
+		}
+		i++;
+	}
 }

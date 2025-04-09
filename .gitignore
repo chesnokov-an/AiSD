@@ -1,0 +1,11 @@
+# obj directory
+build/
+
+# lib directory
+ld/
+
+# obj files
+*.o
+
+# executable files
+prog

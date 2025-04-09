@@ -38,15 +38,15 @@ void message(err flag){
 }
 
 void Dialog(){
-	err (*func_array[])(Table *) = {D_insert, D_delete, D_find, D_show};
+	err (*func_array[])(Table *) = {D_insert, D_delete, D_find, D_show, D_input, D_output};
 	Table *table = create_table(START_CAPACITY);
 	int option = -1;
 	err flag = ERR_OK;
 	do{
 		printf("\n\n---------- МЕНЮ ----------\nВозможные команды:\n\n");
-		printf("0: Завершение программы.\n1: Вставка нового элемента.\n2: Удаление элемента.\n3: Поиск элемента.\n4: Вывод содержимого массива.\n5: Импорт таблицы из бинарного файла.\n6: Экспорт таблицы в бинарный файл.\n\n");
+		printf("0: Завершение программы.\n1: Вставка нового элемента.\n2: Удаление элемента.\n3: Поиск элемента.\n4: Вывод содержимого таблицы.\n5: Импорт таблицы из бинарного файла.\n6: Экспорт таблицы в бинарный файл.\n\n");
 		printf("Выберите опцию: ");
-		flag = input_int(&option, 0, 4);
+		flag = input_int(&option, 0, 6);
 		printf("\n");
 		if(flag == ERR_EOF || option == 0){ goto end_program; }
 		flag = func_array[option-1](table);
@@ -137,24 +137,45 @@ char *my_strip(char const * const s){
 	return new_s;
 }
 
-/*
-err D_load(Table *table){
+FILE *input_correct_file(){
 	char *str_file = readline("Введите название файла: ");
 	char *clear_s_file = my_strip(str_file);
 	FILE *file = fopen(clear_s_file, "r");
 	free(str_file);
 	free(clear_s_file);
-	err flag = ERR_OK;
 	if(!file){
 		printf("Unknown file\n");
-		flag = ERR_VAL;
-		return flag;
+		return NULL;
 	}
-	flag = load_from_txt(table, file);
+	return file;
+}
+
+err D_input(Table *table){
+	char *str_file = readline("Введите название файла: ");
+	char *clear_s_file = my_strip(str_file);
+	FILE *file = fopen(clear_s_file, "r");
+	free(str_file);
+	free(clear_s_file);
+	if(!file){
+		printf("Unknown file\n");
+		return ERR_VAL;
+	}
+	err flag = input_bin(table, file);
 	fclose(file);
 	return flag;
 }
 
+err D_output(Table *table){
+	char *str_file = readline("Введите название файла: ");
+	char *clear_s_file = my_strip(str_file);
+	FILE *file = fopen(clear_s_file, "w");
+	free(str_file);
+	free(clear_s_file);
+	output_bin(table, file);
+	fclose(file);
+	return ERR_OK;
+}
+/*
 err D_reorganize(Table *table){
 	err flag = reorganize_table(table);
 	show_table(table);

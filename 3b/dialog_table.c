@@ -11,26 +11,34 @@
 #include "my_readline.h"
 
 #define START_CAPACITY 7
+#define GREEN "\033[38;2;0;255;0m"
+#define RED "\033[38;2;255;0;0m"
+#define BLUE "\033[38;2;0;191;255m"
+#define LIGHT "\033[38;2;180;180;180m"
+#define ORANGE "\033[38;2;255;165;0m"
+#define MAGENTA "\033[38;2;255;20;147m"
+#define YELLOW "\033[38;2;255;255;0m"
+#define RESET "\033[0;0m"
 
 void message(err flag){
 	switch(flag){
 	case ERR_MEM:
-		printf("\nОшибка при выделении памяти.\n");
+		printf(RED"\nОшибка при выделении памяти.\n"RESET);
 		break;
 	case ERR_VAL:
-		printf("\nНекорректное значение.\n");
+		printf(RED"\nНекорректное значение.\n"RESET);
 		break;
 	case ERR_NULL:
-		printf("\nПередан нулевой указатель.\n");
+		printf(RED"\nПередан нулевой указатель.\n"RESET);
 		break;
 	case ERR_FULL:
-		printf("\nТаблица заполнена.\n");
+		printf(RED"\nТаблица заполнена.\n"RESET);
 		break;
 	case ERR_EMPTY:
-		printf("\nТаблица пуста.\n");
+		printf(RED"\nТаблица пуста.\n"RESET);
 		break;
 	case ERR_EOF:
-		printf("\nЗавершение программы.\n");
+		printf(RED"\nЗавершение программы.\n"RESET);
 		break;
 	case ERR_OK:
 		break;
@@ -43,9 +51,9 @@ void Dialog(){
 	int option = -1;
 	err flag = ERR_OK;
 	do{
-		printf("\n\n---------- МЕНЮ ----------\nВозможные команды:\n\n");
-		printf("0: Завершение программы.\n1: Вставка нового элемента.\n2: Удаление элемента.\n3: Поиск элемента.\n4: Вывод содержимого таблицы.\n5: Импорт таблицы из бинарного файла.\n6: Экспорт таблицы в бинарный файл.\n\n");
-		printf("Выберите опцию: ");
+		printf(MAGENTA"\n\n---------- МЕНЮ ----------\nВозможные команды:\n\n"RESET);
+		printf("0: Завершение программы.\n"GREEN"1: Вставка нового элемента.\n"RED"2: Удаление элемента.\n"BLUE"3: Поиск элемента.\n"LIGHT"4: Вывод содержимого таблицы.\n"YELLOW"5: Импорт таблицы из бинарного файла.\n"ORANGE"6: Экспорт таблицы в бинарный файл.\n\n"RESET);
+		printf(MAGENTA"Выберите опцию: "RESET);
 		flag = input_int(&option, 0, 6);
 		printf("\n");
 		if(flag == ERR_EOF || option == 0){ goto end_program; }

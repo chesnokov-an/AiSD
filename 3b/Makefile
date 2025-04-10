@@ -5,7 +5,7 @@ LIB = table
 LIBTYPE ?= dynamic
 OBJDIR = build
 LIBDIR = ../libs/ld
-LDFLAGS = -l$(LIB) -lreadline -linput -lmy_readline
+LDFLAGS = -l$(LIB) -lreadline -linput -lmy_readline -lm
 OBJ = $(addprefix $(OBJDIR)/, $(patsubst %.c, %.o, $(filter-out $(LIB).c, $(wildcard *.c))))
 HDIR = ../libs
 

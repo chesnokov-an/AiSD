@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <limits.h>
+#include <math.h>
 #include "err.h"
 #include "table.h"
 #include "input.h"
@@ -67,7 +68,7 @@ unsigned step_hash(const char * const str, unsigned msize){
 
 }
 
-err insert_elem(Table * const table, const char * const key, const char * const info){
+err insert_elem(Table *table, const char * const key, const char * const info){
 	Table *find_table = find(table, key);
 	if(find_table != NULL){
 		clear_table(find_table);
@@ -92,11 +93,14 @@ err insert_elem(Table * const table, const char * const key, const char * const 
 	if(seen >= table->msize){
 		if(table->csize < table->msize){
 			flag = rehash(table);
-			if(flag != ERR_OK){ return flag; }
-			flag = insert_elem(table, key, info);
-			return flag;
 		}
-		return ERR_FULL;
+		else{
+			flag = resize(table);
+		}
+		if(flag != ERR_OK){ return flag; }
+		flag = insert_elem(table, key, info);
+		return flag;
+
 	}
 	setter_keyspase(&(table->ks[index]), key, info);
 	table->csize += 1;
@@ -248,6 +252,46 @@ err output_bin(const Table * const table, FILE * const file){
 
 err rehash(Table * const table){
 	Table *new_table = create_table(table->msize);
+	if(new_table == NULL){ return ERR_NULL; }
+	err flag = ERR_OK;
+	for(unsigned i = 0; i < table->msize; i++){
+		if(table->ks[i].key == NULL){ continue; }
+		if(table->ks[i].busy == 0){ continue; }
+		flag = insert_elem(new_table, table->ks[i].key, table->ks[i].info);
+		if(flag != ERR_OK){
+			goto clean_and_return;
+		}
+	}
+	clear_table(table);
+	*table = *new_table;
+	free(new_table);
+	return ERR_OK;
+
+clean_and_return:
+	clear_table(new_table);
+	free(new_table);
+	return flag;
+}
+
+char is_prime(const unsigned n){
+	for(unsigned i = 2; i < sqrt(n) + 1; i++){
+		if((n % i) == 0){
+			return 0;
+		}
+	}
+	return 1;
+}
+
+unsigned bigger_prime(const unsigned n){
+	unsigned i = n + 1;
+	while(is_prime(i) == 0){
+		i++;
+	}
+	return i;
+}
+
+err resize(Table *table){
+	Table *new_table = create_table(bigger_prime(table->msize));
 	if(new_table == NULL){ return ERR_NULL; }
 	err flag = ERR_OK;
 	for(unsigned i = 0; i < table->msize; i++){

@@ -221,7 +221,9 @@ err input_bin(Table *table, FILE * const file){
 		if(flag != ERR_OK){ goto clean_and_return; }
 	}
 	clear_table(table);
-	*table = *new_table;
+	table->ks = new_table->ks;
+	table->msize = new_table->msize;
+	table->csize = new_table->csize;
 	free(new_table);
 	return ERR_OK;
 
@@ -280,7 +282,9 @@ err rehash(Table * const table){
 		}
 	}
 	clear_table(table);
-	*table = *new_table;
+	table->ks = new_table->ks;
+	table->msize = new_table->msize;
+	table->csize = new_table->csize;
 	free(new_table);
 	return ERR_OK;
 
@@ -320,7 +324,9 @@ err resize(Table *table){
 		}
 	}
 	clear_table(table);
-	*table = *new_table;
+	table->ks = new_table->ks;
+	table->msize = new_table->msize;
+	table->csize = new_table->csize;
 	free(new_table);
 	return ERR_OK;
 

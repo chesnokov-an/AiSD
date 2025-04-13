@@ -3,8 +3,14 @@
 
 #include "err.h"
 
+typedef enum busytype{
+	BUSY = 1,
+	DELETED = -1,
+	FREE = 0,
+}busytype;
+
 typedef struct KeySpace{
-	char busy;
+	busytype busy;
 	char *key;
 	char *info;
 } KeySpace;

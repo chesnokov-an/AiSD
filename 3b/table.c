@@ -30,7 +30,7 @@ void clear_table(Table * const table){
 		return;
 	}
 	for(unsigned i = 0; i < table->msize; i++){
-		table->ks[i].busy = 0;
+		table->ks[i].busy = FREE;
 		if(table->ks[i].key){
 			free(table->ks[i].key);
 		}
@@ -44,7 +44,7 @@ void clear_table(Table * const table){
 }
 
 void setter_keyspase(KeySpace * const ks, const char * const key, const char * const info){
-	ks->busy = 1;
+	ks->busy = BUSY;
 	ks->key = strdup(key);
 	ks->info = strdup(info);
 }
@@ -68,21 +68,28 @@ unsigned step_hash(const char * const str, unsigned msize){
 
 }
 
+char cmp(const char * const key1, const char * const key2){
+	return ((strcmp(key1, key2) == 0) ? 0 : 1);
+}
+
 err insert_elem(Table *table, const char * const key, const char * const info){
 	Table *find_table = find(table, key);
-	if(find_table != NULL){
-		clear_table(find_table);
-		free(find_table);
+	if(find_table == NULL){
+		return ERR_MEM;
+	}
+	if(find_table->csize == 1){
 		return ERR_VAL;
 	}
+	clear_table(find_table);
+	free(find_table);
 	unsigned index = hash(key, table->msize);
 	unsigned step = step_hash(key, table->msize);
 	unsigned seen = 0;
-	while((table->ks[index].key != NULL) && (seen < table->msize)){
-		if(strcmp(table->ks[index].key, key) == 0){
+	while((table->ks[index].busy != FREE) && (seen < table->msize)){
+		if(cmp(table->ks[index].key, key) == 0){
 			free(table->ks[index].info);
 			table->ks[index].info = strdup(info);
-			table->ks[index].busy = 1;
+			table->ks[index].busy = BUSY;
 			table->csize += 1;
 			return ERR_OK;
 		}
@@ -110,6 +117,9 @@ err insert_elem(Table *table, const char * const key, const char * const info){
 err delete_elem(Table * const table, const char * const key){
 	Table *find_table = find(table, key);
 	if(find_table == NULL){
+		return ERR_MEM;
+	}
+	if(find_table->csize == 0){
 		return ERR_VAL;
 	}
 	clear_table(find_table);
@@ -117,10 +127,10 @@ err delete_elem(Table * const table, const char * const key){
 	unsigned index = hash(key, table->msize);
 	unsigned step = step_hash(key, table->msize);
 	unsigned seen = 0;
-	while((table->ks[index].key != NULL) && (seen < table->msize)){
-		if(strcmp(table->ks[index].key, key) == 0){
+	while((table->ks[index].busy != FREE) && (seen < table->msize)){
+		if(cmp(table->ks[index].key, key) == 0){
 			table->csize -= 1;
-			table->ks[index].busy = 0;
+			table->ks[index].busy = DELETED;
 			return ERR_OK;
 		}
 		index = (index + step) % table->msize;
@@ -133,12 +143,13 @@ Table *find(const Table * const table, const char * const key){
 	unsigned index = hash(key, table->msize);
 	unsigned step = step_hash(key, table->msize);
 	unsigned seen = 0;
-	while((table->ks[index].key != NULL) && (seen < table->msize)){
-		if(strcmp(table->ks[index].key, key) == 0){
-			if(table->ks[index].busy == 0){ return NULL; }
-			Table *res = create_table(1);
-			if(res == NULL){ return NULL; }
-			res->msize = 1;
+	Table *res = create_table(1);
+	if(res == NULL){ return NULL; }
+	res->msize = 1;
+	res->csize = 0;
+	while((table->ks[index].busy != FREE) && (seen < table->msize)){
+		if(cmp(table->ks[index].key, key) == 0){
+			if(table->ks[index].busy == DELETED){ return res; }
 			res->csize = 1;
 			setter_keyspase(&(res->ks[0]), key, table->ks[index].info);
 			return res;
@@ -146,20 +157,14 @@ Table *find(const Table * const table, const char * const key){
 		index = (index + step) % table->msize;
 		seen += 1;
 	}
-	return NULL;
+	return res;
 }
 
 void show_table(const Table * const table){
 	printf("Размер таблицы: %u\nЗаполнено ячеек: %u\n\n", table->msize, table->csize);
-	printf("  ------------Ключ------------ | ----Значение----\n");
-	unsigned i = 0;
-	unsigned count = 0;
-	while(count < table->csize){
-		if(table->ks[i].busy == 1){
-			printf("%30s | \"%s\"\n", table->ks[i].key, table->ks[i].info);
-			count++;
-		}
-		i++;
+	printf("Состояние | -------------Ключ------------ | ----Значение----\n");
+	for(unsigned i = 0; i < table->msize; i++){
+		printf("%5d     |%30s | \"%s\"\n", (int)(table->ks[i].busy), table->ks[i].key, table->ks[i].info);
 	}
 }
 
@@ -224,7 +229,7 @@ err output_bin(const Table * const table, FILE * const file){
 	unsigned *lens = (unsigned *)calloc(2 * table->csize, sizeof(unsigned));
 	if(lens == NULL){ return ERR_MEM; }
 	for(unsigned i = 0; i < table->msize; i++){
-		if(table->ks[i].busy == 0){
+		if(table->ks[i].busy != BUSY){
 			unsigned tmp = 0;
 			fwrite(&tmp, 1, sizeof(unsigned), file);
 			fwrite(&tmp, 1, sizeof(unsigned), file);
@@ -256,7 +261,7 @@ err rehash(Table * const table){
 	err flag = ERR_OK;
 	for(unsigned i = 0; i < table->msize; i++){
 		if(table->ks[i].key == NULL){ continue; }
-		if(table->ks[i].busy == 0){ continue; }
+		if(table->ks[i].busy != BUSY){ continue; }
 		flag = insert_elem(new_table, table->ks[i].key, table->ks[i].info);
 		if(flag != ERR_OK){
 			goto clean_and_return;
@@ -296,7 +301,7 @@ err resize(Table *table){
 	err flag = ERR_OK;
 	for(unsigned i = 0; i < table->msize; i++){
 		if(table->ks[i].key == NULL){ continue; }
-		if(table->ks[i].busy == 0){ continue; }
+		if(table->ks[i].busy != BUSY){ continue; }
 		flag = insert_elem(new_table, table->ks[i].key, table->ks[i].info);
 		if(flag != ERR_OK){
 			goto clean_and_return;

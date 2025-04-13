@@ -2,14 +2,14 @@ CC = cc
 CFLAGS = -c -Wall -Wextra -g
 TARGET = prog
 LIB = table
-LIBTYPE ?= dynamic
+DFLAGS ?=
 OBJDIR = build
 LIBDIR = ../libs/ld
 LDFLAGS = -l$(LIB) -lreadline -linput -lmy_readline -lm
 OBJ = $(addprefix $(OBJDIR)/, $(patsubst %.c, %.o, $(filter-out $(LIB).c, $(wildcard *.c))))
 HDIR = ../libs
 
-all: $(MAKE) $(OBJDIR) $(LIBTYPE) $(TARGET)
+all: $(MAKE) $(OBJDIR) $(OBJDIR)/lib$(LIB).so $(TARGET)
 
 $(OBJDIR):
 	mkdir $(OBJDIR)
@@ -18,16 +18,13 @@ $(MAKE):
 	cd $(HDIR) && make
 
 $(OBJDIR)/%.o: %.c
-	$(CC) -I$(HDIR) $(CFLAGS) $< -o $@
+	$(CC) -I$(HDIR) $(CFLAGS) $< -o $@ $(DFLAGS)
 
 $(OBJDIR)/$(LIB).o: $(LIB).c
-	$(CC) -fpic -I$(HDIR) $(CFLAGS) $< -o $@
+	$(CC) -fpic -I$(HDIR) $(CFLAGS) $< -o $@ $(DFLAGS)
 
-static: $(OBJDIR)/$(LIB).o
-	ar rcs $(OBJDIR)/lib$(LIB).a $<
-
-dynamic: $(OBJDIR)/$(LIB).o
-	$(CC) -shared $(OBJDIR)/$(LIB).o -o $(OBJDIR)/lib$(LIB).so
+$(OBJDIR)/lib$(LIB).so: $(OBJDIR)/$(LIB).o
+	$(CC) -shared $(OBJDIR)/$(LIB).o -o $(OBJDIR)/lib$(LIB).so $(DFLAGS)
 
 $(TARGET): $(OBJ)
 	$(CC) -o prog -I$(HDIR) $^ $(LDFLAGS) -L$(LIBDIR) -L$(OBJDIR) -Wl,-rpath=$(LIBDIR),-rpath=$(OBJDIR)

@@ -8,7 +8,16 @@
 #include "input.h"
 #include "my_readline.h"
 
+#ifdef DEBUG
+#define DEBUG_PRINT(fmt, ...) fprintf(stderr, "\nDEBUG: %s:%d:%s(): " fmt "\n", \
+								__FILE__, __LINE__, __func__, __VA_ARGS__)
+#else
+#define DEBUG_PRINT(fmt, ...) ((void)0)
+#endif
+
 #define SEED 31
+#define GREEN "\033[38;2;0;255;0m"
+#define RESET "\033[0;0m"
 
 Table *create_table(const unsigned msize){
 	Table *table = (Table *)calloc(1, sizeof(Table));
@@ -84,6 +93,9 @@ err insert_elem(Table *table, const char * const key, const char * const info){
 	free(find_table);
 	unsigned index = hash(key, table->msize);
 	unsigned step = step_hash(key, table->msize);
+
+	DEBUG_PRINT(GREEN"\nhash_index: %u\nhash_step: %u\n\n"RESET, index, step);
+
 	unsigned seen = 0;
 	while((table->ks[index].busy != FREE) && (seen < table->msize)){
 		if(cmp(table->ks[index].key, key) == 0){

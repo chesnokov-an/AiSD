@@ -30,6 +30,14 @@ Node *create_node(const keytype const key, const infotype info){
 	return node;
 }
 
+void clear_node(Node *node){
+	if(node == NULL){ return; }
+	if(node->info != NULL){ free(node->info); }
+	if(node->children != NULL){ free(node->children); }
+	if(node->key){ free(node->key); }
+	free(node);
+}
+
 char cmp(keytype key1, keytype key2){
 	return strcmp(key1, key2);
 }
@@ -84,12 +92,65 @@ err insert_elem(Tree * const tree, const keytype const key, const infotype info)
 	}
 	return ERR_OK;
 }
-/*
+
+char is_possible_to_delete(const Node * const node){
+	if(node->left == NULL || node->right){
+		return 1;
+	}
+	return 0;
+}
+
 err delete_elem(Tree * const tree, const keytype const key){
 	if(tree == NULL){ return ERR_NULL; }
 	if(tree->root == NULL){
 		return ERR_EMPTY;
 	}
+	Node *node = tree->root;
+	Node *pre_node = NULL;
+	char left_flag = -1;
+	char cmp_val = 0;
+	while(node != NULL){
+		cmp_val = cmp(node->key, key);
+		if(cmp_val == 1){
+			break;
+		}
+		pre_node = node;
+		if(cmp_val > 0){
+			node = node->left;
+			left_flag = 1;
+		}
+		else{
+			node = node->right;
+			left_flag = 0;
+		}
+	}
+	if(node == NULL){
+		return ERR_NO_ELEM;
+	}
 
-
-}*/
+	if((node->left == NULL) && (node->right == NULL)){
+		clear_node(node);
+		return ERR_OK;
+	}
+	if(node->left == NULL){
+		if(left_flag == 1){
+			pre_node->left = node->right;
+			free(node);
+			return ERR_OK;
+		}
+		pre_node->right = node->right;
+		free(node);
+		return ERR_OK;
+	}
+	if(node->right == NULL){
+		if(left_flag == 1){
+			pre_node->left = node->left;
+			free(node);
+			return ERR_OK;
+		}
+		pre_node->right = node->left;
+		free(node);
+		return ERR_OK;
+	}
+	// ...
+}

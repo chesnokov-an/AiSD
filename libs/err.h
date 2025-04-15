@@ -9,6 +9,7 @@ typedef enum err{
 	ERR_NULL = 3,
 	ERR_FULL = 4,
 	ERR_EMPTY = 5,
+	ERR_NO_ELEM = 6,
 }err;
 
 #endif

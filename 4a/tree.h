@@ -22,5 +22,6 @@ Node *spec_find(const Tree * const, const keytype const);
 void format_tree(const Tree * const);
 void graph_tree(const Tree * const);
 void import_tree(const Tree * const, FILE *);
+void firmware(Tree * const tree);
 
 #endif

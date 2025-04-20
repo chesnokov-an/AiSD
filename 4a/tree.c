@@ -5,7 +5,6 @@
 #define left children[0]
 #define right children[1]
 
-
 Tree *create_tree(){
 	Tree *tree = (Tree *)calloc(1, sizeof(Tree));
 	return tree;
@@ -90,6 +89,7 @@ err insert_elem(Tree * const tree, const keytype const key, const infotype info)
 		pre_node->right = create_node(key, info);
 		if(pre_node->right == NULL){ return ERR_MEM; }
 	}
+	firmware(tree);
 	return ERR_OK;
 }
 
@@ -131,7 +131,7 @@ err delete_elem(Tree * const tree, const keytype const key){
 	// Удаляем, если нет потомков
 	if((node->left == NULL) && (node->right == NULL)){
 		if(left_flag == -1){ tree->root = NULL; }
-		clear_node(node);
+		goto end_of_insert;
 		return ERR_OK;
 	}
 	// Удаляем, если один потомок
@@ -145,7 +145,7 @@ err delete_elem(Tree * const tree, const keytype const key){
 		else{
 			pre_node->right = node->right;
 		}
-		free(node);
+		goto end_of_insert;
 		return ERR_OK;
 	}
 	if(node->right == NULL){
@@ -158,7 +158,7 @@ err delete_elem(Tree * const tree, const keytype const key){
 		else{
 			pre_node->right = node->left;
 		}
-		free(node);
+		goto end_of_insert;
 		return ERR_OK;
 	}
 	// Удаляем, если два потомка
@@ -179,7 +179,7 @@ err delete_elem(Tree * const tree, const keytype const key){
 			pre_node->right = min_right;
 		}
 		min_right->left = node->left;
-		free(node);
+		goto end_of_insert;
 		return ERR_OK;
 	}
 	if(left_flag == -1){
@@ -194,6 +194,26 @@ err delete_elem(Tree * const tree, const keytype const key){
 	pre_min->left = min_right->right;
 	min_right->right = node->right;
 	min_right->left = node->left;
+	goto end_of_insert;
+
+end_of_insert:
+	clear_node(node);
 	free(node);
+	firmware(tree);
 	return ERR_OK;
+}
+
+void firmware(Tree * const tree) {
+	Node *prev = NULL;
+	firmware_by_node(tree->root, prev);
+}
+
+void firmware_by_node(Node * const node, Node * const prev){
+	if(node == NULL){ return; }
+
+	firmware_by_node(node->left, prev);
+	firmware_by_node(node->right, prev);
+
+	node->next = prev;
+	prev = node;
 }

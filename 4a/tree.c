@@ -34,7 +34,7 @@ void clear_node(Node *node){
 	if(node == NULL){ return; }
 	if(node->info != NULL){ free(node->info); }
 	if(node->children != NULL){ free(node->children); }
-	if(node->key){ free(node->key); }
+	if(node->key != NULL){ free(node->key); }
 	free(node);
 }
 
@@ -47,7 +47,7 @@ Node *find(const Tree * const tree, const keytype const key){
 	char cmp_val = 0;
 	while(node != NULL){
 		cmp_val = cmp(node->key, key);
-		if(cmp_val == 1){
+		if(cmp_val == 0){
 			return node;
 		}
 		if(cmp_val > 0){
@@ -71,7 +71,7 @@ err insert_elem(Tree * const tree, const keytype const key, const infotype info)
 	char cmp_val = 0;
 	while(node != NULL){
 		cmp_val = cmp(node->key, key);
-		if(cmp_val == 1){
+		if(cmp_val == 0){
 			return ERR_VAL;
 		}
 		pre_node = node;
@@ -105,13 +105,14 @@ err delete_elem(Tree * const tree, const keytype const key){
 	if(tree->root == NULL){
 		return ERR_EMPTY;
 	}
+	// Находим элемент с таким ключом и его родителя
 	Node *node = tree->root;
 	Node *pre_node = NULL;
 	char left_flag = -1;
 	char cmp_val = 0;
 	while(node != NULL){
 		cmp_val = cmp(node->key, key);
-		if(cmp_val == 1){
+		if(cmp_val == 0){
 			break;
 		}
 		pre_node = node;
@@ -127,30 +128,72 @@ err delete_elem(Tree * const tree, const keytype const key){
 	if(node == NULL){
 		return ERR_NO_ELEM;
 	}
-
+	// Удаляем, если нет потомков
 	if((node->left == NULL) && (node->right == NULL)){
+		if(left_flag == -1){ tree->root = NULL; }
 		clear_node(node);
 		return ERR_OK;
 	}
+	// Удаляем, если один потомок
 	if(node->left == NULL){
-		if(left_flag == 1){
-			pre_node->left = node->right;
-			free(node);
-			return ERR_OK;
+		if(left_flag == -1){
+			tree->root = node->right;
 		}
-		pre_node->right = node->right;
+		else if(left_flag == 1){
+			pre_node->left = node->right;
+		}
+		else{
+			pre_node->right = node->right;
+		}
 		free(node);
 		return ERR_OK;
 	}
 	if(node->right == NULL){
-		if(left_flag == 1){
-			pre_node->left = node->left;
-			free(node);
-			return ERR_OK;
+		if(left_flag == -1){
+			tree->root = node->left;
 		}
-		pre_node->right = node->left;
+		else if(left_flag == 1){
+			pre_node->left = node->left;
+		}
+		else{
+			pre_node->right = node->left;
+		}
 		free(node);
 		return ERR_OK;
 	}
-	// ...
+	// Удаляем, если два потомка
+	Node *min_right = node->right;
+	Node *pre_min = NULL;
+	while(node->left != NULL){
+		pre_min = node;
+		min_right = min_right->left;
+	}
+	if(pre_min == NULL){
+		if(left_flag == -1){
+			tree->root = min_right;
+		}
+		else if(left_flag == 1){
+			pre_node->left = min_right;
+		}
+		else{
+			pre_node->right = min_right;
+		}
+		min_right->left = node->left;
+		free(node);
+		return ERR_OK;
+	}
+	if(left_flag == -1){
+		tree->root = min_right;
+	}
+	else if(left_flag == 1){
+		pre_node->left = min_right;
+	}
+	else{
+		pre_node->right = min_right;
+	}
+	pre_min->left = min_right->right;
+	min_right->right = node->right;
+	min_right->left = node->left;
+	free(node);
+	return ERR_OK;
 }

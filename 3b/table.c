@@ -181,6 +181,12 @@ void show_table(const Table * const table){
 }
 
 err input_bin(Table *table, FILE * const file){
+	char *magic_word = bin_read_n_symbols(file, 4);
+	if(strcmp(magic_word, "DWRF") != 0){
+		free(magic_word);
+		return ERR_VAL;
+	}
+	free(magic_word);
 	unsigned msize = 0;
 	err flag = bin_input_uint(file, &msize, 0, UINT_MAX);
 	if(flag != ERR_OK || msize == 0){ goto clean_and_return; }
@@ -237,6 +243,8 @@ clean_and_return:
 err output_bin(const Table * const table, FILE * const file){
 	if(table == NULL){ return ERR_NULL; }
 	if(table->msize == 0 || table->csize == 0){ return ERR_EMPTY; }
+	char magic_word[4] = "DWRF";
+	fwrite(magic_word, 4, sizeof(char), file);
 	fwrite(&(table->msize), 1, sizeof(unsigned), file);
 	fwrite(&(table->csize), 1, sizeof(unsigned), file);
 	unsigned total_len = 0;
@@ -252,7 +260,7 @@ err output_bin(const Table * const table, FILE * const file){
 		}
 		unsigned key_len = strlen(table->ks[i].key);
 		unsigned info_len = strlen(table->ks[i].info);
-		unsigned offset = sizeof(unsigned) * (2 + 3 * table->msize) + sizeof(char) * total_len;
+		unsigned offset = sizeof(unsigned) * (2 + 3 * table->msize) + sizeof(char) * total_len + sizeof(char) * 4;
 		fwrite(&key_len, 1, sizeof(unsigned), file);
 		fwrite(&info_len, 1, sizeof(unsigned), file);
 		fwrite(&offset, 1, sizeof(unsigned), file);

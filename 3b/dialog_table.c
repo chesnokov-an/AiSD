@@ -160,8 +160,14 @@ FILE *input_correct_file(){
 
 err D_input(Table *table){
 	char *str_file = readline("Введите название файла: ");
+	if(str_file == NULL){ return ERR_VAL; }
 	char *clear_s_file = my_strip(str_file);
 	FILE *file = fopen(clear_s_file, "rb");
+	if(!file){
+		free(str_file);
+		free(clear_s_file);
+		return ERR_VAL;
+	}
 	free(str_file);
 	free(clear_s_file);
 	if(!file){
@@ -175,8 +181,14 @@ err D_input(Table *table){
 
 err D_output(Table *table){
 	char *str_file = readline("Введите название файла: ");
+	if(str_file == NULL){ return ERR_VAL; }
 	char *clear_s_file = my_strip(str_file);
 	FILE *file = fopen(clear_s_file, "wb");
+	if(!file){
+		free(str_file);
+		free(clear_s_file);
+		return ERR_VAL;
+	}
 	free(str_file);
 	free(clear_s_file);
 	err flag = output_bin(table, file);

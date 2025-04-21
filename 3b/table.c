@@ -87,6 +87,8 @@ err insert_elem(Table *table, const char * const key, const char * const info){
 		return ERR_MEM;
 	}
 	if(find_table->csize == 1){
+		clear_table(find_table);
+		free(find_table);
 		return ERR_VAL;
 	}
 	clear_table(find_table);
@@ -132,6 +134,8 @@ err delete_elem(Table * const table, const char * const key){
 		return ERR_MEM;
 	}
 	if(find_table->csize == 0){
+		clear_table(find_table);
+		free(find_table);
 		return ERR_VAL;
 	}
 	clear_table(find_table);
@@ -182,6 +186,7 @@ void show_table(const Table * const table){
 
 err input_bin(Table *table, FILE * const file){
 	char *magic_word = bin_read_n_symbols(file, 4);
+	if(magic_word == NULL){ return ERR_VAL; }
 	if(strcmp(magic_word, "DWRF") != 0){
 		free(magic_word);
 		return ERR_VAL;

@@ -227,3 +227,44 @@ void traversal(const Tree * const tree){
 		node = node->next;
 	}
 }
+
+void show_node(const Node * const node, int level, char left_flag, char right_flag){
+	int i = level;
+	if(left_flag == 1){
+		while(i-- > 0){
+			printf(" | ");
+		}
+		printf("\\\n");
+	}
+	i = level;
+	if(node != NULL){
+		if(node->right != NULL){
+			show_node(node->right, level + 1, 0, 1);
+		}
+		else{
+			show_node(node->right, level + 1, 0, 0);
+		}
+		while(i-- > 0){
+			printf(" | ");
+		}
+		printf("%s\n", node->key);
+		if(node->left != NULL){
+			show_node(node->left, level + 1, 1, 0);
+		}
+		else{
+			show_node(node->left, level + 1, 0, 0);
+		}
+
+	}
+	i = level;
+	if(right_flag == 1){
+		while(i-- > 0){
+			printf(" | ");
+		}
+		printf("/\n");
+	}
+}
+
+void show(const Tree * const tree){
+	show_node(tree->root, 0, 0, 0);
+}

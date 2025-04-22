@@ -206,8 +206,13 @@ err delete_elem(Tree * const tree, const char * const key){
 	goto end_of_delete;
 
 end_of_delete:
+	if(node->prev != NULL){
+		node->prev->next = node->next;
+	}
+	if(node->next != NULL){
+		node->next->prev = node->prev;
+	}
 	clear_node(node);
-	free(node);
 	return ERR_OK;
 }
 

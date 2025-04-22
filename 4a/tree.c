@@ -16,7 +16,7 @@ Tree *create_tree(){
 Node *create_node(const char * const key, const unsigned info){
 	Node *node = (Node *)calloc(1, sizeof(Node));
 	if(node == NULL){ return NULL; }
-	node->children = (Node **)calloc(1, sizeof(Node *));
+	node->children = (Node **)calloc(4, sizeof(Node *));
 	if(node->children == NULL){
 		free(node);
 		return NULL;

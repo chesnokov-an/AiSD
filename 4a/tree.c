@@ -5,6 +5,17 @@
 #include "tree.h"
 #include "my_readline.h"
 #include "input.h"
+/*
+#ifdef DEBUG
+#define DEBUG_PRINT(fmt, ...) fprintf(stderr, "\nDEBUG: %s:%d:%s(): " fmt "\n", __FILE__, __LINE__, __func__, __VA_ARGS__)
+#else
+#define DEBUG_PRINT(fmt, ...) ((void)0)
+#endif
+*/
+
+
+#define GREEN "\033[38;2;0;255;0m"
+#define RESET "\033[0;0m"
 
 #define left children[0]
 #define right children[1]
@@ -270,11 +281,16 @@ void clear_tree_node(Node *node){
 
 void clear_tree(Tree *tree){
 	clear_tree_node(tree->root);
+	tree->root = NULL;
 }
 
 err import_tree(Tree *tree, FILE * const file){
+	if(tree == NULL){ return ERR_NULL; }
 	clear_tree(tree);
-	if(tree == NULL){ return ERR_MEM; }
+	char *magic_word = txt_readline(file);
+	if(magic_word == NULL){ return ERR_VAL; }
+	if(strcmp("DWRF", magic_word) != 0){ return ERR_VAL; }
+	free(magic_word);
 	err flag = ERR_OK;
 	unsigned info = 0;
 	while(flag == ERR_OK){
@@ -288,6 +304,6 @@ err import_tree(Tree *tree, FILE * const file){
 		flag = insert_elem(tree, key, info);
 		free(key);
 	}
-	if(flag == ERR_EOF){ flag = ERR_VAL; }
+	if(flag == ERR_EOF){ flag = ERR_OK; }
 	return flag;
 }

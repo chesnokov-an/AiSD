@@ -38,7 +38,7 @@ void clear_node(Node *node){
 	if(node->info != NULL){ free(node->info); }
 	if(node->children != NULL){ free(node->children); }
 	if(node->key != NULL){ free(node->key); }
-	//free(node);
+	free(node);
 }
 
 char cmp(const char * const key1, const char * const key2){
@@ -140,6 +140,12 @@ err delete_elem(Tree * const tree, const char * const key){
 	// Удаляем, если нет потомков
 	if((node->left == NULL) && (node->right == NULL)){
 		if(left_flag == -1){ tree->root = NULL; }
+		if(left_flag == 1){
+			pre_node->left = NULL;
+		}
+		else{
+			pre_node->right = NULL;
+		}
 		goto end_of_delete;
 		return ERR_OK;
 	}
@@ -231,15 +237,27 @@ void traversal(const Tree * const tree){
 void show_node(const Node * const node, int level){
 	int i = level;
 	if(node != NULL){
-		show_node(node->right, level + 1);
+		show_node(node->right, level + strlen(node->key));
 		while(i-- > 0){
 			printf("  ");
 		}
 		printf("%s\n", node->key);
-		show_node(node->left, level + 1);
+		show_node(node->left, level + strlen(node->key));
 	}
 }
 
 void show(const Tree * const tree){
 	show_node(tree->root, 0);
+}
+
+void clear_tree_node(Node *node){
+	if(node != NULL){
+		clear_tree_node(node->right);
+		clear_tree_node(node->left);
+		clear_node(node);
+	}
+}
+
+void clear_tree(Tree *tree){
+	clear_tree_node(tree->root);
 }

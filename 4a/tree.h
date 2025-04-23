@@ -23,5 +23,7 @@ Node *spec_find(const Tree * const, const char * const);
 void show(const Tree * const);
 void graph(const Tree * const);
 void import_tree(const Tree * const, FILE *);
+void clear_tree(Tree *);
+
 
 #endif

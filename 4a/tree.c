@@ -256,6 +256,10 @@ void show(const Tree * const tree){
 	show_node(tree->root, 0);
 }
 
+void draw(const Tree * const tree){
+	return;
+}
+
 void clear_tree_node(Node *node){
 	if(node != NULL){
 		clear_tree_node(node->right);

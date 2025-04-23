@@ -139,7 +139,10 @@ err delete_elem(Tree * const tree, const char * const key){
 	}
 	// Удаляем, если нет потомков
 	if((node->left == NULL) && (node->right == NULL)){
-		if(left_flag == -1){ tree->root = NULL; }
+		if(pre_node == NULL){
+			tree->root = NULL;
+			goto end_of_delete;
+		}
 		if(left_flag == 1){
 			pre_node->left = NULL;
 		}
@@ -223,7 +226,7 @@ end_of_delete:
 }
 
 void traversal(const Tree * const tree){
-	if(tree == NULL){ return; }
+	if(tree == NULL || tree->root == NULL){ return; }
 	Node *node = tree->root;
 	while(node->right != NULL){
 		node = node->right;

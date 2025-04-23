@@ -14,14 +14,14 @@ typedef struct Tree{
 	Node *root;
 }Tree;
 
+Tree *create_tree();
 err insert_elem(Tree * const, const char * const, const unsigned);
 err delete_elem(Tree * const, const char * const);
-void firmware(Tree * const tree);
 void traversal(const Tree * const);
 Node *find(const Tree * const, const char * const);
 Node *spec_find(const Tree * const, const char * const);
 void show(const Tree * const);
-void graph(const Tree * const);
+void draw(const Tree * const);
 err import_tree(Tree *, FILE * const);
 void clear_tree(Tree *);
 

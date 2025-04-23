@@ -38,7 +38,7 @@ void clear_node(Node *node){
 	if(node->info != NULL){ free(node->info); }
 	if(node->children != NULL){ free(node->children); }
 	if(node->key != NULL){ free(node->key); }
-	free(node);
+	//free(node);
 }
 
 char cmp(const char * const key1, const char * const key2){
@@ -173,8 +173,8 @@ err delete_elem(Tree * const tree, const char * const key){
 	// Удаляем, если два потомка
 	Node *min_right = node->right;
 	Node *pre_min = NULL;
-	while(node->left != NULL){
-		pre_min = node;
+	while(min_right->left != NULL){
+		pre_min = min_right;
 		min_right = min_right->left;
 	}
 	if(pre_min == NULL){
@@ -228,43 +228,18 @@ void traversal(const Tree * const tree){
 	}
 }
 
-void show_node(const Node * const node, int level, char left_flag, char right_flag){
+void show_node(const Node * const node, int level){
 	int i = level;
-	if(left_flag == 1){
-		while(i-- > 0){
-			printf(" | ");
-		}
-		printf("\\\n");
-	}
-	i = level;
 	if(node != NULL){
-		if(node->right != NULL){
-			show_node(node->right, level + 1, 0, 1);
-		}
-		else{
-			show_node(node->right, level + 1, 0, 0);
-		}
+		show_node(node->right, level + 1);
 		while(i-- > 0){
-			printf(" | ");
+			printf("  ");
 		}
 		printf("%s\n", node->key);
-		if(node->left != NULL){
-			show_node(node->left, level + 1, 1, 0);
-		}
-		else{
-			show_node(node->left, level + 1, 0, 0);
-		}
-
-	}
-	i = level;
-	if(right_flag == 1){
-		while(i-- > 0){
-			printf(" | ");
-		}
-		printf("/\n");
+		show_node(node->left, level + 1);
 	}
 }
 
 void show(const Tree * const tree){
-	show_node(tree->root, 0, 0, 0);
+	show_node(tree->root, 0);
 }

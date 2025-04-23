@@ -1,7 +1,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <limits.h>
 #include "tree.h"
+#include "my_readline.h"
+#include "input.h"
 
 #define left children[0]
 #define right children[1]
@@ -263,4 +266,24 @@ void clear_tree_node(Node *node){
 
 void clear_tree(Tree *tree){
 	clear_tree_node(tree->root);
+}
+
+err import_tree(Tree *tree, FILE * const file){
+	clear_tree(tree);
+	if(tree == NULL){ return ERR_MEM; }
+	err flag = ERR_OK;
+	unsigned info = 0;
+	while(flag == ERR_OK){
+		char *key = txt_readline(file);
+		if(key == NULL){ break; }
+		flag = txt_input_uint(file, &info, 0, UINT_MAX);
+		if(flag != ERR_OK){
+			free(key);
+			break;
+		}
+		flag = insert_elem(tree, key, info);
+		free(key);
+	}
+	if(flag == ERR_EOF){ flag = ERR_VAL; }
+	return flag;
 }

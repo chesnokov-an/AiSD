@@ -19,7 +19,7 @@ err insert_elem(Tree * const, const char * const, const unsigned);
 err delete_elem(Tree * const, const char * const);
 void traversal(const Tree * const);
 Node *find(const Tree * const, const char * const);
-Node *spec_find(const Tree * const, const char * const);
+Node **spec_find(const Tree * const, const unsigned, unsigned *);
 void show(const Tree * const);
 void draw(const Tree * const);
 err import_tree(Tree *, FILE * const);

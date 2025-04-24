@@ -292,12 +292,12 @@ void traversal(const Tree * const tree){
 void show_node(const Node * const node, int level){
 	int i = level;
 	if(node != NULL){
-		show_node(node->right, level + strlen(node->key));
+		show_node(node->right, level + 1);
 		while(i-- > 0){
 			printf("  ");
 		}
 		printf("%s\n", node->key);
-		show_node(node->left, level + strlen(node->key));
+		show_node(node->left, level + 1);
 	}
 }
 

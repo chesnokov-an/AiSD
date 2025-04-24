@@ -77,6 +77,44 @@ Node *find(const Tree * const tree, const char * const key){
 	return node;
 }
 
+Node **spec_find(const Tree * const tree, const unsigned info, unsigned *count){
+	if(tree == NULL || tree->root == NULL){ return NULL; }
+	Node *node = tree->root;
+	while(node->right != NULL){
+		node = node->right;
+	}
+	unsigned diff = 0;
+	unsigned cur_diff = 0;
+	*count = 0;
+	while(node != NULL){
+		cur_diff = (*node->info > info) ? (*node->info - info) : (info - *node->info);
+		if(diff == cur_diff){
+			*count += 1;
+		}
+		else if(diff < cur_diff){
+			*count = 1;
+			diff = cur_diff;
+		}
+		node = node->next;
+	}
+	Node **arr_nodes = (Node **)calloc(*count, sizeof(Node *));
+	if(arr_nodes == NULL){ return NULL; }
+	node = tree->root;
+	while(node->right != NULL){
+		node = node->right;
+	}
+	*count = 0;
+	while(node != NULL){
+		cur_diff = (*node->info > info) ? (*node->info - info) : (info - *node->info);
+		if(cur_diff == diff){
+			arr_nodes[*count] = node;
+			*count += 1;
+		}
+		node = node->next;
+	}
+	return arr_nodes;
+}
+
 err insert_elem(Tree * const tree, const char * const key, const unsigned info){
 	if(tree == NULL){ return ERR_NULL; }
 	if(tree->root == NULL){

@@ -122,6 +122,21 @@ err D_find(Tree *tree){
 
 
 err D_spec_find(Tree *tree){
+	unsigned info = 0;
+	printf("Введите значение: ");
+	err flag = input_uint(&info, 0, UINT_MAX);
+	if(flag != ERR_OK){
+		return flag;
+	}
+	unsigned len = 0;
+	Node **arr_nodes = spec_find(tree, info, &len);
+	if(arr_nodes == NULL){
+		return ERR_MEM;
+	}
+	for(unsigned i = 0; i < len; i++){
+		printf("Ключ: \"%s\" Значение: %u\n", arr_nodes[i]->key, *arr_nodes[i]->info);
+	}
+	free(arr_nodes);
 	return ERR_OK;
 }
 

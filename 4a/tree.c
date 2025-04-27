@@ -289,9 +289,10 @@ void traversal(const Tree * const tree){
 	}
 }
 
-void show_node(const Node * const node, const Node * const pre_node, int level){
-	int i = level;
-	int max_len = 1;
+void show_node(const Node * const node, const Node * const pre_node, int offset, int level, char left_flag){
+	int i = offset;
+	int j = level;
+	int max_len = 0;
 	if(pre_node != NULL){
 		if(pre_node->right != NULL && pre_node->left != NULL){
 			max_len = (strlen(pre_node->right->key) > strlen(pre_node->left->key)) ? (strlen(pre_node->right->key)) : (strlen(pre_node->left->key));
@@ -299,18 +300,30 @@ void show_node(const Node * const node, const Node * const pre_node, int level){
 		else if(pre_node->right != NULL){ max_len = strlen(pre_node->right->key); }
 		else if(pre_node->left != NULL){ max_len = strlen(pre_node->left->key); }
 	}
+	else if(node != NULL){
+		max_len = strlen(node->key);
+	}
 	if(node != NULL){
-		show_node(node->right, node, level + max_len);
+		show_node(node->right, node, offset + strlen(node->key) + 2, max_len - strlen(node->key), 0);
 		while(i-- > 0){
 			printf(" ");
 		}
+		if(left_flag == 0){
+			printf("┌──");
+		}
+		else if(left_flag == 1){
+			printf("└──");
+		}
+		while(j-- > 0){
+			printf("─");
+		}
 		printf("%s\n", node->key);
-		show_node(node->left ,node, level + max_len);
+		show_node(node->left, node, offset + strlen(node->key) + 2, max_len - strlen(node->key), 1);
 	}
 }
 
 void show(const Tree * const tree){
-	show_node(tree->root, NULL, 0);
+	show_node(tree->root, NULL, -2, 0, -1);
 }
 
 void draw(const Tree * const tree){

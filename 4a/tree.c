@@ -326,8 +326,36 @@ void show(const Tree * const tree){
 	show_node(tree->root, NULL, -2, 0, -1);
 }
 
-void draw(const Tree * const tree){
-	return;
+void draw_node(const Node * const node, FILE * const file, unsigned *i){
+	if(node != NULL){
+		if(node->left != NULL){
+			fprintf(file, "\"%s\" -> \"%s\" [dir=none];\n", node->key, node->left->key);
+		}
+		else{
+			fprintf(file, "none%u [style=invis]\n", *i);
+			fprintf(file, "\"%s\" -> none%u [style=invis];\n", node->key, *i);
+			*i += 1;
+		}
+		if(node->right != NULL){
+			fprintf(file, "\"%s\" -> \"%s\" [dir=none];\n", node->key, node->right->key);
+		}
+		else{
+			fprintf(file, "none%u [style=invis]\n", *i);
+			fprintf(file, "\"%s\" -> none%u [style=invis];\n", node->key, *i);
+			*i += 1;
+		}
+		draw_node(node->left, file, i);
+		draw_node(node->right, file, i);
+	}
+}
+
+void draw(const Tree * const tree, FILE * const file){
+	fprintf(file, "digraph BST {\n");
+	if(tree->root != NULL){
+		unsigned i = 0;
+		draw_node(tree->root, file, &i);
+	}
+	fprintf(file, "}");
 }
 
 void clear_tree_node(Node *node){

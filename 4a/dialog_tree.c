@@ -146,7 +146,10 @@ err D_show(Tree *tree){
 }
 
 err D_draw(Tree *tree){
-	draw(tree);
+	FILE *file = fopen("tree.dot", "w");
+	draw(tree, file);
+	system("dot -Tpng tree.dot > tree.png");
+	fclose(file);
 	return ERR_OK;
 }
 

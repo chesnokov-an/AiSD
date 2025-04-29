@@ -21,7 +21,7 @@ void traversal(const Tree * const);
 Node *find(const Tree * const, const char * const);
 Node **spec_find(const Tree * const, const unsigned, unsigned *);
 void show(const Tree * const);
-void draw(const Tree * const);
+void draw(const Tree * const, FILE * const);
 err import_tree(Tree *, FILE * const);
 void clear_tree(Tree *);
 

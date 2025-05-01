@@ -361,35 +361,36 @@ void draw(const Tree * const tree, FILE * const file){
 }
 */
 
+Agedge_t *make_edge(char *key1, char *key2, Agraph_t *graph){
+	Agnode_t *node1 = agnode(graph, key1, TRUE);
+	Agnode_t *node2 = agnode(graph, key2, TRUE);
+	Agedge_t __attribute__((unused)) *edge = agedge(graph, node1, node2,"edge1",TRUE);
+	return edge;
+}
+
 void draw_node(const Node * const node, Agraph_t *graph, unsigned *i){
 	if(node != NULL){
 		if(node->left != NULL){
-			Agnode_t *node1 = agnode(graph, node->key, TRUE);
-			Agnode_t *node2 = agnode(graph, node->left->key, TRUE);
-			Agedge_t __attribute__((unused)) *edge = agedge(graph, node1, node2,"edge1",TRUE);
+			make_edge(node->key, node->left->key, graph);
 		}
 		else{
-			Agnode_t *node1 = agnode(graph, node->key, TRUE);
 			char index [14] = "";
 			sprintf(index, "none%u", *i);
 			Agnode_t *node2 = agnode(graph, index, TRUE);
 			agsafeset(node2, "style", "invis", "");
-			Agedge_t *edge = agedge(graph, node1, node2,"edge1",TRUE);
+			Agedge_t *edge = make_edge(node->key, index, graph);
 			agsafeset(edge, "style", "invis", "");
 			*i += 1;
 		}
 		if(node->right != NULL){
-			Agnode_t *node1 = agnode(graph, node->key, TRUE);
-			Agnode_t *node2 = agnode(graph, node->right->key, TRUE);
-			Agedge_t __attribute__((unused)) *edge = agedge(graph, node1, node2,"edge1",TRUE);
+			make_edge(node->key, node->right->key, graph);
 		}
 		else{
-			Agnode_t *node1 = agnode(graph, node->key, TRUE);
 			char index [14] = "";
 			sprintf(index, "none%u", *i);
 			Agnode_t *node2 = agnode(graph, index, TRUE);
 			agsafeset(node2, "style", "invis", "");
-			Agedge_t *edge = agedge(graph, node1, node2,"edge1",TRUE);
+			Agedge_t *edge = make_edge(node->key, index, graph);
 			agsafeset(edge, "style", "invis", "");
 			*i += 1;
 		}
@@ -446,9 +447,7 @@ void draw(const Tree * const tree, FILE * const file){
 	gvFreeLayout(gvc, graph);
 	agclose(graph);
 	gvFreeContext(gvc);
-	}
-
-
+}
 
 void clear_tree_node(Node *node){
 	if(node != NULL){

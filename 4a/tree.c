@@ -411,20 +411,12 @@ void draw(const Tree * const tree, FILE * const file){
 		while(node->right != NULL){
 			node = node->right;
 		}
-
-		Agnode_t *node1 = agnode(graph, "null1", TRUE);
-		Agnode_t *node2 = agnode(graph, node->key, FALSE);
-		agsafeset(node1, "style", "invis", "");
-		Agedge_t *edge1 = agedge(graph, node1, node2,"edge2",TRUE);
-		agsafeset(edge1, "color", "green", "");
-		agsafeset(edge1, "dir", "forward", "");
-		agsafeset(edge1, "arrowhead", "normal", "");
-		Agedge_t *edge2 = agedge(graph, node2, node1,"edge3",TRUE);
-		agsafeset(edge2, "color", "red", "");
-		agsafeset(edge2, "dir", "forward", "");
-		agsafeset(edge2, "arrowhead", "normal", "");
 		Node *pre_node = node;
 		node = node->next;
+		Agnode_t *node1 = NULL;
+		Agnode_t *node2 = NULL;
+		Agedge_t *edge1 = NULL;
+		Agedge_t *edge2 = NULL;
 		while(node != NULL){
 			node1 = agnode(graph, pre_node->key, FALSE);
 			node2 = agnode(graph, node->key, FALSE);
@@ -433,6 +425,9 @@ void draw(const Tree * const tree, FILE * const file){
 			agsafeset(edge1, "color", "green", "");
 			agsafeset(edge1, "dir", "forward", "");
 			agsafeset(edge1, "arrowhead", "normal", "");
+			if(pre_node->prev == NULL){
+				agsafeset(node1, "color", "green", "");
+			}
 			edge2 = agedge(graph, node2, node1,"edge3",TRUE);
 			agsafeset(edge2, "color", "red", "");
 			agsafeset(edge2, "constraint", "false", "");
@@ -440,22 +435,14 @@ void draw(const Tree * const tree, FILE * const file){
 			agsafeset(edge2, "arrowhead", "normal", "");
 			pre_node = node;
 			node = node->next;
+			if(node == NULL){
+				agsafeset(node2, "color", "red", "");
+			}
 		}
-		node1 = agnode(graph, pre_node->key, FALSE);
-		node2 = agnode(graph, "null2", TRUE);
-		agsafeset(node2, "style", "invis", "");
-		edge1 = agedge(graph, node1, node2,"edge2",TRUE);
-		agsafeset(edge1, "color", "green", "");
-		agsafeset(edge1, "dir", "forward", "");
-		agsafeset(edge1, "arrowhead", "normal", "");
-		edge2 = agedge(graph, node2, node1,"edge3",TRUE);
-		agsafeset(edge2, "color", "red", "");
-		agsafeset(edge2, "dir", "forward", "");
-		agsafeset(edge2, "arrowhead", "normal", "");
 	}
 	GVC_t *gvc = gvContext();
 	gvLayout(gvc, graph, "dot");
-	gvRender(gvc, graph, "png", file);
+	gvRender(gvc, graph, "dot", file);
 	gvFreeLayout(gvc, graph);
 	agclose(graph);
 	gvFreeContext(gvc);

@@ -146,8 +146,11 @@ err D_show(Tree *tree){
 }
 
 err D_draw(Tree *tree){
-	FILE *file = fopen("tree.png", "wb");
+	FILE *file = fopen("tree.dot", "wb");
 	draw(tree, file);
+	fclose(file);
+	file = fopen("tree.dot", "rb");
+	system("dot -Tx11 -Gdpi=500 -Gsize=100,100 tree.dot");
 	fclose(file);
 	return ERR_OK;
 }

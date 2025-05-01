@@ -2,9 +2,12 @@
 #include <stdlib.h>
 #include <string.h>
 #include <limits.h>
+#include <graphviz/cgraph.h>
+#include <graphviz/gvc.h>
 #include "tree.h"
 #include "my_readline.h"
 #include "input.h"
+
 /*
 #ifdef DEBUG
 #define DEBUG_PRINT(fmt, ...) fprintf(stderr, "\nDEBUG: %s:%d:%s(): " fmt "\n", __FILE__, __LINE__, __func__, __VA_ARGS__)
@@ -12,7 +15,6 @@
 #define DEBUG_PRINT(fmt, ...) ((void)0)
 #endif
 */
-
 
 #define GREEN "\033[38;2;0;255;0m"
 #define RESET "\033[0;0m"
@@ -325,7 +327,7 @@ void show_node(const Node * const node, const Node * const pre_node, int offset,
 void show(const Tree * const tree){
 	show_node(tree->root, NULL, -2, 0, -1);
 }
-
+/*
 void draw_node(const Node * const node, FILE * const file, unsigned *i){
 	if(node != NULL){
 		if(node->left != NULL){
@@ -357,6 +359,62 @@ void draw(const Tree * const tree, FILE * const file){
 	}
 	fprintf(file, "}");
 }
+*/
+
+void draw_node(const Node * const node, Agraph_t *graph, unsigned *i){
+	if(node != NULL){
+		if(node->left != NULL){
+			Agnode_t *node1 = agnode(graph, node->key, TRUE);
+			Agnode_t *node2 = agnode(graph, node->left->key, TRUE);
+			Agedge_t __attribute__((unused)) *edge = agedge(graph, node1, node2,"edge1",TRUE);
+		}
+		else{
+			Agnode_t *node1 = agnode(graph, node->key, TRUE);
+			char index [14] = "";
+			sprintf(index, "none%u", *i);
+			Agnode_t *node2 = agnode(graph, index, TRUE);
+			agsafeset(node2, "style", "invis", "");
+			Agedge_t *edge = agedge(graph, node1, node2,"edge1",TRUE);
+			agsafeset(edge, "style", "invis", "");
+			*i += 1;
+		}
+		if(node->right != NULL){
+			Agnode_t *node1 = agnode(graph, node->key, TRUE);
+			Agnode_t *node2 = agnode(graph, node->right->key, TRUE);
+			Agedge_t __attribute__((unused)) *edge = agedge(graph, node1, node2,"edge1",TRUE);
+		}
+		else{
+			Agnode_t *node1 = agnode(graph, node->key, TRUE);
+			char index [14] = "";
+			sprintf(index, "none%u", *i);
+			Agnode_t *node2 = agnode(graph, index, TRUE);
+			agsafeset(node2, "style", "invis", "");
+			Agedge_t *edge = agedge(graph, node1, node2,"edge1",TRUE);
+			agsafeset(edge, "style", "invis", "");
+			*i += 1;
+		}
+		draw_node(node->left, graph, i);
+		draw_node(node->right, graph, i);
+	}
+}
+
+
+void draw(const Tree * const tree, FILE * const file){
+	Agraph_t *graph;
+	graph = agopen("Tree", Agundirected, NULL);
+	if(tree->root != NULL){
+		unsigned i = 0;
+		draw_node(tree->root, graph, &i);
+	}
+	GVC_t *gvc = gvContext();
+	gvLayout(gvc, graph, "dot");
+	gvRender(gvc, graph, "png", file);
+	gvFreeLayout(gvc, graph);
+	agclose(graph);
+	gvFreeContext(gvc);
+	}
+
+
 
 void clear_tree_node(Node *node){
 	if(node != NULL){

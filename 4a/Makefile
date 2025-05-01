@@ -5,7 +5,7 @@ LIB = tree
 DFLAGS ?=
 OBJDIR = build
 LIBDIR = ../libs/ld
-LDFLAGS = -l$(LIB) -lreadline -linput -lmy_readline -lm
+LDFLAGS = -l$(LIB) -lreadline -linput -lmy_readline -lm -lcgraph -lgvc
 OBJ = $(addprefix $(OBJDIR)/, $(patsubst %.c, %.o, $(filter-out $(LIB).c, $(wildcard *.c))))
 HDIR = ../libs
 

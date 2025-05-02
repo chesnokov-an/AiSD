@@ -113,37 +113,22 @@ err insert_elem(Tree * const tree, const char * const key, const unsigned info){
 	char cmp_val = 0;
 	while(node != NULL){
 		cmp_val = cmp(node->key, key);
-		if(cmp_val == 0){
-			return ERR_VAL;
-		}
+		if(cmp_val == 0){ return ERR_VAL; }
 		pre_node = node;
-		if(cmp_val > 0){
-			node = node->left;
-		}
-		else{
-			node = node->right;
-		}
+		node = (cmp_val > 0) ? (node->left) : (node->right);
 	}
-	if(cmp_val > 0){
-		pre_node->left = create_node(key, info);
-		if(pre_node->left == NULL){ return ERR_MEM; }
-		pre_node->left->next = pre_node->next;
-		pre_node->left->prev = pre_node;
-		if(pre_node->next != NULL){
-			pre_node->next->prev = pre_node->left;
-		}
-		pre_node->next = pre_node->left;
+
+	int new_index = (cmp_val > 0) ? 0 : 1;
+	int new_thread1 = (cmp_val > 0) ? 3 : 2;
+	int new_thread2 = (cmp_val > 0) ? 2 : 3;
+	pre_node->children[new_index] = create_node(key, info);
+	if(pre_node->children[new_index] == NULL){ return ERR_MEM; }
+	pre_node->children[new_index]->children[new_thread1] = pre_node->children[new_thread1];
+	pre_node->children[new_index]->children[new_thread2] = pre_node;
+	if(pre_node->children[new_thread1] != NULL){
+		pre_node->children[new_thread1]->children[new_thread2] = pre_node->children[new_index];
 	}
-	else{
-		pre_node->right = create_node(key, info);
-		if(pre_node->right == NULL){ return ERR_MEM; }
-		pre_node->right->next = pre_node;
-		pre_node->right->prev = pre_node->prev;
-		if(pre_node->prev != NULL){
-			pre_node->prev->next = pre_node->right;
-		}
-		pre_node->prev = pre_node->right;
-	}
+	pre_node->children[new_thread1] = pre_node->children[new_index];
 	return ERR_OK;
 }
 

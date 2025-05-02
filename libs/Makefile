@@ -14,7 +14,7 @@ $(LIBDIR):
 	mkdir $(LIBDIR)
 
 $(OBJDIR)/%.o: %.c
-	$(CC) -fpic $(CFLAGS) $< -o $@
+	$(CC) -fpic $(CFLAGS) $< -o $@ $(LDFLAGS)
 
 $(LIBDIR)/lib%.so: $(OBJDIR)/%.o
 	$(CC) -shared $< -o $@

@@ -162,17 +162,10 @@ err D_traversal(Tree *tree){
 }
 
 err D_input(Tree *tree){
-	char *str_file = readline("Введите название файла: ");
-	if(str_file == NULL){ return ERR_VAL; }
-	char *clear_s_file = my_strip(str_file);
-	FILE *file = fopen(clear_s_file, "r");
+	FILE *file = input_correct_file();
 	if(!file){
-		free(str_file);
-		free(clear_s_file);
 		return ERR_VAL;
 	}
-	free(str_file);
-	free(clear_s_file);
 	if(!file){
 		printf("Unknown file\n");
 		return ERR_VAL;

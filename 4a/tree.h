@@ -2,6 +2,8 @@
 #define TREE_H
 
 #include "err.h"
+#include <graphviz/cgraph.h>
+#include <graphviz/gvc.h>
 
 typedef struct Node{
 	char *key;
@@ -21,6 +23,7 @@ Node *find(const Tree * const, const char * const);
 Node *spec_find(const Tree * const, const char * const);
 void show(const Tree * const);
 void draw(const Tree * const, FILE * const);
+void write_to_txt(const Tree * const, FILE * const);
 err import_tree(Tree *, FILE * const);
 void clear_tree(Tree *);
 

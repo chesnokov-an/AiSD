@@ -132,7 +132,12 @@ err D_spec_find(Tree *tree){
 	if(node == NULL){
 		return ERR_MEM;
 	}
-	printf(GREEN"Ключ: \"%s\" Значение: %u\n"RESET, node->key, *node->info);
+
+	printf("\n╔══════════════════════════╦═════════════════╗\n");
+	printf("║           Ключ           ║     Значение    ║\n");
+	printf("║══════════════════════════║═════════════════║\n");
+	printf("║  %22s  ║  %14u ║\n", node->key, *node->info);
+	printf("╚══════════════════════════╩═════════════════╝\n\n");
 	return ERR_OK;
 }
 
@@ -154,39 +159,6 @@ err D_draw(Tree *tree){
 err D_traversal(Tree *tree){
 	traversal(tree);
 	return ERR_OK;
-}
-
-char *my_strip(char const * const s){
-	if(s == NULL){
-		return NULL;
-	}
-	size_t i = 0;
-	while((i < strlen(s)) && ((s[i] == ' ') || (s[i] == '\t'))){
-		i++;
-	}
-	size_t count = 0;
-	while(((i + count) < strlen(s)) && ((s[i + count] != ' ') && (s[i + count] != '\t'))){
-		count++;
-	}
-	char *new_s = (char *)calloc(count + 1, sizeof(char));
-	if(!new_s){
-		return NULL;
-	}
-	memcpy(new_s, s + i, count * sizeof(char));
-	return new_s;
-}
-
-FILE *input_correct_file(){
-	char *str_file = readline("Введите название файла: ");
-	char *clear_s_file = my_strip(str_file);
-	FILE *file = fopen(clear_s_file, "r");
-	free(str_file);
-	free(clear_s_file);
-	if(!file){
-		printf("Unknown file\n");
-		return NULL;
-	}
-	return file;
 }
 
 err D_input(Tree *tree){

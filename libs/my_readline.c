@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <limits.h>
+#include <readline/readline.h>
 #include "err.h"
 #include "input.h"
 
@@ -59,4 +60,38 @@ char *bin_readline(FILE* file_name){
 	}
 	char *res = bin_read_n_symbols(file_name, count);
 	return res;
+}
+
+
+char *my_strip(char const * const s){
+	if(s == NULL){
+		return NULL;
+	}
+	size_t i = 0;
+	while((i < strlen(s)) && ((s[i] == ' ') || (s[i] == '\t'))){
+		i++;
+	}
+	size_t count = 0;
+	while(((i + count) < strlen(s)) && ((s[i + count] != ' ') && (s[i + count] != '\t'))){
+		count++;
+	}
+	char *new_s = (char *)calloc(count + 1, sizeof(char));
+	if(!new_s){
+		return NULL;
+	}
+	memcpy(new_s, s + i, count * sizeof(char));
+	return new_s;
+}
+
+FILE *input_correct_file(){
+	char *str_file = readline("Введите название файла: ");
+	char *clear_s_file = my_strip(str_file);
+	FILE *file = fopen(clear_s_file, "r");
+	free(str_file);
+	free(clear_s_file);
+	if(!file){
+		printf("Unknown file\n");
+		return NULL;
+	}
+	return file;
 }

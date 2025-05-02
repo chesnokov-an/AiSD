@@ -218,6 +218,17 @@ void traversal(const Tree * const tree){
 
 }
 
+void write_to_txt(const Tree * const tree, FILE * const file){
+	if(tree == NULL || tree->root == NULL){ return; }
+	Node *node = max_node(tree);
+	fprintf(file, "Ключ : Значение\n");
+	while(node != NULL){
+		fprintf(file, "%s : %u\n", node->key, *node->info);
+		node = node->next;
+	}
+}
+
+
 void show_node(const Node * const node, const Node * const pre_node, int offset, int level, char side_flag){
 	int i = offset;
 	int j = level;

@@ -140,22 +140,14 @@ err delete_elem(Tree * const tree, const char * const key){
 	// Находим элемент с таким ключом и его родителя
 	Node *node = tree->root;
 	Node *pre_node = NULL;
-	char left_flag = -1;
+	int side_flag = -1;
 	char cmp_val = 0;
 	while(node != NULL){
 		cmp_val = cmp(node->key, key);
-		if(cmp_val == 0){
-			break;
-		}
+		if(cmp_val == 0){ break; }
 		pre_node = node;
-		if(cmp_val > 0){
-			node = node->left;
-			left_flag = 1;
-		}
-		else{
-			node = node->right;
-			left_flag = 0;
-		}
+		node = (cmp_val > 0) ? node->left : node->right;
+		side_flag = (cmp_val > 0) ? 0 : 1;
 	}
 	if(node == NULL){
 		return ERR_NO_ELEM;
@@ -166,41 +158,19 @@ err delete_elem(Tree * const tree, const char * const key){
 			tree->root = NULL;
 			goto end_of_delete;
 		}
-		if(left_flag == 1){
-			pre_node->left = NULL;
-		}
-		else{
-			pre_node->right = NULL;
-		}
+		pre_node->children[side_flag] = NULL;
 		goto end_of_delete;
-		return ERR_OK;
 	}
 	// Удаляем, если один потомок
-	if(node->left == NULL){
-		if(left_flag == -1){
-			tree->root = node->right;
-		}
-		else if(left_flag == 1){
-			pre_node->left = node->right;
-		}
-		else{
-			pre_node->right = node->right;
-		}
-		goto end_of_delete;
-		return ERR_OK;
-	}
-	if(node->right == NULL){
-		if(left_flag == -1){
+	if(node->left == NULL || node->right == NULL){
+		int next_side = (node->left == NULL) ? 1 : 0;
+		if(side_flag == -1){
 			tree->root = node->left;
 		}
-		else if(left_flag == 1){
-			pre_node->left = node->left;
-		}
 		else{
-			pre_node->right = node->left;
+			pre_node->children[side_flag] = node->children[next_side];
 		}
 		goto end_of_delete;
-		return ERR_OK;
 	}
 	// Удаляем, если два потомка
 	Node *min_right = node->right;
@@ -209,32 +179,18 @@ err delete_elem(Tree * const tree, const char * const key){
 		pre_min = min_right;
 		min_right = min_right->left;
 	}
-	if(pre_min == NULL){
-		if(left_flag == -1){
-			tree->root = min_right;
-		}
-		else if(left_flag == 1){
-			pre_node->left = min_right;
-		}
-		else{
-			pre_node->right = min_right;
-		}
-		min_right->left = node->left;
-		goto end_of_delete;
-		return ERR_OK;
-	}
-	if(left_flag == -1){
+	if(side_flag == -1){
 		tree->root = min_right;
 	}
-	else if(left_flag == 1){
-		pre_node->left = min_right;
-	}
 	else{
-		pre_node->right = min_right;
+		pre_node->children[side_flag] = min_right;
+	}
+	min_right->left = node->left;
+	if(pre_min == NULL){
+		goto end_of_delete;
 	}
 	pre_min->left = min_right->right;
 	min_right->right = node->right;
-	min_right->left = node->left;
 	goto end_of_delete;
 
 end_of_delete:
@@ -257,7 +213,7 @@ void traversal(const Tree * const tree){
 	}
 }
 
-void show_node(const Node * const node, const Node * const pre_node, int offset, int level, char left_flag){
+void show_node(const Node * const node, const Node * const pre_node, int offset, int level, char side_flag){
 	int i = offset;
 	int j = level;
 	int max_len = 0;
@@ -276,10 +232,10 @@ void show_node(const Node * const node, const Node * const pre_node, int offset,
 		while(i-- > 0){
 			printf(" ");
 		}
-		if(left_flag == 0){
+		if(side_flag == 0){
 			printf("┌──");
 		}
-		else if(left_flag == 1){
+		else if(side_flag == 1){
 			printf("└──");
 		}
 		while(j-- > 0){

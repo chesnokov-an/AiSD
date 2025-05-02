@@ -60,12 +60,7 @@ Node *find(const Tree * const tree, const char * const key){
 		if(cmp_val == 0){
 			return node;
 		}
-		if(cmp_val > 0){
-			node = node->left;
-		}
-		else{
-			node = node->right;
-		}
+		node = (cmp_val > 0) ? (node->left) : (node->right);
 	}
 	return node;
 }
@@ -80,16 +75,29 @@ unsigned str_diff(const char * const key1, const char * const key2){
 	return diff;
 }
 
+Node *max_node(const Tree * const tree){
+	if(tree == NULL || tree->root == NULL){ return NULL; }
+	Node *node = tree->root;
+	while(node->right != NULL){
+		node = node->right;
+	}
+	return node;
+}
+
+Node *min_node(const Tree * const tree){
+	if(tree == NULL || tree->root == NULL){ return NULL; }
+	Node *node = tree->root;
+	while(node->left != NULL){
+		node = node->left;
+	}
+	return node;
+}
+
+
 Node *spec_find(const Tree * const tree, const char * const key){
 	if(tree == NULL || tree->root == NULL){ return NULL; }
-	Node *r_node = tree->root;
-	while(r_node->right != NULL){
-		r_node = r_node->right;
-	}
-	Node *l_node = tree->root;
-	while(l_node->left != NULL){
-		l_node = l_node->left;
-	}
+	Node *r_node = max_node(tree);
+	Node *l_node = min_node(tree);
 	return (str_diff(r_node->key, key) > str_diff(l_node->key, key)) ? (r_node) : (l_node);
 }
 
@@ -257,10 +265,7 @@ end_of_delete:
 
 void traversal(const Tree * const tree){
 	if(tree == NULL || tree->root == NULL){ return; }
-	Node *node = tree->root;
-	while(node->right != NULL){
-		node = node->right;
-	}
+	Node *node = max_node(tree);
 	while(node != NULL){
 		printf("%s %u\n", node->key, *node->info);
 		node = node->next;
@@ -384,10 +389,7 @@ void draw(const Tree * const tree, FILE * const file){
 		unsigned i = 0;
 		draw_node(tree->root, graph, &i);
 
-		Node *node = tree->root;
-		while(node->right != NULL){
-			node = node->right;
-		}
+		Node *node = max_node(tree);
 		Node *pre_node = node;
 		node = node->next;
 		Agnode_t *node1 = NULL;

@@ -5,9 +5,8 @@
 
 typedef struct Node{
 	char *key;
-	struct Node **children;
+	struct Node *children[4];
 	unsigned *info;
-	char is_thread;
 }Node;
 
 typedef struct Tree{
@@ -19,7 +18,7 @@ err insert_elem(Tree * const, const char * const, const unsigned);
 err delete_elem(Tree * const, const char * const);
 void traversal(const Tree * const);
 Node *find(const Tree * const, const char * const);
-Node **spec_find(const Tree * const, const unsigned, unsigned *);
+Node *spec_find(const Tree * const, const char * const);
 void show(const Tree * const);
 void draw(const Tree * const, FILE * const);
 err import_tree(Tree *, FILE * const);

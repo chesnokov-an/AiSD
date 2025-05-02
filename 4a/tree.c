@@ -8,13 +8,12 @@
 #include "my_readline.h"
 #include "input.h"
 
-/*
 #ifdef DEBUG
-#define DEBUG_PRINT(fmt, ...) fprintf(stderr, "\nDEBUG: %s:%d:%s(): " fmt "\n", __FILE__, __LINE__, __func__, __VA_ARGS__)
+#define DEBUG_PRINT(fmt, ...) fprintf(stderr, "DEBUG: %s:%d:%s(): " fmt "\n", \
+									                                  __FILE__, __LINE__, __func__, __VA_ARGS__)
 #else
 #define DEBUG_PRINT(fmt, ...) ((void)0)
 #endif
-*/
 
 #define GREEN "\033[38;2;0;255;0m"
 #define RESET "\033[0;0m"
@@ -32,27 +31,19 @@ Tree *create_tree(){
 Node *create_node(const char * const key, const unsigned info){
 	Node *node = (Node *)calloc(1, sizeof(Node));
 	if(node == NULL){ return NULL; }
-	node->children = (Node **)calloc(4, sizeof(Node *));
-	if(node->children == NULL){
-		free(node);
-		return NULL;
-	}
 	node->info = (unsigned *)calloc(1, sizeof(unsigned));
 	if(node->info == NULL){
-		free(node->children);
 		free(node);
 		return NULL;
 	}
 	node->key = strdup(key);
 	*(node->info) = info;
-	node->is_thread = 0;
 	return node;
 }
 
 void clear_node(Node *node){
 	if(node == NULL){ return; }
 	if(node->info != NULL){ free(node->info); }
-	if(node->children != NULL){ free(node->children); }
 	if(node->key != NULL){ free(node->key); }
 	free(node);
 }
@@ -79,42 +70,27 @@ Node *find(const Tree * const tree, const char * const key){
 	return node;
 }
 
-Node **spec_find(const Tree * const tree, const unsigned info, unsigned *count){
-	if(tree == NULL || tree->root == NULL){ return NULL; }
-	Node *node = tree->root;
-	while(node->right != NULL){
-		node = node->right;
-	}
+unsigned str_diff(const char * const key1, const char * const key2){
 	unsigned diff = 0;
-	unsigned cur_diff = 0;
-	*count = 0;
-	while(node != NULL){
-		cur_diff = (*node->info > info) ? (*node->info - info) : (info - *node->info);
-		if(diff == cur_diff){
-			*count += 1;
-		}
-		else if(diff < cur_diff){
-			*count = 1;
-			diff = cur_diff;
-		}
-		node = node->next;
+	size_t min_len = (strlen(key1) > strlen(key2)) ? strlen(key2) : strlen(key1);
+	for(size_t i = 0; i < min_len; i++){
+		diff += abs(key1[i] - key2[i]);
+		DEBUG_PRINT("%d", key1[i]);
 	}
-	Node **arr_nodes = (Node **)calloc(*count, sizeof(Node *));
-	if(arr_nodes == NULL){ return NULL; }
-	node = tree->root;
-	while(node->right != NULL){
-		node = node->right;
+	return diff;
+}
+
+Node *spec_find(const Tree * const tree, const char * const key){
+	if(tree == NULL || tree->root == NULL){ return NULL; }
+	Node *r_node = tree->root;
+	while(r_node->right != NULL){
+		r_node = r_node->right;
 	}
-	*count = 0;
-	while(node != NULL){
-		cur_diff = (*node->info > info) ? (*node->info - info) : (info - *node->info);
-		if(cur_diff == diff){
-			arr_nodes[*count] = node;
-			*count += 1;
-		}
-		node = node->next;
+	Node *l_node = tree->root;
+	while(l_node->left != NULL){
+		l_node = l_node->left;
 	}
-	return arr_nodes;
+	return (str_diff(r_node->key, key) > str_diff(l_node->key, key)) ? (r_node) : (l_node);
 }
 
 err insert_elem(Tree * const tree, const char * const key, const unsigned info){

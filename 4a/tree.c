@@ -207,10 +207,15 @@ end_of_delete:
 void traversal(const Tree * const tree){
 	if(tree == NULL || tree->root == NULL){ return; }
 	Node *node = max_node(tree);
+	printf("\n╔══════════════════════════╦═════════════════╗\n");
+	printf("║           Ключ           ║     Значение    ║\n");
+	printf("║══════════════════════════║═════════════════║\n");
 	while(node != NULL){
-		printf("%s %u\n", node->key, *node->info);
+		printf("║  %22s  ║  %14u ║\n", node->key, *node->info);
 		node = node->next;
 	}
+	printf("╚══════════════════════════╩═════════════════╝\n\n");
+
 }
 
 void show_node(const Node * const node, const Node * const pre_node, int offset, int level, char side_flag){

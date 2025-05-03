@@ -1,10 +1,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
+#include <limits.h>
 #include "tree.h"
 
 char *generate_key(){
-	int key_len = rand() % 10 + 1;
+	int key_len = rand() % 100 + 1;
 	char *key = (char *)calloc(key_len + 1, sizeof(char));
 	for(int j = 0; j < key_len; j++){
 		key[j] = (rand() % 26) + 97;
@@ -19,7 +20,7 @@ Tree *generate_tree(int seed, int size){
 	unsigned info = 0;
 	for(int i = 0; i < size; i++){
 		key = generate_key();
-		info = rand() % 10 + 1;
+		info = rand() % UINT_MAX + 1;
 		insert_elem(tree, key, info);
 		free(key);
 	}

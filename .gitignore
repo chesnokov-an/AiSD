@@ -9,3 +9,6 @@ ld/
 
 # executable files
 prog
+
+# tests
+TEST*

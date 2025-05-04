@@ -19,6 +19,7 @@ int main(){
 			if(ispunct(line[i])){
 				line[i] = ' ';
 			}
+			line[i] = tolower(line[i]);
 		}
 		char *word = strtok(line, "\t ");
 		while(word != NULL){

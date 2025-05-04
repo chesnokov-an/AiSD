@@ -399,7 +399,6 @@ void clear_tree(Tree *tree){
 
 err import_tree(Tree *tree, FILE * const file){
 	if(tree == NULL){ return ERR_NULL; }
-	clear_tree(tree);
 	char *magic_word = txt_readline(file);
 	if(magic_word == NULL){ return ERR_VAL; }
 	if(strcmp("DWRF", magic_word) != 0){ return ERR_VAL; }

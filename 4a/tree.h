@@ -2,8 +2,6 @@
 #define TREE_H
 
 #include "err.h"
-#include <graphviz/cgraph.h>
-#include <graphviz/gvc.h>
 
 typedef struct Node{
 	char *key;

@@ -53,6 +53,11 @@
 
 ![chart](Chart.png)
 
+Скачать файл words_alpha.txt для таймирования проекта можно по ссылке:
+```
+https://github.com/dwyl/english-words/blob/master/words_alpha.txt
+```
+
 ## Как установить и запустить проект:
 1. Склонировать репозиторий проекта:
 ```bash

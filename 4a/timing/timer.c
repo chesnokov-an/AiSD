@@ -9,8 +9,20 @@
 #include "my_readline.h"
 #include "tree.h"
 
+#define ALL_WORDS 370105
+#define AVERAGE 1000
+
+int is_nember(char *data){
+	for(size_t i = 0; i < strlen(data); i++){
+		if(!isdigit(data[i])){
+			return 0;
+		}
+	}
+	return 1;
+}
+
 int main(int argc, char **argv){
-	if(argc != 3){
+	if(argc != 3 || is_nember(argv[1]) == 0 || is_nember(argv[2]) == 0){
 		printf("Передайте 2 параметра: количество элементов в дереве и количество усреднений.");
 		return 0;
 	}
@@ -18,8 +30,12 @@ int main(int argc, char **argv){
 	int iters = atoi(argv[2]);
 
 	FILE *file = fopen("words_alpha.txt", "r");
-	char **keys = (char **)calloc(370105, sizeof(char *));
-	for(int i = 0; i < 370105; i++){
+	if(!file){
+		printf("Неизвестный файл");
+		return 0;
+	}
+	char **keys = (char **)calloc(ALL_WORDS, sizeof(char *));
+	for(int i = 0; i < ALL_WORDS; i++){
 		keys[i] = txt_readline(file);
 	}
 	fclose(file);
@@ -28,11 +44,12 @@ int main(int argc, char **argv){
 	unsigned info = 0;
 	char ***cur_keys = (char ***)calloc(iters, sizeof(char **));
 
+	// Заполнение дерева перед таймированием
 	for(int j = 0; j < iters; j++){
 		data[j] = create_tree();
 		cur_keys[j] = (char **)calloc(size, sizeof(char *));
 		for(int i = 0; i < size; i++){
-			cur_keys[j][i] = keys[rand() % 370105];
+			cur_keys[j][i] = keys[rand() % ALL_WORDS];
 			info = rand() % UINT_MAX;
 			insert_elem(data[j], cur_keys[j][i], info);
 		}
@@ -43,9 +60,9 @@ int main(int argc, char **argv){
 	gettimeofday(&tv1, NULL);
 	char *key = NULL;
 	for(int j = 0; j < iters; j++){
-		for(int i = 0; i < 1000; i++){
+		for(int i = 0; i < AVERAGE; i++){
 			if(i%2 == 0){
-				key = keys[rand() % 370105];
+				key = keys[rand() % ALL_WORDS];
 			}
 			else{
 				key = cur_keys[j][rand() % size];
@@ -60,9 +77,9 @@ int main(int argc, char **argv){
 	// поиск
 	gettimeofday(&tv1, NULL);
 	for(int j = 0; j < iters; j++){
-		for(int i = 0; i < 1000; i++){
+		for(int i = 0; i < AVERAGE; i++){
 			if(i%2 == 0){
-				key = keys[rand() % 370105];
+				key = keys[rand() % ALL_WORDS];
 			}
 			else{
 				key = cur_keys[j][rand() % size];
@@ -76,9 +93,9 @@ int main(int argc, char **argv){
 	// Удаление
 	gettimeofday(&tv1, NULL);
 	for(int j = 0; j < iters; j++){
-		for(int i = 0; i < 1000; i++){
+		for(int i = 0; i < AVERAGE; i++){
 			if(i%2 == 0){
-				key = keys[rand() % 370105];
+				key = keys[rand() % ALL_WORDS];
 			}
 			else{
 				key = cur_keys[j][rand() % size];
@@ -90,14 +107,12 @@ int main(int argc, char **argv){
 	printf("Усреднённое за %d итераций время УДАЛЕНИЯ из деревв из %d элементов составило %lf секунд.\n", iters, size, (double) (tv2.tv_usec - tv1.tv_usec) / 1000000 + (double) (tv2.tv_sec - tv1.tv_sec));
 
 
-	struct timeval  tv1, tv2;
 	gettimeofday(&tv1, NULL);
-	char *key = NULL;
 	for(int j = 0; j < iters; j++){
 		traversal(data[j]);
 	}
 	gettimeofday(&tv2, NULL);
-	printf("Усреднённое за %d итераций время ОБХОДА дерева составило %lf секунд.\n", iters, size, (double) (tv2.tv_usec - tv1.tv_usec) / 1000000 + (double) (tv2.tv_sec - tv1.tv_sec));
+	printf("Усреднённое за %d итераций время ОБХОДА дерева составило %lf секунд.\n", iters, (double) (tv2.tv_usec - tv1.tv_usec) / 1000000 + (double) (tv2.tv_sec - tv1.tv_sec));
 
 
 	for(int j = 0; j < iters; j++){
@@ -110,7 +125,7 @@ int main(int argc, char **argv){
 	}
 
 	free(cur_keys);
-	for(int i = 0; i < 370105; i++){
+	for(int i = 0; i < ALL_WORDS; i++){
 		free(keys[i]);
 	}
 	free(keys);

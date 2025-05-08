@@ -5,8 +5,8 @@
 
 typedef struct Node{
 	int size;
-	char *key[2];
-	char *info[2];
+	char *key[3];	// the last one is fictitious for operations
+	char *info[3];
 	struct Node *children[4];	// the last one is a pointer to the parent
 }Node;
 

@@ -112,6 +112,55 @@ Node *spec_find(const Tree * const tree, const char * const key){
 	return (str_diff(r_node->key[0], key) > str_diff(l_node->key[0], key)) ? (r_node) : (l_node);
 }
 
+int add_value(Node * const node, const char *key, const char *info){
+	int i = node->size - 1;
+	while(cmp(node->key[i], key) > 0 && i > -1){
+		node->key[i+1] = node->key[i];
+		node->info[i+1] = node->info[i];
+		i--;
+	}
+	node->key[i+1] = key;
+	node->info[i+1] = info;
+	return i+1;
+}
+
+Node *split(Node * const node){
+	if(node == NULL){ return node; }
+	if(node->size < 3){ return node; }
+	if(node->parent == NULL){
+		Node *new_parent = create_node();
+		node->parent = new_parent;
+	}
+	int p_index = add_value(node->parent, node->key[1], node->info[1]);
+	node->key[1] = NULL;
+	node->info[1] = NULL;
+
+	Node *new_right = create_node();
+	new_right->parent = node->parent;
+	add_value(new_right, node->key[2], node->info[2]);
+	node->key[2] = NULL;
+	node->info[2] = NULL;
+
+	node->parent->children[p_index] = node;
+	node->parent->children[p_index + 1] = new_right;
+	return split(node->parent);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 /*
 err insert_elem(Tree * const tree, const char * const key, const unsigned info){

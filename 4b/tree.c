@@ -57,19 +57,18 @@ Node *find(const Tree * const tree, const char * const key){
 
 	while(node != NULL){
 		cmp_val_1 = cmp(node->key[0], key);
-		cmp_val_2 = cmp(node->key[1], key);
-		if(cmp_val_1 == 0 || cmp_val_2 == 0){
-			return node;
-		}
+		if(cmp_val_1 == 0){ return node; }
 		if(cmp_val_1 > 0){
 			node = node->left;
+			continue;
 		}
-		else if(cmp_val_2 < 0){
-			node = node->right;
-		}
-		else{
+		if(node->size == 1){
 			node = node->middle;
+			continue;
 		}
+		cmp_val_2 = cmp(node->key[1], key);
+		if(cmp_val_2 == 0){ return node; }
+		node = (cmp_val_2 > 0) ? (node->middle) : (node->right);
 	}
 	return node;
 }
@@ -114,9 +113,6 @@ Node *spec_find(const Tree * const tree, const char * const key){
 
 int add_value(Node * const node, const char *key, const char *info){
 	int i = node->size - 1;
-	char *tmp_key = node->keys[i];
-	char *tmp_info = node->info[i];
-	Node *tmp_child = node->info[i+1]
 	i--;
 	while(cmp(node->key[i], key) > 0 && i > -1){
 		node->key[i+1] = node->key[i];
@@ -124,15 +120,15 @@ int add_value(Node * const node, const char *key, const char *info){
 		node->children[i+2] = node->children[i+1];
 		i--;
 	}
-	node->key[i+1] = tmp_key;
-	node->info[i+1] = tmp_info;
-	node->children[i+2] = tmp_child;
+	node->key[i+1] = strdup(key);
+	node->info[i+1] = strdup(info);
+	node->size += 1;
 	return i+1;
 }
 
-Node *split(Node * const node){
-	if(node == NULL){ return node; }
-	if(node->size < 3){ return node; }
+void split(Node *node){
+	if(node == NULL){ return; }
+	if(node->size < 2){ return; }
 	if(node->parent == NULL){
 		Node *new_parent = create_node();
 		node->parent = new_parent;
@@ -149,7 +145,53 @@ Node *split(Node * const node){
 
 	node->parent->children[p_index] = node;
 	node->parent->children[p_index + 1] = new_right;
-	return split(node->parent);
+
+	new_right->size = 1;
+	node->size = 1;
+
+	node = node->parent;
+}
+
+err insert_elem(Tree * const tree, const char * const key, const char * const info){
+	if(tree == NULL){ return ERR_NULL; }
+	if(tree->root == NULL){
+		tree->root = create_node();
+		if(tree->root == NULL){ return ERR_MEM; }
+		tree->root->key[0] = strdup(key);
+		tree->root->info[0] = strdup(info);
+		return ERR_OK;
+	}
+
+	if(tree->root->size == 2){
+		split(tree->root);
+	}
+	Node *node = tree->root;
+	Node *pre_node = NULL;
+	char cmp_val_1 = 0;
+	char cmp_val_2 = 0;
+	while(node != NULL){
+		if(node->size == 2){
+			split(node);
+		}
+		cmp_val_1 = cmp(node->key[0], key);
+		if(cmp_val_1 == 0){ return ERR_VAL; }
+		if(cmp_val_1 > 0){
+			pre_node = node;
+			node = node->left;
+			continue;
+		}
+		if(node->size == 1){
+			pre_node = node;
+			node = node->middle;
+			continue;
+		}
+		cmp_val_2 = cmp(node->key[1], key);
+		if(cmp_val_2 == 0){ return ERR_VAL; }
+		pre_node = node;
+		node = (cmp_val_2 > 0) ? (node->middle) : (node->right);
+	}
+	add_value(pre_node, key, info);
+	return ERR_OK;
 }
 
 

@@ -74,21 +74,6 @@ Node *find(const Tree * const tree, const char * const key){
 	return node;
 }
 
-
-/*
-Node *find(const Tree * const tree, const char * const key){
-	Node *node = tree->root;
-	char cmp_val = 0;
-	while(node != NULL){
-		cmp_val = cmp(node->key, key);
-		if(cmp_val == 0){
-			return node;
-		}
-		node = (cmp_val > 0) ? (node->left) : (node->right);
-	}
-	return node;
-}
-
 unsigned str_diff(const char * const key1, const char * const key2){
 	unsigned diff = 0;
 	size_t min_len = (strlen(key1) > strlen(key2)) ? strlen(key2) : strlen(key1);
@@ -102,8 +87,8 @@ unsigned str_diff(const char * const key1, const char * const key2){
 Node *max_node(const Tree * const tree){
 	if(tree == NULL || tree->root == NULL){ return NULL; }
 	Node *node = tree->root;
-	while(node->right != NULL){
-		node = node->right;
+	while(node->middle != NULL){
+		node = (node->right == NULL) ? (node->middle) : (node->right);
 	}
 	return node;
 }
@@ -117,14 +102,18 @@ Node *min_node(const Tree * const tree){
 	return node;
 }
 
-
 Node *spec_find(const Tree * const tree, const char * const key){
 	if(tree == NULL || tree->root == NULL){ return NULL; }
 	Node *r_node = max_node(tree);
 	Node *l_node = min_node(tree);
-	return (str_diff(r_node->key, key) > str_diff(l_node->key, key)) ? (r_node) : (l_node);
+	if(r_node->size == 2){
+		return (str_diff(r_node->key[1], key) > str_diff(l_node->key[0], key)) ? (r_node) : (l_node);
+	}
+	return (str_diff(r_node->key[0], key) > str_diff(l_node->key[0], key)) ? (r_node) : (l_node);
 }
 
+
+/*
 err insert_elem(Tree * const tree, const char * const key, const unsigned info){
 	if(tree == NULL){ return ERR_NULL; }
 	if(tree->root == NULL){

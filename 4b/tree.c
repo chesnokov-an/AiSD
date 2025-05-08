@@ -114,13 +114,19 @@ Node *spec_find(const Tree * const tree, const char * const key){
 
 int add_value(Node * const node, const char *key, const char *info){
 	int i = node->size - 1;
+	char *tmp_key = node->keys[i];
+	char *tmp_info = node->info[i];
+	Node *tmp_child = node->info[i+1]
+	i--;
 	while(cmp(node->key[i], key) > 0 && i > -1){
 		node->key[i+1] = node->key[i];
 		node->info[i+1] = node->info[i];
+		node->children[i+2] = node->children[i+1];
 		i--;
 	}
-	node->key[i+1] = key;
-	node->info[i+1] = info;
+	node->key[i+1] = tmp_key;
+	node->info[i+1] = tmp_info;
+	node->children[i+2] = tmp_child;
 	return i+1;
 }
 

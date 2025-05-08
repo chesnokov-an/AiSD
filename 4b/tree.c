@@ -9,19 +9,19 @@
 #include "input.h"
 
 #ifdef DEBUG
-#define DEBUG_PRINT(fmt, ...) fprintf(stderr, "DEBUG: %s:%d:%s(): " fmt "\n", \
-									                                  __FILE__, __LINE__, __func__, __VA_ARGS__)
+#define DEBUG_PRINT(fmt, ...) fprintf(stderr, "DEBUG: %s:%d:%s(): " fmt "\n", __FILE__, __LINE__, __func__, __VA_ARGS__)
 #else
 #define DEBUG_PRINT(fmt, ...) ((void)0)
 #endif
 
+#define RED "\033[38;2;255;0;0m"
 #define GREEN "\033[38;2;0;255;0m"
 #define RESET "\033[0;0m"
 
 #define left children[0]
 #define middle children[1]
 #define right children[2]
-#define parent children[3]
+#define parent children[4]
 
 Tree *create_tree(){
 	Tree *tree = (Tree *)calloc(1, sizeof(Tree));
@@ -35,7 +35,7 @@ Node *create_node(){
 
 void clear_node(Node *node){
 	if(node == NULL){ return; }
-	for(int i = 0; i < 2; i++){
+	for(int i = 0; i < 3; i++){
 		if(node->key[i] != NULL){
 			free(node->key[i]);
 		}
@@ -78,7 +78,6 @@ unsigned str_diff(const char * const key1, const char * const key2){
 	size_t min_len = (strlen(key1) > strlen(key2)) ? strlen(key2) : strlen(key1);
 	for(size_t i = 0; i < min_len; i++){
 		diff += abs(key1[i] - key2[i]);
-		DEBUG_PRINT("%d", key1[i]);
 	}
 	return diff;
 }
@@ -113,8 +112,7 @@ Node *spec_find(const Tree * const tree, const char * const key){
 
 int add_value(Node * const node, const char *key, const char *info){
 	int i = node->size - 1;
-	i--;
-	while(cmp(node->key[i], key) > 0 && i > -1){
+	while(i > -1 && cmp(node->key[i], key) > 0){
 		node->key[i+1] = node->key[i];
 		node->info[i+1] = node->info[i];
 		node->children[i+2] = node->children[i+1];
@@ -126,20 +124,31 @@ int add_value(Node * const node, const char *key, const char *info){
 	return i+1;
 }
 
-void split(Node *node){
-	if(node == NULL){ return; }
-	if(node->size < 2){ return; }
+Node *split(Node *node){
+	if(node == NULL){ return node; }
+	if(node->size < 3){ return node; }
 	if(node->parent == NULL){
 		Node *new_parent = create_node();
 		node->parent = new_parent;
 	}
 	int p_index = add_value(node->parent, node->key[1], node->info[1]);
+	free(node->key[1]);
+	free(node->info[1]);
 	node->key[1] = NULL;
 	node->info[1] = NULL;
 
 	Node *new_right = create_node();
 	new_right->parent = node->parent;
 	add_value(new_right, node->key[2], node->info[2]);
+	free(node->key[2]);
+	free(node->info[2]);
+	node->key[2] = NULL;
+	node->info[2] = NULL;
+
+	new_right->children[0] = node->children[2];
+	new_right->children[1] = node->children[3];
+	node->children[2] = NULL;
+	node->children[3] = NULL;
 	node->key[2] = NULL;
 	node->info[2] = NULL;
 
@@ -148,8 +157,7 @@ void split(Node *node){
 
 	new_right->size = 1;
 	node->size = 1;
-
-	node = node->parent;
+	return split(node->parent);
 }
 
 err insert_elem(Tree * const tree, const char * const key, const char * const info){
@@ -157,22 +165,14 @@ err insert_elem(Tree * const tree, const char * const key, const char * const in
 	if(tree->root == NULL){
 		tree->root = create_node();
 		if(tree->root == NULL){ return ERR_MEM; }
-		tree->root->key[0] = strdup(key);
-		tree->root->info[0] = strdup(info);
+		add_value(tree->root, key, info);
 		return ERR_OK;
-	}
-
-	if(tree->root->size == 2){
-		split(tree->root);
 	}
 	Node *node = tree->root;
 	Node *pre_node = NULL;
 	char cmp_val_1 = 0;
 	char cmp_val_2 = 0;
 	while(node != NULL){
-		if(node->size == 2){
-			split(node);
-		}
 		cmp_val_1 = cmp(node->key[0], key);
 		if(cmp_val_1 == 0){ return ERR_VAL; }
 		if(cmp_val_1 > 0){
@@ -191,9 +191,57 @@ err insert_elem(Tree * const tree, const char * const key, const char * const in
 		node = (cmp_val_2 > 0) ? (node->middle) : (node->right);
 	}
 	add_value(pre_node, key, info);
+	if(pre_node->size == 3){
+		pre_node = split(pre_node);
+	}
+	while(pre_node->parent != NULL){
+		pre_node = pre_node->parent;
+	}
+	tree->root = pre_node;
 	return ERR_OK;
 }
 
+void show_node(const Node * const node, int level, int side){
+	if(node == NULL){ return; }
+	int i = level;
+	while(i-- > 0){
+		printf("│    ");
+	}
+	if(side == 0){
+		printf("├─(R)");
+	}
+	else if(side == 1){
+		printf("├─(M)");
+	}
+	else if(side == 2){
+		printf("└─(L)");
+	}
+
+	//printf(GREEN"[\"%s\" : \"%s\", \"%s\" : \"%s\"]\n"RESET, node->key[0], node->info[0], node->key[1], node->info[1]);
+	printf(GREEN"[\"%s\", \"%s\", \"%s\"]\n"RESET, node->key[0], node->key[1], node->key[2]);
+
+	show_node(node->right, level + 1, 0);
+	show_node(node->middle, level + 1, 1);
+	show_node(node->left, level + 1, 2);
+}
+
+void show(const Tree * const tree){
+	show_node(tree->root, 0, -1);
+}
+
+void clear_tree_node(Node *node){
+	if(node != NULL){
+		clear_tree_node(node->right);
+		clear_tree_node(node->middle);
+		clear_tree_node(node->left);
+		clear_node(node);
+	}
+}
+
+void clear_tree(Tree *tree){
+	clear_tree_node(tree->root);
+	tree->root = NULL;
+}
 
 
 
@@ -339,42 +387,6 @@ void write_to_txt(const Tree * const tree, FILE * const file){
 }
 
 
-void show_node(const Node * const node, const Node * const pre_node, int offset, int level, char side_flag){
-	int i = offset;
-	int j = level;
-	int max_len = 0;
-	if(pre_node != NULL){
-		if(pre_node->right != NULL && pre_node->left != NULL){
-			max_len = (strlen(pre_node->right->key) > strlen(pre_node->left->key)) ? (strlen(pre_node->right->key)) : (strlen(pre_node->left->key));
-		}
-		else if(pre_node->right != NULL){ max_len = strlen(pre_node->right->key); }
-		else if(pre_node->left != NULL){ max_len = strlen(pre_node->left->key); }
-	}
-	else if(node != NULL){
-		max_len = strlen(node->key);
-	}
-	if(node != NULL){
-		show_node(node->right, node, offset + strlen(node->key) + 2, max_len - strlen(node->key), 0);
-		while(i-- > 0){
-			printf(" ");
-		}
-		if(side_flag == 0){
-			printf("┌──");
-		}
-		else if(side_flag == 1){
-			printf("└──");
-		}
-		while(j-- > 0){
-			printf("─");
-		}
-		printf("%s\n", node->key);
-		show_node(node->left, node, offset + strlen(node->key) + 2, max_len - strlen(node->key), 1);
-	}
-}
-
-void show(const Tree * const tree){
-	show_node(tree->root, NULL, -2, 0, -1);
-}
 
 Agedge_t *make_edge(char *key1, char *key2, Agraph_t *graph){
 	Agnode_t *node1 = agnode(graph, key1, TRUE);

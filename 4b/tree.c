@@ -35,7 +35,6 @@ Node *create_node(){
 
 void clear_node(Node *node){
 	if(node == NULL){ return; }
-	if(node->info != NULL){ free(node->info); }
 	for(int i = 0; i < 2; i++){
 		if(node->key[i] != NULL){
 			free(node->key[i]);
@@ -51,6 +50,32 @@ char cmp(const char * const key1, const char * const key2){
 	return strcmp(key1, key2);
 }
 
+Node *find(const Tree * const tree, const char * const key){
+	Node *node = tree->root;
+	char cmp_val_1 = 0;
+	char cmp_val_2 = 0;
+
+	while(node != NULL){
+		cmp_val_1 = cmp(node->key[0], key);
+		cmp_val_2 = cmp(node->key[1], key);
+		if(cmp_val_1 == 0 || cmp_val_2 == 0){
+			return node;
+		}
+		if(cmp_val_1 > 0){
+			node = node->left;
+		}
+		else if(cmp_val_2 < 0){
+			node = node->right;
+		}
+		else{
+			node = node->middle;
+		}
+	}
+	return node;
+}
+
+
+/*
 Node *find(const Tree * const tree, const char * const key){
 	Node *node = tree->root;
 	char cmp_val = 0;
@@ -264,39 +289,6 @@ void show_node(const Node * const node, const Node * const pre_node, int offset,
 void show(const Tree * const tree){
 	show_node(tree->root, NULL, -2, 0, -1);
 }
-/*
-void draw_node(const Node * const node, FILE * const file, unsigned *i){
-	if(node != NULL){
-		if(node->left != NULL){
-			fprintf(file, "\"%s\" -> \"%s\" [dir=none];\n", node->key, node->left->key);
-		}
-		else{
-			fprintf(file, "none%u [style=invis]\n", *i);
-			fprintf(file, "\"%s\" -> none%u [style=invis];\n", node->key, *i);
-			*i += 1;
-		}
-		if(node->right != NULL){
-			fprintf(file, "\"%s\" -> \"%s\" [dir=none];\n", node->key, node->right->key);
-		}
-		else{
-			fprintf(file, "none%u [style=invis]\n", *i);
-			fprintf(file, "\"%s\" -> none%u [style=invis];\n", node->key, *i);
-			*i += 1;
-		}
-		draw_node(node->left, file, i);
-		draw_node(node->right, file, i);
-	}
-}
-
-void draw(const Tree * const tree, FILE * const file){
-	fprintf(file, "digraph BST {\n");
-	if(tree->root != NULL){
-		unsigned i = 0;
-		draw_node(tree->root, file, &i);
-	}
-	fprintf(file, "}");
-}
-*/
 
 Agedge_t *make_edge(char *key1, char *key2, Agraph_t *graph){
 	Agnode_t *node1 = agnode(graph, key1, TRUE);
@@ -417,4 +409,4 @@ err import_tree(Tree *tree, FILE * const file){
 	}
 	if(flag == ERR_EOF){ flag = ERR_OK; }
 	return flag;
-}
+}*/

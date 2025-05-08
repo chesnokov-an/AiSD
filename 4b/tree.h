@@ -4,9 +4,10 @@
 #include "err.h"
 
 typedef struct Node{
+	int size;
 	char *key[2];
-	struct Node *children[4];	// the last one is a pointer to the parent
 	char *info[2];
+	struct Node *children[4];	// the last one is a pointer to the parent
 }Node;
 
 typedef struct Tree{

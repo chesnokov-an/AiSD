@@ -112,7 +112,6 @@ Node *spec_find(const Tree * const tree, const char * const key){
 
 int add_value(Node * const node, const char *key, const char *info){
 	int i = node->size - 1;
-	//Node *tmp_child = node->children[i+1];
 	while(i > -1 && cmp(node->key[i], key) > 0){
 		node->key[i+1] = node->key[i];
 		node->info[i+1] = node->info[i];
@@ -121,7 +120,6 @@ int add_value(Node * const node, const char *key, const char *info){
 	}
 	node->key[i+1] = strdup(key);
 	node->info[i+1] = strdup(info);
-	//node->children[i+2] = tmp_child;
 	node->size += 1;
 	return i+1;
 }
@@ -129,8 +127,6 @@ int add_value(Node * const node, const char *key, const char *info){
 Node *split(Node *node){
 	if(node == NULL){ return node; }
 	if(node->size < 3){ return node; }
-	DEBUG_PRINT("\nРазделяем узел: [%s, %s, %s]\n", node->key[0], node->key[1], node->key[2]);
-	if(node->parent != NULL){DEBUG_PRINT("\nЕго родитель: [%s, %s, %s]\n", node->parent->key[0], node->parent->key[1], node->parent->key[2]);}
 
 	if(node->parent == NULL){
 		Node *new_parent = create_node();
@@ -144,21 +140,17 @@ Node *split(Node *node){
 	free(node->info[2]);
 	node->key[2] = NULL;
 	node->info[2] = NULL;
-//	DEBUG_PRINT("%p %p %p %p", node->children[1], node->children[2], node->children[3], node->children[4]);
 	if(node->children[2] != NULL && node->children[3] != NULL){
 		node->children[2]->parent = new_right;
 		node->children[3]->parent = new_right;
 	}
 	new_right->children[0] = node->children[2];
 	new_right->children[1] = node->children[3];
-	//new_right->children[0]->parent = new_right;
-	//new_right->children[1]->parent = new_right;
 	node->children[2] = NULL;
 	node->children[3] = NULL;
 	node->key[2] = NULL;
 	node->info[2] = NULL;
 
-	//node->parent->children[node->parent->size + 1] = new_right;
 	int p_index = add_value(node->parent, node->key[1], node->info[1]);
 	free(node->key[1]);
 	free(node->info[1]);

@@ -288,16 +288,61 @@ err delete_elem(Tree * const tree, const char * const key){
 	int index = index_in_parent(node);
 	if((node->size == 1) && (bro_index != -1)){
 		free(node->key[0]);
+		free(node->info[0]);
 		if(bro_index > index){
 			node->key[0] = node->parent->key[index];
+			node->info[0] = node->parent->info[index];
 			node->parent->key[index] = node->parent->children[bro_index]->key[0];
+			node->parent->info[index] = node->parent->children[bro_index]->info[0];
 			node->parent->children[bro_index]->key[0] = node->parent->children[bro_index]->key[1];
+			node->parent->children[bro_index]->info[0] = node->parent->children[bro_index]->info[1];
 		}
 		else{
 			node->key[0] = node->parent->key[index - 1];
+			node->info[0] = node->parent->info[index - 1];
 			node->parent->key[index - 1] = node->parent->children[bro_index]->key[1];
+			node->parent->info[index - 1] = node->parent->children[bro_index]->info[1];
 		}
 		node->parent->children[bro_index]->key[1] = NULL;
+		node->parent->children[bro_index]->info[1] = NULL;
+		node->parent->children[bro_index]->size = 1;
+		return ERR_OK;
+	}
+
+	// Удаляем, если в листе 1 ключ, в родителе 2 ключа
+	if(node->parent->size == 2){
+		free(node->key[0]);
+		free(node->info[0]);
+		if(index == 0){
+			node->key[0] = node->parent->key[0];
+			node->info[0] = node->parent->info[0];
+			node->key[1] = node->parent->children[index + 1]->key[0];
+			node->info[1] = node->parent->children[index + 1]->info[0];
+			node->parent->key[0] = node->parent->key[1];
+			node->parent->info[0] = node->parent->info[1];
+			free(node->parent->children[index + 1]);
+			node->parent->children[index + 1] = node->parent->children[index + 2];
+		}
+		else if(index == 1){
+			node->parent->children[index - 1]->key[1] = node->parent->key[0];
+			node->parent->children[index - 1]->info[1] = node->parent->info[0];
+			node->parent->key[0] = node->parent->key[1];
+			node->parent->info[0] = node->parent->info[1];
+			node = node->parent->children[index + 1];
+			free(node->parent->children[index]);
+			node->parent->children[index] = node->parent->children[index + 1];
+
+		}
+		else{
+			node->parent->children[index - 1]->key[1] = node->parent->key[1];
+			node->parent->children[index - 1]->info[1] = node->parent->info[1];
+			node = node->parent->children[index - 1];
+			free(node->parent->children[index]);
+		}
+		node->parent->key[1] = NULL;
+		node->parent->info[1] = NULL;
+		node->parent->children[2] = NULL;
+
 		return ERR_OK;
 	}
 }

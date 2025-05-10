@@ -206,6 +206,75 @@ err insert_elem(Tree * const tree, const char * const key, const char * const in
 	return ERR_OK;
 }
 
+
+
+
+
+
+
+err delete_elem(Tree * const tree, const char * const key){
+	if(tree == NULL){ return ERR_NULL; }
+	if(tree->root == NULL){
+		return ERR_EMPTY;
+	}
+
+	// Находим элемент с таким ключом
+	Node *node = tree->root;
+	char cmp_val_1 = 0;
+	char cmp_val_2 = 0;
+	while(node != NULL){
+		cmp_val_1 = cmp(node->key[0], key);
+		if(cmp_val_1 == 0){ break; }
+		if(cmp_val_1 > 0){
+			node = node->left;
+			continue;
+		}
+		if(node->size == 1){
+			node = node->middle;
+			continue;
+		}
+		cmp_val_2 = cmp(node->key[1], key);
+		if(cmp_val_2 == 0){ break; }
+		node = (cmp_val_2 > 0) ? (node->middle) : (node->right);
+	}
+	if(node == NULL){
+		return ERR_NO_ELEM;
+	}
+
+	// Удаляем, если это корень с 1 ключом и 0 потомков
+	if(node == tree->root){
+		clear_node(tree->root);
+		tree->root = NULL;
+		return ERR_OK;
+	}
+
+	// Удаляем, если это лист с 2 ключами
+	if(node->left == NULL && node->size == 2){
+		if(cmp_val_1 == 0){
+			free(node->key[0]);
+			free(node->info[0]);
+			node->key[0] = node->key[1];
+			node->key[1] = NULL;
+			node->info[0] = node->info[1];
+			node->info[1] = NULL;
+		}
+		else{
+			free(node->key[1]);
+			node->key[1] = NULL;
+			free(node->info[1]);
+			node->info[1] = NULL;
+
+		}
+		node->size = 1;
+		return ERR_OK;
+	}
+}
+
+
+
+
+
+
 void show_node(const Node * const node, int level, int side){
 	if(node == NULL){ return; }
 	int i = level;
@@ -230,6 +299,10 @@ void show_node(const Node * const node, int level, int side){
 }
 
 void show(const Tree * const tree){
+	if(tree == NULL){ return; }
+	if(tree->root == NULL){
+		printf("\nДерево пусто.\n");
+	}
 	show_node(tree->root, 0, -1);
 }
 

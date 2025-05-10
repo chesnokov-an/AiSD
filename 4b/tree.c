@@ -82,28 +82,28 @@ unsigned str_diff(const char * const key1, const char * const key2){
 	return diff;
 }
 
-Node *max_node(const Tree * const tree){
-	if(tree == NULL || tree->root == NULL){ return NULL; }
-	Node *node = tree->root;
-	while(node->middle != NULL){
-		node = (node->right == NULL) ? (node->middle) : (node->right);
+Node *max_node(Node * const node){
+	if(node == NULL){ return NULL; }
+	Node *res = node;
+	while(res->middle != NULL){
+		res = (res->right != NULL) ? (res->right) : (res->middle);
 	}
-	return node;
+	return res;
 }
 
-Node *min_node(const Tree * const tree){
-	if(tree == NULL || tree->root == NULL){ return NULL; }
-	Node *node = tree->root;
-	while(node->left != NULL){
-		node = node->left;
+Node *min_node(Node * const node){
+	if(node == NULL){ return NULL; }
+	Node *res = node;
+	while(res->left != NULL){
+		res = res->left;
 	}
-	return node;
+	return res;
 }
 
 Node *spec_find(const Tree * const tree, const char * const key){
 	if(tree == NULL || tree->root == NULL){ return NULL; }
-	Node *r_node = max_node(tree);
-	Node *l_node = min_node(tree);
+	Node *r_node = max_node(tree->root);
+	Node *l_node = min_node(tree->root);
 	if(r_node->size == 2){
 		return (str_diff(r_node->key[1], key) > str_diff(l_node->key[0], key)) ? (r_node) : (l_node);
 	}
@@ -143,13 +143,11 @@ Node *split(Node *node){
 	if(node->children[2] != NULL && node->children[3] != NULL){
 		node->children[2]->parent = new_right;
 		node->children[3]->parent = new_right;
+		new_right->children[0] = node->children[2];
+		new_right->children[1] = node->children[3];
+		node->children[2] = NULL;
+		node->children[3] = NULL;
 	}
-	new_right->children[0] = node->children[2];
-	new_right->children[1] = node->children[3];
-	node->children[2] = NULL;
-	node->children[3] = NULL;
-	node->key[2] = NULL;
-	node->info[2] = NULL;
 
 	int p_index = add_value(node->parent, node->key[1], node->info[1]);
 	free(node->key[1]);
@@ -206,14 +204,25 @@ err insert_elem(Tree * const tree, const char * const key, const char * const in
 	return ERR_OK;
 }
 
-
-
-
-
 void swap_str(char **s1, char **s2){
 	char *tmp = *s1;
 	*s1 = *s2;
 	*s2 = tmp;
+}
+
+int index_in_parent(const Node * const node){
+	if(node == NULL || node->parent == NULL){ return -1; }
+	if(node == node->parent->left){ return 0; }
+	else if(node == node->parent->middle){ return 1; }
+	return 2;
+}
+
+int is_bro_with_2_keys(const Node * const node){
+	if(node == NULL || node->parent == NULL){ return -1; }
+	int index = index_in_parent(node);
+	if((index - 1 >= 0) && (node->parent->children[index - 1]->size == 2)){ return index - 1; }
+	if((index + 1 <= 2) && (node->parent->children[index + 1] != NULL) && (node->parent->children[index + 1]->size == 2)){ return index + 1; }
+	return -1;
 }
 
 err delete_elem(Tree * const tree, const char * const key){
@@ -221,7 +230,6 @@ err delete_elem(Tree * const tree, const char * const key){
 	if(tree->root == NULL){
 		return ERR_EMPTY;
 	}
-
 	// Находим элемент с таким ключом
 	Node *node = tree->root;
 	char cmp_val_1 = 0;
@@ -245,29 +253,24 @@ err delete_elem(Tree * const tree, const char * const key){
 		return ERR_NO_ELEM;
 	}
 
+	int deleted = (cmp_val_1 == 0) ? (0) : (1);
 	// Удаляем, если это корень с 1 ключом и 0 потомков
-	if(node == tree->root && node->left == NULL){
+	if(node == tree->root && node->left == NULL && node->size == 1){
 		clear_node(tree->root);
 		tree->root = NULL;
 		return ERR_OK;
 	}
 
-
-	int deleted = (cmp_val_1 == 0) ? (0) : (1);
-
 	// Если вершина - не лист, то находим подмену
 	if(node->left != NULL){
-		Node *min_right = (node->right != NULL) ? (node->right) : (node->middle);
-		while(min_right->left != NULL){
-			min_right = min_right->left;
-		}
+		Node *min_right = (node->right != NULL) ? (min_node(node->right)) : (min_node(node->middle));
 		swap_str(&node->key[deleted], &min_right->key[0]);
 		swap_str(&node->info[deleted], &min_right->info[0]);
 		node = min_right;
 	}
 
-	// Удаляем, если это лист с 2 ключами
-	if(node->left == NULL && node->size == 2){
+	// Удаляем, если в листе 2 ключа
+	if(node->size == 2){
 		free(node->key[deleted]);
 		free(node->info[deleted]);
 		if(cmp_val_1 == 0){
@@ -280,8 +283,23 @@ err delete_elem(Tree * const tree, const char * const key){
 		return ERR_OK;
 	}
 
-	// Удаляем, если это лист с одной вершиной, который имеет брата с 2 ключами
-
+	// Удаляем, если в листе 1 ключ, и есть брат с 2 ключами
+	int bro_index = is_bro_with_2_keys(node);
+	int index = index_in_parent(node);
+	if((node->size == 1) && (bro_index != -1)){
+		free(node->key[0]);
+		if(bro_index > index){
+			node->key[0] = node->parent->key[index];
+			node->parent->key[index] = node->parent->children[bro_index]->key[0];
+			node->parent->children[bro_index]->key[0] = node->parent->children[bro_index]->key[1];
+		}
+		else{
+			node->key[0] = node->parent->key[index - 1];
+			node->parent->key[index - 1] = node->parent->children[bro_index]->key[1];
+		}
+		node->parent->children[bro_index]->key[1] = NULL;
+		return ERR_OK;
+	}
 }
 
 

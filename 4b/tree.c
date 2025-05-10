@@ -210,7 +210,11 @@ err insert_elem(Tree * const tree, const char * const key, const char * const in
 
 
 
-
+void swap_str(char **s1, char **s2){
+	char *tmp = *s1;
+	*s1 = *s2;
+	*s2 = tmp;
+}
 
 err delete_elem(Tree * const tree, const char * const key){
 	if(tree == NULL){ return ERR_NULL; }
@@ -242,32 +246,42 @@ err delete_elem(Tree * const tree, const char * const key){
 	}
 
 	// Удаляем, если это корень с 1 ключом и 0 потомков
-	if(node == tree->root){
+	if(node == tree->root && node->left == NULL){
 		clear_node(tree->root);
 		tree->root = NULL;
 		return ERR_OK;
 	}
 
+
+	int deleted = (cmp_val_1 == 0) ? (0) : (1);
+
+	// Если вершина - не лист, то находим подмену
+	if(node->left != NULL){
+		Node *min_right = (node->right != NULL) ? (node->right) : (node->middle);
+		while(min_right->left != NULL){
+			min_right = min_right->left;
+		}
+		swap_str(&node->key[deleted], &min_right->key[0]);
+		swap_str(&node->info[deleted], &min_right->info[0]);
+		node = min_right;
+	}
+
 	// Удаляем, если это лист с 2 ключами
 	if(node->left == NULL && node->size == 2){
+		free(node->key[deleted]);
+		free(node->info[deleted]);
 		if(cmp_val_1 == 0){
-			free(node->key[0]);
-			free(node->info[0]);
 			node->key[0] = node->key[1];
-			node->key[1] = NULL;
 			node->info[0] = node->info[1];
-			node->info[1] = NULL;
 		}
-		else{
-			free(node->key[1]);
-			node->key[1] = NULL;
-			free(node->info[1]);
-			node->info[1] = NULL;
-
-		}
+		node->key[1] = NULL;
+		node->info[1] = NULL;
 		node->size = 1;
 		return ERR_OK;
 	}
+
+	// Удаляем, если это лист с одной вершиной, который имеет брата с 2 ключами
+
 }
 
 

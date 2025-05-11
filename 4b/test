@@ -1,0 +1,97 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
+#include "tree.h"
+#include "err.h"
+
+
+#ifdef DEBUG
+#define DEBUG_PRINT(fmt, ...) fprintf(stderr, "DEBUG: %s:%d:%s(): " fmt "\n", __FILE__, __LINE__, __func__, __VA_ARGS__)
+#else
+#define DEBUG_PRINT(fmt, ...) ((void)0)
+#endif
+
+
+#define GREEN "\033[38;2;0;255;0m"
+#define RED "\033[38;2;255;0;0m"
+#define RESET "\033[0;0m"
+
+
+int main(){
+	srand(time(NULL));
+	Tree *tree = create_tree();
+	char **keys = (char **)calloc(40, sizeof(char *));
+	for(int i = 0; i < 40; i++){
+		keys[i] = (char *)calloc(2, sizeof(char *));
+		keys[i][0] = (rand() % 26) + 65;
+		insert_elem(tree, keys[i], keys[i]);
+	}
+	show(tree);
+	for(int i = 0; i < 40; i++){
+		printf("\n--------------------\n");
+		char *key = keys[rand() % 40];
+		printf("\nOOOOOOOOOOOOOOO---%s---OOOOOOOOOOOOOOOOOO\n", key);
+		delete_elem(tree, key);
+		show(tree);
+	}
+	for(int i = 0; i < 40; i++){
+		free(keys[i]);
+	}
+	free(keys);
+
+	/*insert_elem(tree, "A", "1");
+	insert_elem(tree, "L", "2");
+	insert_elem(tree, "O", "2");
+	insert_elem(tree, "H", "2");
+	insert_elem(tree, "N", "2");
+	insert_elem(tree, "F", "2");
+	show(tree);
+	printf("\n-------\n");*/
+	//insert_elem(tree, "6", "2");
+	//insert_elem(tree, "5", "2");
+	//insert_elem(tree, "5", "2");
+
+	//delete_elem(tree, "1");*/
+	//delete_elem(tree, "2");
+	//insert_elem(tree, "c", "3");
+	//insert_elem(tree, "d", "4");
+	/*printf("\n------------\n");
+
+	show(tree);
+
+
+	delete_elem(tree, "4");*/
+	/*err flag = insert_elem(tree, "dqregq", "2");
+	flag = insert_elem(tree, "qer gqx", "3");
+	flag = insert_elem(tree, "qerj", "4");
+	flag = insert_elem(tree, "eaga", "5");
+	flag = insert_elem(tree, "rgc", "6");
+	flag = insert_elem(tree, "aregf", "7");
+	flag = insert_elem(tree, "gsr", "8");
+	flag = insert_elem(tree, "qergn", "10");
+	flag = insert_elem(tree, "hqergq", "9");
+	flag = insert_elem(tree, "rqegt", "44");
+	flag = insert_elem(tree, "zrdhrrqegzt", "44");
+	flag = insert_elem(tree, "rneaab qqegt", "44");
+	flag = insert_elem(tree, "hzdrhfhrqegt", "44");
+	flag = insert_elem(tree, "rjtsztj`qegt", "44");*/
+
+	/*err flag = insert_elem(tree, "15", "1");
+	flag = insert_elem(tree, "4", "2");
+	flag = insert_elem(tree, "24", "3");
+	flag = insert_elem(tree, "10", "4");
+	flag = insert_elem(tree, "5", "5");
+	flag = insert_elem(tree, "3", "6");
+	flag = insert_elem(tree, "6", "7");
+	flag = insert_elem(tree, "18", "8");
+	flag = insert_elem(tree, "14", "10");
+	flag = insert_elem(tree, "88", "9");*/
+
+	//show(tree);
+	printf("\n------------\n");
+
+
+	clear_tree(tree);
+	free(tree);
+	return 0;
+}

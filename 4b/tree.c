@@ -362,8 +362,8 @@ Node *redistribute(Node *node){
 
 
 		    }
-			else if(le->size == 2) {
-	            if(node->middle == NULL) {
+			else if(le->size == 2){
+	            if(node->middle == NULL){
 	                node->middle = node->left;
 	                node->left = NULL;
 				}
@@ -381,8 +381,47 @@ Node *redistribute(Node *node){
 			}
 			return par;
 		}
+		if(index == 2){
+			if(node->left != NULL){
+				node->middle = node->left;
+				node->left = NULL;
+			}
+			node->key[0] = par->key[1];
+			node->info[0] = par->info[1];
+            if(mi->size == 2){
+				par->key[1] = mi->key[1];
+				par->info[1] = mi->info[1];
+				mi->key[1] = NULL;
+				mi->info[1] = NULL;
+				node->left = mi->right;
+				mi->right = NULL;
+				if(node->left != NULL){
+					node->left->parent = node;
+				}
+			}
+			else if(le->size == 2){
+				par->key[1] = mi->key[0];
+				par->info[1] = mi->info[0];
+				node->left = mi->middle;
+				mi->middle = mi->left;
+				if(node->left != NULL){
+					node->left->parent = node;
+				}
+				mi->key[0] = par->key[0];
+				mi->info[0] = par->info[0];
+				par->key[0] = le->key[1];
+				par->info[0] = le->info[1];
+				le->key[1] = NULL;
+				le->info[1] = NULL;
+				mi->left = le->right;
+				if(mi->left != NULL){
+					mi->left->parent = mi;
+				}
+				le->right = NULL;
+			}
+			return par;
+		}
 	}
-
 }
 
 

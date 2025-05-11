@@ -422,10 +422,55 @@ Node *redistribute(Node *node){
 			return par;
 		}
 	}
+	// В родителе 1 ключ и есть брат с 2 ключами
+	if(par->size == 1){
+		node->key[0] = par->key[0];
+		node->info[0] = par->info[0];
+		if((index == 0) && (mi->size == 2)){
+			par->key[0] = mi->key[0];
+			par->info[0] = mi->info[0];
+			mi->key[0] = mi->key[1];
+			mi->info[0] = mi->info[1];
+			mi->key[1] = NULL;
+			mi->info[1] = NULL;
+			if(node->left == NULL){
+				node->left = node->middle;
+			}
+			node->middle = mi->left;
+			mi->left = mi->middle;
+			mi->middle = mi->right;
+			mi->right = NULL;
+			if(node->middle != NULL){
+				node->middle->parent = node;
+			}
+		}
+		else if((index == 1) && (le->size == 2)){
+			par->key[0] = le->key[1];
+			par->info[0] = le->info[1];
+			le->key[1] = NULL;
+			le->info[1] = NULL;
+			if(node->middle == NULL){
+				node->middle = node->left;
+			}
+			node->left = le->right;
+			le->right = NULL;
+			if(node->left != NULL){
+				node->left->parent = node;
+			}
+		}
+	}
+	return par;
 }
 
-
-
+char is_redistributable(const Node * const node){
+	if(node->parent->size == 2){
+		return 1;
+	}
+	if((node->parent->size == 1) && ((node->parent->left->size == 2) || (node->parent->middle->size == 2))){
+		return 1;
+	}
+	return 0;
+}
 
 err delete_elem(Tree * const tree, const char * const key){
 	if(tree == NULL){ return ERR_NULL; }
@@ -513,7 +558,7 @@ err delete_elem(Tree * const tree, const char * const key){
 	}*/
 
 	// Удаляем, если в листе 1 ключ, в родителе 2 ключа
-	if(node->parent->size == 2){
+	if(is_redistributable(node)){
 		free(node->key[0]);
 		free(node->info[0]);
 		redistribute(node);

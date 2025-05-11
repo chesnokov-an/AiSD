@@ -16,6 +16,7 @@
 
 #define RED "\033[38;2;255;0;0m"
 #define GREEN "\033[38;2;0;255;0m"
+#define BLUE "\033[38;2;0;191;255m"
 #define RESET "\033[0;0m"
 
 #define left children[0]
@@ -222,7 +223,6 @@ Node *redistribute(Node *node){
 	Node *le = par->left;
 	Node *mi = par->middle;
 	Node *ri = par->right;
-//	int index = index_in_parent(node);
 
 	// в родителе 2 ключа, нет братьев с 2 ключами
 	if((par->size == 2) && (le->size != 2) && (mi->size != 2) && (ri->size != 2)){
@@ -372,7 +372,6 @@ Node *redistribute(Node *node){
 				ri->middle = ri->right;
 				ri->right = NULL;
 				par->right->size = 1;
-				//par->left->size = 1;
 				par->middle->size=  1;
 		    }
 			else if(le->size == 2){
@@ -391,7 +390,6 @@ Node *redistribute(Node *node){
 					mi->left->parent = mi;
 				}
 				le->right = NULL;
-				//par->right->size = 1;
 				par->left->size = 1;
 				par->middle->size=  1;
 			}
@@ -413,7 +411,6 @@ Node *redistribute(Node *node){
 				if(node->left != NULL){
 					node->left->parent = node;
 				}
-				//par->left->size = 1;
 				par->right->size = 1;
 				par->middle->size = 1;
 			}
@@ -616,9 +613,6 @@ err delete_elem(Tree * const tree, const char * const key){
 		swap_str(&node->key[deleted], &min_right->key[0]);
 		swap_str(&node->info[deleted], &min_right->info[0]);
 		node = min_right;
-		printf(RED"\n");
-		show_node(node->parent, 0, -1);
-		printf(RESET"\n");
 	}
 
 	// Удаляем, если в листе 2 ключа
@@ -638,10 +632,6 @@ err delete_elem(Tree * const tree, const char * const key){
 	free(node->key[0]);
 	free(node->info[0]);
 	node->size = 0;
-	/*if(is_redistributable(node)){
-		redistribute(node);
-		return ERR_OK;
-	}*/
 	node = fix_after_delete(node);
 	while(node->parent != NULL){
 		node = node->parent;
@@ -649,11 +639,6 @@ err delete_elem(Tree * const tree, const char * const key){
 	tree->root = node;
 	return ERR_OK;
 }
-
-
-
-
-
 
 void show_node(const Node * const node, int level, int side){
 	if(node == NULL){ return; }
@@ -671,7 +656,7 @@ void show_node(const Node * const node, int level, int side){
 		printf("└─(L)");
 	}
 
-	printf(GREEN"[\"%s\", \"%s\", \"%s\"] : %d\n"RESET, node->key[0], node->key[1], node->key[2], node->size);
+	printf(GREEN"[\"%s\", \"%s\"]"RESET" : "BLUE"[\"%s\", \"%s\"]\n"RESET, node->key[0], node->key[1], node->info[0], node->info[1]);
 
 	show_node(node->right, level + 1, 0);
 	show_node(node->middle, level + 1, 1);
@@ -711,113 +696,7 @@ void clear_tree(Tree *tree){
 
 
 
-
-
-
-
 /*
-err insert_elem(Tree * const tree, const char * const key, const unsigned info){
-	if(tree == NULL){ return ERR_NULL; }
-	if(tree->root == NULL){
-		tree->root = create_node(key, info);
-		if(tree->root == NULL){ return ERR_MEM; }
-		return ERR_OK;
-	}
-	Node *node = tree->root;
-	Node *pre_node = NULL;
-	char cmp_val = 0;
-	while(node != NULL){
-		cmp_val = cmp(node->key, key);
-		if(cmp_val == 0){ return ERR_VAL; }
-		pre_node = node;
-		node = (cmp_val > 0) ? (node->left) : (node->right);
-	}
-
-	int new_index = (cmp_val > 0) ? 0 : 1;
-	int new_thread1 = (cmp_val > 0) ? 3 : 2;
-	int new_thread2 = (cmp_val > 0) ? 2 : 3;
-	pre_node->children[new_index] = create_node(key, info);
-	if(pre_node->children[new_index] == NULL){ return ERR_MEM; }
-	pre_node->children[new_index]->children[new_thread1] = pre_node->children[new_thread1];
-	pre_node->children[new_index]->children[new_thread2] = pre_node;
-	if(pre_node->children[new_thread1] != NULL){
-		pre_node->children[new_thread1]->children[new_thread2] = pre_node->children[new_index];
-	}
-	pre_node->children[new_thread1] = pre_node->children[new_index];
-	return ERR_OK;
-}
-
-err delete_elem(Tree * const tree, const char * const key){
-	if(tree == NULL){ return ERR_NULL; }
-	if(tree->root == NULL){
-		return ERR_EMPTY;
-	}
-	// Находим элемент с таким ключом и его родителя
-	Node *node = tree->root;
-	Node *pre_node = NULL;
-	int side_flag = -1;
-	char cmp_val = 0;
-	while(node != NULL){
-		cmp_val = cmp(node->key, key);
-		if(cmp_val == 0){ break; }
-		pre_node = node;
-		node = (cmp_val > 0) ? node->left : node->right;
-		side_flag = (cmp_val > 0) ? 0 : 1;
-	}
-	if(node == NULL){
-		return ERR_NO_ELEM;
-	}
-	// Удаляем, если нет потомков
-	if((node->left == NULL) && (node->right == NULL)){
-		if(pre_node == NULL){
-			tree->root = NULL;
-			goto end_of_delete;
-		}
-		pre_node->children[side_flag] = NULL;
-		goto end_of_delete;
-	}
-	// Удаляем, если один потомок
-	if(node->left == NULL || node->right == NULL){
-		int next_side = (node->left == NULL) ? 1 : 0;
-		if(side_flag == -1){
-			tree->root = node->left;
-		}
-		else{
-			pre_node->children[side_flag] = node->children[next_side];
-		}
-		goto end_of_delete;
-	}
-	// Удаляем, если два потомка
-	Node *min_right = node->right;
-	Node *pre_min = NULL;
-	while(min_right->left != NULL){
-		pre_min = min_right;
-		min_right = min_right->left;
-	}
-	if(side_flag == -1){
-		tree->root = min_right;
-	}
-	else{
-		pre_node->children[side_flag] = min_right;
-	}
-	min_right->left = node->left;
-	if(pre_min == NULL){
-		goto end_of_delete;
-	}
-	pre_min->left = min_right->right;
-	min_right->right = node->right;
-	goto end_of_delete;
-
-end_of_delete:
-	if(node->prev != NULL){
-		node->prev->next = node->next;
-	}
-	if(node->next != NULL){
-		node->next->prev = node->prev;
-	}
-	clear_node(node);
-	return ERR_OK;
-}
 
 void traversal(const Tree * const tree){
 	if(tree == NULL || tree->root == NULL){ return; }
@@ -928,19 +807,6 @@ void draw(const Tree * const tree, FILE * const file){
 	gvFreeLayout(gvc, graph);
 	agclose(graph);
 	gvFreeContext(gvc);
-}
-
-void clear_tree_node(Node *node){
-	if(node != NULL){
-		clear_tree_node(node->right);
-		clear_tree_node(node->left);
-		clear_node(node);
-	}
-}
-
-void clear_tree(Tree *tree){
-	clear_tree_node(tree->root);
-	tree->root = NULL;
 }
 
 err import_tree(Tree *tree, FILE * const file){

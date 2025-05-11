@@ -20,7 +20,7 @@ err delete_elem(Tree * const, const char * const);
 void traversal(const Tree * const);
 Node *find(const Tree * const, const char * const);
 Node *spec_find(const Tree * const, const char * const);
-void show_node(const Node * const node, int level, int side);
+void show_node(const Node * const, int, int);
 void show(const Tree * const);
 void draw(const Tree * const, FILE * const);
 void write_to_txt(const Tree * const, FILE * const);

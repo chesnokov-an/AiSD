@@ -232,8 +232,8 @@ Node *redistribute(Node *node){
 			par->right = NULL;
 			par->left->key[1] = par->left->key[0];
 			par->left->info[1] = par->left->info[0];
-			par->left->key[0] = par->key[0];
-			par->left->info[0] = par->info[0];
+			par->left->key[1] = par->key[0];
+			par->left->info[1] = par->info[0];
 			par->key[0] = par->key[1];
 			par->info[0] = par->info[1];
 			par->left->right = par->left->middle;
@@ -530,7 +530,7 @@ Node *merge(Node *node){
 	}
 	if(par->parent == NULL){
 		Node *tmp = NULL;
-		if (par->left != NULL){
+		if(par->left != NULL){
 			tmp = par->left;
 		}
 		else{
@@ -610,10 +610,13 @@ err delete_elem(Tree * const tree, const char * const key){
 
 	// Если вершина - не лист, то находим подмену
 	if(node->left != NULL){
-		Node *min_right = (node->right != NULL) ? (min_node(node->right)) : (min_node(node->middle));
+		Node *min_right = (cmp_val_1 == 0) ? (min_node(node->middle)) : (min_node(node->right));
 		swap_str(&node->key[deleted], &min_right->key[0]);
 		swap_str(&node->info[deleted], &min_right->info[0]);
 		node = min_right;
+		printf(RED"\n");
+		show_node(node->parent, 0, -1);
+		printf(RESET"\n");
 	}
 
 	// Удаляем, если в листе 2 ключа

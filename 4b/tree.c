@@ -222,11 +222,11 @@ Node *redistribute(Node *node){
 	Node *le = par->left;
 	Node *mi = par->middle;
 	Node *ri = par->right;
-	int index = index_in_parent(node);
+//	int index = index_in_parent(node);
 
 	// в родителе 2 ключа, нет братьев с 2 ключами
 	if((par->size == 2) && (le->size != 2) && (mi->size != 2) && (ri->size != 2)){
-		if(index == 0){
+		if(node == par->left){
 			par->left = par->middle;
 			par->middle = par->right;
 			par->right = NULL;
@@ -252,7 +252,7 @@ Node *redistribute(Node *node){
 			par->left->size = 2;
 			free(le);
 		}
-		else if(index == 1){
+		else if(node == par->middle){
 			le->key[1] = par->key[0];
 			le->info[1] = par->info[0];
 			par->key[0] = par->key[1];
@@ -295,8 +295,8 @@ Node *redistribute(Node *node){
 	}
 
 	// в родителе 2 ключа, есть братья с 2 ключами
-	else if((par->size == 2) && ((le->size == 1) || (mi->size == 1) || (ri->size == 1))){
-		if(index == 0){
+	else if((par->size == 2) && ((le->size == 2) || (mi->size == 2) || (ri->size == 2))){
+		if(node == par->left){
 			if(node->left == NULL){
 				node->left = node->middle;
 				node->middle = NULL;
@@ -319,7 +319,7 @@ Node *redistribute(Node *node){
 				mi->middle = mi->right;
 				mi->right = NULL;
 				par->left->size = 1;
-				par->right->size = 1;
+				//par->right->size = 1;
 				par->middle->size = 1;
 			}
 			else if(ri->size == 2){
@@ -344,12 +344,13 @@ Node *redistribute(Node *node){
 				ri->left = ri->middle;
 				ri->middle = ri->right;
 				ri->right = NULL;
-				par->size = 1;
-				par->left->size = 2;
-				par->middle->size = 2;
+				par->size = 2;
+				par->left->size = 1;
+				par->middle->size = 1;
+				par->right->size = 1;
 			}
 		}
-		if(index == 1){
+		if(node == par->middle){
 			if(ri->size == 2){
 				if(node->left == NULL){
 					node->left = node->middle;
@@ -371,7 +372,7 @@ Node *redistribute(Node *node){
 				ri->middle = ri->right;
 				ri->right = NULL;
 				par->right->size = 1;
-				par->left->size = 1;
+				//par->left->size = 1;
 				par->middle->size=  1;
 		    }
 			else if(le->size == 2){
@@ -390,12 +391,12 @@ Node *redistribute(Node *node){
 					mi->left->parent = mi;
 				}
 				le->right = NULL;
-				par->right->size = 1;
+				//par->right->size = 1;
 				par->left->size = 1;
 				par->middle->size=  1;
 			}
 		}
-		if(index == 2){
+		if(node == par->right){
 			if(node->left != NULL){
 				node->middle = node->left;
 				node->left = NULL;
@@ -412,7 +413,7 @@ Node *redistribute(Node *node){
 				if(node->left != NULL){
 					node->left->parent = node;
 				}
-				par->left->size = 1;
+				//par->left->size = 1;
 				par->right->size = 1;
 				par->middle->size = 1;
 			}
@@ -435,9 +436,10 @@ Node *redistribute(Node *node){
 					mi->left->parent = mi;
 				}
 				le->right = NULL;
-				par->middle->size = 2;
-				par->left->size = 2;
-				par->size = 1;
+				par->right->size = 1;
+				par->middle->size = 1;
+				par->left->size = 1;
+				par->size = 2;
 			}
 		}
 	}
@@ -445,7 +447,7 @@ Node *redistribute(Node *node){
 	else if(par->size == 1){
 		node->key[0] = par->key[0];
 		node->info[0] = par->info[0];
-		if((index == 0) && (mi->size == 2)){
+		if((node == par->left) && (mi->size == 2)){
 			mi->size = 1;
 			par->key[0] = mi->key[0];
 			par->info[0] = mi->info[0];
@@ -464,7 +466,7 @@ Node *redistribute(Node *node){
 				node->middle->parent = node;
 			}
 		}
-		else if((index == 1) && (le->size == 2)){
+		else if((node == par->middle) && (le->size == 2)){
 			le->size = 1;
 			par->key[0] = le->key[1];
 			par->info[0] = le->info[1];
@@ -669,7 +671,7 @@ void show_node(const Node * const node, int level, int side){
 		printf("└─(L)");
 	}
 
-	printf(GREEN"[\"%s\", \"%s\", \"%s\"]\n"RESET, node->key[0], node->key[1], node->key[2]);
+	printf(GREEN"[\"%s\", \"%s\", \"%s\"] : %d\n"RESET, node->key[0], node->key[1], node->key[2], node->size);
 
 	show_node(node->right, level + 1, 0);
 	show_node(node->middle, level + 1, 1);

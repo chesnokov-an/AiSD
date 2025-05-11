@@ -157,7 +157,7 @@ err D_traversal(Tree *tree){
 }
 
 err D_input(Tree *tree){
-	/*FILE *file = input_correct_file();
+	FILE *file = input_correct_file();
 	if(!file){
 		return ERR_VAL;
 	}
@@ -167,5 +167,5 @@ err D_input(Tree *tree){
 	}
 	err flag = import_tree(tree, file);
 	fclose(file);
-	return flag;*/
+	return flag;
 }

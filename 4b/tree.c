@@ -217,13 +217,176 @@ int index_in_parent(const Node * const node){
 	return 2;
 }
 
-int is_bro_with_2_keys(const Node * const node){
-	if(node == NULL || node->parent == NULL){ return -1; }
+Node *redistribute(Node *node){
+	Node *par = node->parent;
+	Node *le = par->left;
+	Node *mi = par->middle;
+	Node *ri = par->right;
 	int index = index_in_parent(node);
-	if((index - 1 >= 0) && (node->parent->children[index - 1]->size == 2)){ return index - 1; }
-	if((index + 1 <= 2) && (node->parent->children[index + 1] != NULL) && (node->parent->children[index + 1]->size == 2)){ return index + 1; }
-	return -1;
+
+	// в родителе 2 ключа, нет братьев с 2 ключами
+	if((par->size == 2) && (le->size == 1) && (mi->size == 1) && (ri->size == 1)){
+		if(index == 0){
+			par->left = par->middle;
+			par->middle = par->right;
+			par->right = NULL;
+			par->left->key[1] = par->left->key[0];
+			par->left->info[1] = par->left->info[0];
+			par->left->key[0] = par->key[0];
+			par->left->info[0] = par->info[0];
+			par->key[0] = par->key[1];
+			par->info[0] = par->info[1];
+			par->left->right = par->left->middle;
+			par->left->middle = par->left->left;
+
+			if(node->left != NULL){
+				par->left->left = node->left;
+			}
+			else if(node->middle != NULL){
+				par->left->left = node->middle;
+			}
+			if(par->left->left != NULL){
+				par->left->left->parent = par->left;
+			}
+			free(le);
+		}
+		else if(index == 1){
+			le->key[1] = par->key[0];
+			le->info[1] = par->info[0];
+			par->key[0] = par->key[1];
+			par->info[0] = par->info[1];
+			if(node->left != NULL){
+				le->right = node->left;
+			}
+			else if(node->middle != NULL){
+				le->right = node->middle;
+			}
+			if(le->right != NULL){
+				le->right->parent = le;
+			}
+			par->middle = par->right;
+			par->right = NULL;
+			free(mi);
+		}
+		else{
+			mi->key[1] = par->key[1];
+			mi->info[1] = par->info[1];
+			par->right = NULL;
+			if(node->left != NULL){
+				mi->right = node->left;
+			}
+			else if(node->middle != NULL){
+				mi->right = node->middle;
+			}
+			if(mi->right != NULL){
+				mi->right->parent = mi;
+			}
+			free(ri);
+		}
+		par->key[1] = NULL;
+		par->info[1] = NULL;
+		return par;
+	}
+
+	// в родителе 2 ключа, есть братья с 2 ключами
+	if((par->size == 2) && ((le->size == 1) || (mi->size == 1) || (ri->size == 1))){
+		if(index == 0){
+			if(node->left == NULL){
+				node->left = node->middle;
+				node->middle = NULL;
+			}
+			le->key[0] = par->key[0];
+			le->info[0] = par->info[0];
+			par->key[0] = mi->key[0];
+			par->info[0] = mi->info[0];
+
+			if(mi->size == 2){
+				mi->key[0] = mi->key[1];
+				mi->info[0] = mi->info[1];
+				mi->key[1] = NULL;
+				mi->info[1] = NULL;
+				le->middle = mi->left;
+				if (le->middle != NULL){
+					le->middle->parent = le;
+				}
+				mi->left = mi->middle;
+				mi->middle = mi->right;
+				mi->right = NULL;
+			}
+			else if(ri->size == 2){
+				mi->key[0] = par->key[1];
+				mi->info[0] = par->info[1];
+                par->key[1] = ri->key[0];
+                par->info[1] = ri->info[0];
+				ri->key[0] = ri->key[1];
+				ri->info[0] = ri->info[1];
+				ri->key[1] = NULL;
+				ri->info[1] = NULL;
+
+				le->middle = mi->left;
+				if (le->middle != NULL){
+					le->middle->parent = le;
+				}
+				mi->left = mi->middle;
+				mi->middle = ri->left;
+				if (mi->middle != NULL){
+					mi->middle->parent = mi;
+				}
+				ri->left = ri->middle;
+				ri->middle = ri->right;
+				ri->right = NULL;
+			}
+			return par;
+		}
+		if(index == 1){
+			if(ri->size == 2){
+				if(node->left == NULL){
+					node->left = node->middle;
+					node->middle = NULL;
+				}
+				mi->key[0] = par->key[1];
+				mi->info[0] = par->info[1];
+				par->key[1] = ri->key[0];
+				par->info[1] = ri->info[0];
+				ri->key[0] = ri->key[1];
+				ri->info[0] = ri->info[1];
+				ri->key[1] = NULL;
+				ri->info[1] = NULL;
+				mi->middle = ri->left;
+				if(mi->middle != NULL){
+					mi->middle->parent = mi;
+				}
+				ri->left = ri->middle;
+				ri->middle = ri->right;
+				ri->right = NULL;
+
+
+		    }
+			else if(le->size == 2) {
+	            if(node->middle == NULL) {
+	                node->middle = node->left;
+	                node->left = NULL;
+				}
+				mi->key[0] = par->key[0];
+				mi->info[0] = par->info[0];
+				par->key[0] = le->key[1];
+				par->info[0] = le->info[1];
+				le->key[1] = NULL;
+				le->info[1] = NULL;
+				mi->left = le->right;
+				if(mi->left != NULL){
+					mi->left->parent = mi;
+				}
+				le->right = NULL;
+			}
+			return par;
+		}
+	}
+
 }
+
+
+
 
 err delete_elem(Tree * const tree, const char * const key){
 	if(tree == NULL){ return ERR_NULL; }
@@ -284,6 +447,7 @@ err delete_elem(Tree * const tree, const char * const key){
 	}
 
 	// Удаляем, если в листе 1 ключ, и есть брат с 2 ключами
+	/*
 	int bro_index = is_bro_with_2_keys(node);
 	int index = index_in_parent(node);
 	if((node->size == 1) && (bro_index != -1)){
@@ -307,13 +471,14 @@ err delete_elem(Tree * const tree, const char * const key){
 		node->parent->children[bro_index]->info[1] = NULL;
 		node->parent->children[bro_index]->size = 1;
 		return ERR_OK;
-	}
+	}*/
 
 	// Удаляем, если в листе 1 ключ, в родителе 2 ключа
 	if(node->parent->size == 2){
 		free(node->key[0]);
 		free(node->info[0]);
-		if(index == 0){
+		redistribute(node);
+		/*if(index == 0){
 			node->key[0] = node->parent->key[0];
 			node->info[0] = node->parent->info[0];
 			node->key[1] = node->parent->children[index + 1]->key[0];
@@ -341,7 +506,7 @@ err delete_elem(Tree * const tree, const char * const key){
 		}
 		node->parent->key[1] = NULL;
 		node->parent->info[1] = NULL;
-		node->parent->children[2] = NULL;
+		node->parent->children[2] = NULL;*/
 
 		return ERR_OK;
 	}

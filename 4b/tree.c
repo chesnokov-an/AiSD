@@ -297,8 +297,6 @@ Node *redistribute(Node *node){
 			if(mi->right != NULL){
 				mi->right->parent = mi;
 			}
-			par->left->size = 1;
-			par->middle->size = 2;
 			free(ri);
 		}
 	}
@@ -381,59 +379,47 @@ Node *redistribute(Node *node){
 				node->middle = node->left;
 				node->left = NULL;
 			}
-			node->key[0] = par->key[1];
-			node->info[0] = par->info[1];
+			insert_key_info(node, par->key[1], par->info[1]);
+			remove_key_info(par, 1);
             if(mi->size == 2){
-				par->key[1] = mi->key[1];
-				par->info[1] = mi->info[1];
-				mi->key[1] = NULL;
-				mi->info[1] = NULL;
+				insert_key_info(par, mi->key[1], mi->info[1]);
+				remove_key_info(mi, 1);
 				node->left = mi->right;
 				mi->right = NULL;
 				if(node->left != NULL){
 					node->left->parent = node;
 				}
-				par->right->size = 1;
-				par->middle->size = 1;
 			}
 			else if(le->size == 2){
-				par->key[1] = mi->key[0];
-				par->info[1] = mi->info[0];
+				insert_key_info(par, mi->key[0], mi->info[0]);
+				remove_key_info(mi, 0);
 				node->left = mi->middle;
 				mi->middle = mi->left;
 				if(node->left != NULL){
 					node->left->parent = node;
 				}
-				mi->key[0] = par->key[0];
-				mi->info[0] = par->info[0];
-				par->key[0] = le->key[1];
-				par->info[0] = le->info[1];
-				le->key[1] = NULL;
-				le->info[1] = NULL;
+				insert_key_info(mi, par->key[0], par->info[0]);
+				remove_key_info(par, 0);
+				insert_key_info(par, le->key[1], le->info[1]);
+				remove_key_info(le, 1);
 				mi->left = le->right;
 				if(mi->left != NULL){
 					mi->left->parent = mi;
 				}
 				le->right = NULL;
-				par->right->size = 1;
-				par->middle->size = 1;
-				par->left->size = 1;
-				par->size = 2;
 			}
 		}
 	}
 	// В родителе 1 ключ и есть брат с 2 ключами
 	else if(par->size == 1){
-		node->key[0] = par->key[0];
-		node->info[0] = par->info[0];
+		insert_key_info(node, par->key[0], par->info[0]);
+		remove_key_info(par, 0);
+
 		if((node == par->left) && (mi->size == 2)){
-			mi->size = 1;
-			par->key[0] = mi->key[0];
-			par->info[0] = mi->info[0];
-			mi->key[0] = mi->key[1];
-			mi->info[0] = mi->info[1];
-			mi->key[1] = NULL;
-			mi->info[1] = NULL;
+
+			insert_key_info(par, mi->key[0], mi->info[0]);
+			remove_key_info(mi, 0);
+
 			if(node->left == NULL){
 				node->left = node->middle;
 			}
@@ -446,11 +432,10 @@ Node *redistribute(Node *node){
 			}
 		}
 		else if((node == par->middle) && (le->size == 2)){
-			le->size = 1;
-			par->key[0] = le->key[1];
-			par->info[0] = le->info[1];
-			le->key[1] = NULL;
-			le->info[1] = NULL;
+
+			insert_key_info(par, le->key[1], le->info[1]);
+			remove_key_info(le, 1);
+
 			if(node->middle == NULL){
 				node->middle = node->left;
 			}
@@ -460,21 +445,15 @@ Node *redistribute(Node *node){
 				node->left->parent = node;
 			}
 		}
-		par->left->size = 1;
-		par->middle->size = 1;
 	}
 	return par;
 }
 
 Node *merge(Node *node){
 	Node *par = node->parent;
-	par->size = 0;
 	if(par->left == node){
-		par->middle->size = 2;
-		par->middle->key[1] = par->middle->key[0];
-		par->middle->info[1] = par->middle->info[0];
-		par->middle->key[0] = par->key[0];
-		par->middle->info[0] = par->info[0];
+		insert_key_info(par->middle, par->key[0], par->info[0]);
+		remove_key_info(par, 0);
 		par->middle->right = par->middle->middle;
 	    par->middle->middle = par->middle->left;
 		if(node->left != NULL){
@@ -486,15 +465,12 @@ Node *merge(Node *node){
 	    if(par->middle->left != NULL){
 			par->middle->left->parent = par->middle;
 		}
-		par->key[0] = NULL;
-		par->info[0] = NULL;
 		free(par->left);
 		par->left = NULL;
 	}
 	else if(par->middle == node){
-		par->left->size = 2;
-		par->left->key[1] = par->key[0];
-		par->left->info[1] = par->info[0];
+		insert_key_info(par->left, par->key[0], par->info[0]);
+		remove_key_info(par, 0);
         if(node->left != NULL){
 			par->left->right = node->left;
 		}
@@ -504,8 +480,6 @@ Node *merge(Node *node){
 		if(par->left->right != NULL){
 			par->left->right->parent = par->left;
 		}
-		par->key[0] = NULL;
-		par->info[0] = NULL;
 		free(par->middle);
 		par->middle = NULL;
 	}
@@ -717,18 +691,6 @@ void traversal(const Tree * const tree){
 
 }
 
-void write_to_txt(const Tree * const tree, FILE * const file){
-	if(tree == NULL || tree->root == NULL){ return; }
-	Node *node = max_node(tree);
-	fprintf(file, "Ключ : Значение\n");
-	while(node != NULL){
-		fprintf(file, "%s : %u\n", node->key, *node->info);
-		node = node->next;
-	}
-}
-
-
-
 Agedge_t *make_edge(char *key1, char *key2, Agraph_t *graph){
 	Agnode_t *node1 = agnode(graph, key1, TRUE);
 	Agnode_t *node2 = agnode(graph, key2, TRUE);
@@ -813,26 +775,4 @@ void draw(const Tree * const tree, FILE * const file){
 	agclose(graph);
 	gvFreeContext(gvc);
 }
-
-err import_tree(Tree *tree, FILE * const file){
-	if(tree == NULL){ return ERR_NULL; }
-	char *magic_word = txt_readline(file);
-	if(magic_word == NULL){ return ERR_VAL; }
-	if(strcmp("DWRF", magic_word) != 0){ return ERR_VAL; }
-	free(magic_word);
-	err flag = ERR_OK;
-	unsigned info = 0;
-	while(flag == ERR_OK){
-		char *key = txt_readline(file);
-		if(key == NULL){ break; }
-		flag = txt_input_uint(file, &info, 0, UINT_MAX);
-		if(flag != ERR_OK){
-			free(key);
-			break;
-		}
-		flag = insert_elem(tree, key, info);
-		free(key);
-	}
-	if(flag == ERR_EOF){ flag = ERR_OK; }
-	return flag;
-}*/
+*/

@@ -152,8 +152,16 @@ err D_draw(Tree *tree){
 }
 
 err D_traversal(Tree *tree){
-	/*traversal(tree);
-	return ERR_OK;*/
+	/*if(tree == NULL){
+		return ERR_NULL;
+	}
+	char *key = readline("Введите ключ: ");
+	if(key == NULL){
+		return ERR_EOF;
+	}
+	err flag = traversal(tree, key);
+	free(key);
+	return flag;*/
 }
 
 err D_input(Tree *tree){

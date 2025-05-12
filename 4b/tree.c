@@ -575,13 +575,8 @@ err delete_elem(Tree * const tree, const char * const key){
 	if(node->size == 2){
 		free(node->key[deleted]);
 		free(node->info[deleted]);
-		if(cmp_val_1 == 0){
-			node->key[0] = node->key[1];
-			node->info[0] = node->info[1];
-		}
-		node->key[1] = NULL;
-		node->info[1] = NULL;
-		node->size = 1;
+		if(cmp_val_1 == 0){ remove_key_info(node, 0); }
+		else{ remove_key_info(node, 1); }
 		return ERR_OK;
 	}
 
@@ -613,7 +608,6 @@ void show_node(const Node * const node, int level, int side){
 	}
 
 	printf(GREEN"[\"%s\", \"%s\"]"RESET" : "BLUE"[\"%s\", \"%s\"]"RESET" : "RED"%d\n"RESET, node->key[0], node->key[1], node->info[0], node->info[1], node->size);
-	//printf(GREEN"[\"%s\", \"%s\"] : %d\n"RESET, node->key[0], node->key[1], node->size);
 
 	show_node(node->right, level + 1, 0);
 	show_node(node->middle, level + 1, 1);
@@ -665,6 +659,39 @@ err import_tree(Tree *tree, FILE * const file){
 	return flag;
 }
 
+void traversal_node(const Node * const node, int pos){
+	if(node == NULL){ return; }
+	while(node->children[pos + 1] != NULL){
+		traversal_node(node->children[pos + 1], -1);
+		if(node->key[pos] != NULL && node->info[pos] != NULL){ printf("\"%s\" : \"%s\"\n", node->key[pos], node->info[pos]); }
+		pos += 1;
+	}
+	if(node->parent != NULL && node->parent->key[index_in_parent(node)] != NULL){ printf("\"%s\" : \"%s\"\n", node->parent->key[index_in_parent(node)], node->parent->info[index_in_parent(node)]); }
+	traversal_node(node->parent, index_in_parent(node));
+}
+
+err traversal(const Tree * const tree, const char * const key){
+	if(tree == NULL){ return ERR_NULL; }
+	if(tree->root == NULL){ return ERR_EMPTY; }
+	if(strlen(key) > 0){
+		Node *node = find(tree, key);
+		if(node == NULL){ return ERR_NO_ELEM; }
+		if(strcmp(node->key[0], key) == 0){
+			printf("\"%s\" : \"%s\"\n", node->key[0], node->info[0]);
+			traversal_node(node, 0);
+		}
+		else{
+			printf("\"%s\" : \"%s\"\n", node->key[1], node->info[1]);
+			traversal_node(node, 1);
+		}
+	}
+	else{
+		Node *node = min_node(tree->root);
+		printf("\"%s\" : \"%s\"\n", node->key[0], node->info[0]);
+		traversal_node(node, 0);
+	}
+	return ERR_OK;
+}
 
 
 

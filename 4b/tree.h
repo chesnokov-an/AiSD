@@ -17,7 +17,7 @@ typedef struct Tree{
 Tree *create_tree();
 err insert_elem(Tree * const, const char * const, const char * const);
 err delete_elem(Tree * const, const char * const);
-void traversal(const Tree * const);
+err traversal(const Tree * const, const char * const);
 Node *find(const Tree * const, const char * const);
 Node *spec_find(const Tree * const, const char * const);
 void show_node(const Node * const, int, int);

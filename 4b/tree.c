@@ -314,7 +314,7 @@ Node *redistribute(Node *node){
 			remove_key_info(par, 0);
 			insert_key_info(par, mi->key[0], mi->info[0]);
 			remove_key_info(mi, 0);
-			if(mi->size == 2){
+			if(mi->size == 1){	// 1, т.к. 1 уже забрали в parent
 				le->middle = mi->left;
 				if (le->middle != NULL){
 					le->middle->parent = le;
@@ -375,7 +375,6 @@ Node *redistribute(Node *node){
 				}
 				le->right = NULL;
 			}
-			////////////////////////////////////////////////////
 		}
 		if(node == par->right){
 			if(node->left != NULL){
@@ -639,7 +638,8 @@ void show_node(const Node * const node, int level, int side){
 		printf("└─(L)");
 	}
 
-	printf(GREEN"[\"%s\", \"%s\"]"RESET" : "BLUE"[\"%s\", \"%s\"]\n"RESET, node->key[0], node->key[1], node->info[0], node->info[1]);
+	printf(GREEN"[\"%s\", \"%s\"]"RESET" : "BLUE"[\"%s\", \"%s\"]"RESET" : "RED"%d\n"RESET, node->key[0], node->key[1], node->info[0], node->info[1], node->size);
+	//printf(GREEN"[\"%s\", \"%s\"] : %d\n"RESET, node->key[0], node->key[1], node->size);
 
 	show_node(node->right, level + 1, 0);
 	show_node(node->middle, level + 1, 1);

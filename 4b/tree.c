@@ -24,15 +24,9 @@
 #define right children[2]
 #define parent children[4]
 
-Tree *create_tree(){
-	Tree *tree = (Tree *)calloc(1, sizeof(Tree));
-	return tree;
-}
 
-Node *create_node(){
-	Node *node = (Node *)calloc(1, sizeof(Node));
-	return node;
-}
+Tree *create_tree(){ return (Tree *)calloc(1, sizeof(Tree)); }
+Node *create_node(){ return (Node *)calloc(1, sizeof(Node)); }
 
 void clear_node(Node *node){
 	if(node == NULL){ return; }
@@ -47,6 +41,20 @@ void clear_node(Node *node){
 	free(node);
 }
 
+void clear_tree_node(Node *node){
+	if(node != NULL){
+		clear_tree_node(node->right);
+		clear_tree_node(node->middle);
+		clear_tree_node(node->left);
+		clear_node(node);
+	}
+}
+
+void clear_tree(Tree *tree){
+	clear_tree_node(tree->root);
+	tree->root = NULL;
+}
+
 char cmp(const char * const key1, const char * const key2){
 	return strcmp(key1, key2);
 }
@@ -55,7 +63,6 @@ Node *find(const Tree * const tree, const char * const key){
 	Node *node = tree->root;
 	char cmp_val_1 = 0;
 	char cmp_val_2 = 0;
-
 	while(node != NULL){
 		cmp_val_1 = cmp(node->key[0], key);
 		if(cmp_val_1 == 0){ return node; }
@@ -499,12 +506,8 @@ Node *merge(Node *node){
 }
 
 char is_redistributable(const Node * const node){
-	if(node->parent->size == 2){
-		return 1;
-	}
-	if((node->parent->size == 1) && ((node->parent->left->size == 2) || (node->parent->middle->size == 2))){
-		return 1;
-	}
+	if(node->parent->size == 2){ return 1; }
+	if((node->parent->size == 1) && ((node->parent->left->size == 2) || (node->parent->middle->size == 2))){ return 1; }
 	return 0;
 }
 
@@ -532,6 +535,7 @@ err delete_elem(Tree * const tree, const char * const key){
 	if(tree->root == NULL){
 		return ERR_EMPTY;
 	}
+
 	// Находим элемент с таким ключом
 	Node *node = tree->root;
 	char cmp_val_1 = 0;
@@ -554,8 +558,8 @@ err delete_elem(Tree * const tree, const char * const key){
 	if(node == NULL){
 		return ERR_NO_ELEM;
 	}
-
 	int deleted = (cmp_val_1 == 0) ? (0) : (1);
+
 	// Удаляем, если это корень с 1 ключом и 0 потомков
 	if(node == tree->root && node->left == NULL && node->size == 1){
 		clear_node(tree->root);
@@ -580,6 +584,7 @@ err delete_elem(Tree * const tree, const char * const key){
 		return ERR_OK;
 	}
 
+	// Удаляем, если требуется перераспределение или слияние узлов
 	free(node->key[0]);
 	free(node->info[0]);
 	node->size = 0;
@@ -594,18 +599,10 @@ err delete_elem(Tree * const tree, const char * const key){
 void show_node(const Node * const node, int level, int side){
 	if(node == NULL){ return; }
 	int i = level;
-	while(i-- > 0){
-		printf("│    ");
-	}
-	if(side == 0){
-		printf("├─(R)");
-	}
-	else if(side == 1){
-		printf("├─(M)");
-	}
-	else if(side == 2){
-		printf("└─(L)");
-	}
+	while(i-- > 0){ printf("│    "); }
+	if(side == 0){ printf("├─(R)"); }
+	else if(side == 1){ printf("├─(M)"); }
+	else if(side == 2){ printf("└─(L)"); }
 
 	printf(GREEN"[\"%s\", \"%s\"]"RESET" : "BLUE"[\"%s\", \"%s\"]"RESET" : "RED"%d\n"RESET, node->key[0], node->key[1], node->info[0], node->info[1], node->size);
 
@@ -620,20 +617,6 @@ void show(const Tree * const tree){
 		printf("\nДерево пусто.\n");
 	}
 	show_node(tree->root, 0, -1);
-}
-
-void clear_tree_node(Node *node){
-	if(node != NULL){
-		clear_tree_node(node->right);
-		clear_tree_node(node->middle);
-		clear_tree_node(node->left);
-		clear_node(node);
-	}
-}
-
-void clear_tree(Tree *tree){
-	clear_tree_node(tree->root);
-	tree->root = NULL;
 }
 
 err import_tree(Tree *tree, FILE * const file){
@@ -692,20 +675,6 @@ err traversal(const Tree * const tree, const char * const key){
 
 
 /*
-
-void traversal(const Tree * const tree){
-	if(tree == NULL || tree->root == NULL){ return; }
-	Node *node = max_node(tree);
-	printf("\n╔══════════════════════════╦═════════════════╗\n");
-	printf("║           Ключ           ║     Значение    ║\n");
-	printf("║══════════════════════════║═════════════════║\n");
-	while(node != NULL){
-		printf("║  %22s  ║  %14u ║\n", node->key, *node->info);
-		node = node->next;
-	}
-	printf("╚══════════════════════════╩═════════════════╝\n\n");
-
-}
 
 Agedge_t *make_edge(char *key1, char *key2, Agraph_t *graph){
 	Agnode_t *node1 = agnode(graph, key1, TRUE);

@@ -152,7 +152,7 @@ err D_draw(Tree *tree){
 }
 
 err D_traversal(Tree *tree){
-	/*if(tree == NULL){
+	if(tree == NULL){
 		return ERR_NULL;
 	}
 	char *key = readline("Введите ключ: ");
@@ -161,7 +161,7 @@ err D_traversal(Tree *tree){
 	}
 	err flag = traversal(tree, key);
 	free(key);
-	return flag;*/
+	return flag;
 }
 
 err D_input(Tree *tree){

@@ -659,36 +659,25 @@ err import_tree(Tree *tree, FILE * const file){
 	return flag;
 }
 
-void traversal_node(const Node * const node, int pos){
+void traversal_node(const Node * const node, const char * const key){
 	if(node == NULL){ return; }
-	while(node->children[pos + 1] != NULL){
-		traversal_node(node->children[pos + 1], -1);
-		if(node->key[pos] != NULL && node->info[pos] != NULL){ printf("\"%s\" : \"%s\"\n", node->key[pos], node->info[pos]); }
-		pos += 1;
+	for(int i = 0; i < node->size; i++){
+		if(key == NULL || (key != NULL && strcmp(key, node->key[i]) < 0)){
+			traversal_node(node->children[i], key);
+			printf("\"%s\" : \"%s\"\n", node->key[i], node->info[i]);
+		}
 	}
-	if(node->parent != NULL && node->parent->key[index_in_parent(node)] != NULL){ printf("\"%s\" : \"%s\"\n", node->parent->key[index_in_parent(node)], node->parent->info[index_in_parent(node)]); }
-	traversal_node(node->parent, index_in_parent(node));
+	traversal_node(node->children[node->size], key);
 }
 
 err traversal(const Tree * const tree, const char * const key){
 	if(tree == NULL){ return ERR_NULL; }
 	if(tree->root == NULL){ return ERR_EMPTY; }
 	if(strlen(key) > 0){
-		Node *node = find(tree, key);
-		if(node == NULL){ return ERR_NO_ELEM; }
-		if(strcmp(node->key[0], key) == 0){
-			printf("\"%s\" : \"%s\"\n", node->key[0], node->info[0]);
-			traversal_node(node, 0);
-		}
-		else{
-			printf("\"%s\" : \"%s\"\n", node->key[1], node->info[1]);
-			traversal_node(node, 1);
-		}
+		traversal_node(tree->root, key);
 	}
 	else{
-		Node *node = min_node(tree->root);
-		printf("\"%s\" : \"%s\"\n", node->key[0], node->info[0]);
-		traversal_node(node, 0);
+		traversal_node(tree->root, NULL);
 	}
 	return ERR_OK;
 }

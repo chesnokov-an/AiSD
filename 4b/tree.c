@@ -22,7 +22,6 @@
 #define left children[0]
 #define middle children[1]
 #define right children[2]
-#define parent children[4]
 
 
 Tree *create_tree(){ return (Tree *)calloc(1, sizeof(Tree)); }
@@ -656,102 +655,94 @@ void traversal_node(const Node * const node, const char * const key){
 err traversal(const Tree * const tree, const char * const key){
 	if(tree == NULL){ return ERR_NULL; }
 	if(tree->root == NULL){ return ERR_EMPTY; }
-	if(strlen(key) > 0){
-		traversal_node(tree->root, key);
+	if(key == NULL || strlen(key) == 0){
+		traversal_node(tree->root, NULL);
 	}
 	else{
-		traversal_node(tree->root, NULL);
+		traversal_node(tree->root, key);
 	}
 	return ERR_OK;
 }
 
 
+Agedge_t *make_edge(const Node * const n1, const Node * const n2, Agraph_t *graph){
+	char *sub1_name = (char *)calloc(strlen(n1->key[0]) + 9, sizeof(char));
+	strcpy(sub1_name, "cluster_");
+	strcat(sub1_name, n1->key[0]);
+	Agraph_t *sub_g1 = agsubg(graph, sub1_name, TRUE);
 
+	char *sub2_name = (char *)calloc(strlen(n2->key[0]) + 9, sizeof(char));
+	strcpy(sub2_name, "cluster_");
+	strcat(sub2_name, n2->key[0]);
+	Agraph_t *sub_g2 = agsubg(graph, sub2_name, TRUE);
 
+	char *n1_name = (char *)calloc(strlen(n1->key[0]) + 7, sizeof(char));
+	strcpy(n1_name, "NODE1_");
+	strcat(n1_name, n1->key[0]);
+	Agnode_t *node1 = agnode(graph, n1_name, TRUE);
+	agsubnode(sub_g1, node1, TRUE);
+	free(n1_name);
 
+	char *n2_name = (char *)calloc(strlen(n2->key[0]) + 7, sizeof(char));
+	strcpy(n2_name, "NODE2_");
+	strcat(n2_name, n2->key[0]);
+	Agnode_t *node2 = agnode(graph, n2_name, TRUE);
+	agsubnode(sub_g2, node2, TRUE);
+	free(n2_name);
 
+	agsafeset(node1, "style", "invis", "");
+	agsafeset(node1, "shape", "point", "");
+	agsafeset(node1, "width", "0", "");
+	agsafeset(node2, "style", "invis", "");
+	agsafeset(node2, "shape", "point", "");
+	agsafeset(node2, "width", "0", "");
 
+	Agedge_t *edge = agedge(graph, node1, node2, "edge1", TRUE);
 
+	agsafeset(edge, "lhead", sub2_name, "");
+	agsafeset(edge, "ltail", sub1_name, "");
 
+	free(sub1_name);
+	free(sub2_name);
 
-/*
-
-Agedge_t *make_edge(char *key1, char *key2, Agraph_t *graph){
-	Agnode_t *node1 = agnode(graph, key1, TRUE);
-	Agnode_t *node2 = agnode(graph, key2, TRUE);
-	Agedge_t __attribute__((unused)) *edge = agedge(graph, node1, node2,"edge1",TRUE);
 	return edge;
 }
 
-void draw_node(const Node * const node, Agraph_t *graph, unsigned *i){
+void draw_node(const Node * const node, Agraph_t *graph){
 	if(node != NULL){
-		if(node->left != NULL){
-			make_edge(node->key, node->left->key, graph);
+		char *sub_name = (char *)calloc(strlen(node->key[0]) + 9, sizeof(char));
+		strcpy(sub_name, "cluster_");
+		strcat(sub_name, node->key[0]);
+		Agraph_t *sub_g = agsubg(graph, sub_name, TRUE);
+		free(sub_name);
+
+		Agnode_t __attribute__((unused)) *node1 = agnode(sub_g, node->key[0], TRUE);
+		if(node->size == 2){
+			Agnode_t __attribute__((unused)) *node2 = agnode(sub_g, node->key[1], TRUE);
 		}
-		else{
-			char index [14] = "";
-			sprintf(index, "none%u", *i);
-			Agnode_t *node2 = agnode(graph, index, TRUE);
-			agsafeset(node2, "style", "invis", "");
-			Agedge_t *edge = make_edge(node->key, index, graph);
-			agsafeset(edge, "style", "invis", "");
-			*i += 1;
+
+		if(node->left != NULL){
+			make_edge(node, node->left, graph);
+		}
+		if(node->middle != NULL){
+			make_edge(node, node->middle, graph);
 		}
 		if(node->right != NULL){
-			make_edge(node->key, node->right->key, graph);
+			make_edge(node, node->right, graph);
 		}
-		else{
-			char index [14] = "";
-			sprintf(index, "none%u", *i);
-			Agnode_t *node2 = agnode(graph, index, TRUE);
-			agsafeset(node2, "style", "invis", "");
-			Agedge_t *edge = make_edge(node->key, index, graph);
-			agsafeset(edge, "style", "invis", "");
-			*i += 1;
-		}
-		draw_node(node->left, graph, i);
-		draw_node(node->right, graph, i);
+		draw_node(node->left, graph);
+		draw_node(node->middle, graph);
+		draw_node(node->right, graph);
 	}
 }
 
 
 void draw(const Tree * const tree, FILE * const file){
 	if(tree == NULL){ return; }
-	Agraph_t *graph;
-	graph = agopen("Tree", Agundirected, NULL);
+	Agraph_t *graph = agopen("Tree", Agdirected, NULL);
+	agsafeset(graph, "compound", "true", "");
 	if(tree->root != NULL){
-		unsigned i = 0;
-		draw_node(tree->root, graph, &i);
-
-		Node *node = max_node(tree);
-		Node *pre_node = node;
-		node = node->next;
-		Agnode_t *node1 = NULL;
-		Agnode_t *node2 = NULL;
-		Agedge_t *edge1 = NULL;
-		Agedge_t *edge2 = NULL;
-		while(node != NULL){
-			node1 = agnode(graph, pre_node->key, FALSE);
-			node2 = agnode(graph, node->key, FALSE);
-			edge1 = agedge(graph, node1, node2,"edge2",TRUE);
-			agsafeset(edge1, "constraint", "false", "");
-			agsafeset(edge1, "color", "green", "");
-			agsafeset(edge1, "dir", "forward", "");
-			agsafeset(edge1, "arrowhead", "normal", "");
-			if(pre_node->prev == NULL){
-				agsafeset(node1, "color", "green", "");
-			}
-			edge2 = agedge(graph, node2, node1,"edge3",TRUE);
-			agsafeset(edge2, "color", "red", "");
-			agsafeset(edge2, "constraint", "false", "");
-			agsafeset(edge2, "dir", "forward", "");
-			agsafeset(edge2, "arrowhead", "normal", "");
-			pre_node = node;
-			node = node->next;
-			if(node == NULL){
-				agsafeset(node2, "color", "red", "");
-			}
-		}
+		draw_node(tree->root, graph);
 	}
 	GVC_t *gvc = gvContext();
 	gvLayout(gvc, graph, "dot");
@@ -760,4 +751,3 @@ void draw(const Tree * const tree, FILE * const file){
 	agclose(graph);
 	gvFreeContext(gvc);
 }
-*/

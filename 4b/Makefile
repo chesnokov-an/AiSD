@@ -1,5 +1,5 @@
 CC = cc
-CFLAGS = -c -Wall -Wextra -g
+CFLAGS = -c -Wall -Wextra -g -pedantic
 TARGET = prog
 LIB = tree
 DFLAGS ?= -DDEBUG

@@ -7,7 +7,8 @@ typedef struct Node{
 	int size;
 	char *key[3];	// the last one is fictitious for operations
 	char *info[3];
-	struct Node *children[5];	// the last one is a pointer to the parent
+	struct Node *children[4];
+	struct Node *parent;
 }Node;
 
 typedef struct Tree{

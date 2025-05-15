@@ -716,10 +716,10 @@ void draw_node(const Node * const node, Agraph_t *graph){
 		Agraph_t *sub_g = agsubg(graph, sub_name, TRUE);
 		free(sub_name);
 
-		Agnode_t __attribute__((unused)) *node1 = agnode(sub_g, node->key[0], TRUE);
 		if(node->size == 2){
 			Agnode_t __attribute__((unused)) *node2 = agnode(sub_g, node->key[1], TRUE);
 		}
+		Agnode_t __attribute__((unused)) *node1 = agnode(sub_g, node->key[0], TRUE);
 
 		if(node->left != NULL){
 			make_edge(node, node->left, graph);

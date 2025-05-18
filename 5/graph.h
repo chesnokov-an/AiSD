@@ -4,9 +4,9 @@
 #include "err.h"
 
 typedef enum room_type{
-	entry = 1,
-	exit = -1,
-	pass = 0,
+	ENTRY = 1,
+	EXIT = -1,
+	PASS = 0,
 }room_type;
 
 typedef struct Edge{
@@ -29,16 +29,24 @@ typedef struct Graph{
 
 Graph *create_graph(const size_t capacity);
 Node *create_node();
+Edge *create_edge();
+
 void clear_graph(Graph *graph);
 void clear_node(Node *node);
+void clear_edge(Node *edge);
+
 void free_graph(Graph *graph);
 void free_node(Node *node);
+void free_edge(Edge *edge);
+
 err insert_node(Graph *graph, const char * const id, const room_type room);
 err modify_node(Graph *graph, const char * const id, const room_type room);
 err remove_node(Graph *graph, const char * const id);
+
 err insert_edge(Graph *graph, const char * const id1, const char * const id2, const unsigned edge);
 err modify_edge(Graph *graph, const char * const id1, const char * const id2, const unsigned edge);
 err remove_edge(Graph *graph, const char * const id1, const char * const id2);
+
 void show(Graph *graph);
 void draw(Graph *graph);
 

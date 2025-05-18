@@ -12,7 +12,7 @@
 #define ALL_WORDS 370105
 #define AVERAGE 1000
 
-int is_nember(char *data){
+int is_number(char *data){
 	for(size_t i = 0; i < strlen(data); i++){
 		if(!isdigit(data[i])){
 			return 0;
@@ -22,7 +22,7 @@ int is_nember(char *data){
 }
 
 int main(int argc, char **argv){
-	if(argc != 3 || is_nember(argv[1]) == 0 || is_nember(argv[2]) == 0){
+	if(argc != 3 || is_number(argv[1]) == 0 || is_number(argv[2]) == 0){
 		printf("Передайте 2 параметра: количество элементов в дереве и количество усреднений.");
 		return 0;
 	}

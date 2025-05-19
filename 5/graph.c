@@ -15,6 +15,7 @@
 Graph *create_graph(const size_t capacity){
 	Graph *graph = (Graph *)calloc(1, sizeof(Graph));
 	if(graph == NULL){ return NULL; }
+	if(capacity == 0){ return graph; }
 	graph->array = (Node **)calloc(capacity, sizeof(Node *));
 	if(graph->array == NULL){
 		free(graph);
@@ -25,10 +26,11 @@ Graph *create_graph(const size_t capacity){
 }
 
 Node *create_node(){ return (Node *)calloc(1, sizeof(Node)); }
-Edge *create_node(){ return (Edge *)calloc(1, sizeof(Edge)); }
+Edge *create_edge(){ return (Edge *)calloc(1, sizeof(Edge)); }
 
 /*----------------CLEAR----------------*/
 void clear_graph(Graph *graph){
+	if(graph == NULL || graph->array == NULL){ return; }
 	for(size_t i = 0; i < graph->size; i++){
 		free_node(graph->array[i]);
 	}
@@ -36,6 +38,7 @@ void clear_graph(Graph *graph){
 }
 
 void clear_node(Node *node){
+	if(node == NULL){ return; }
 	Edge *edge = node->edges;
 	Edge *pre_edge = NULL;
 	while(edge != NULL){
@@ -47,26 +50,30 @@ void clear_node(Node *node){
 }
 
 void clear_edge(Node *edge){
-	free(edge->id);
-	edge->id = NULL;
+	if(edge == NULL){ return; }
+	free(edge->node);
+	edge->node = NULL;
 	edge->length = 0;
 	edge->next = NULL;
 }
 
 /*----------------FREE----------------*/
 void free_graph(Graph *graph){
+	if(graph == NULL){ return; }
 	clear_graph(graph);
-	free(graph->array);
+	if(graph->array != NULL){ free(graph->array); }
 	free(graph);
 }
 
 void free_node(Node *node){
+	if(node == NULL){ return; }
 	clear_node(node);
-	free(node->id);
+	if(id != NULL){ free(node->id); }
 	free(node);
 }
 
 void free_edge(Edge *edge){
+	if(edge == NULL){ return; }
 	clear_edge(edge);
 	free(edge);
 }
@@ -74,12 +81,12 @@ void free_edge(Edge *edge){
 /*----------------MAIN FUNCTIONS----------------*/
 err insert_node(Graph *graph, const char * const id, const room_type room){
 	if(graph == NULL || graph->array == NULL || id == NULL){ return ERR_NULL; }
+	if(find_node(graph, id) != NULL){ return ERR_VAL; }
 	err flag = ERR_OK;
 	if(graph->size == graph->capacity){
 		flag = resize(graph);
 		if(flag != ERR_OK){ return flag; }
 	}
-	if(find_id(id) != NULL){ return ERR_VAL; }
 	Node *node = create_node();
 	if(node == NULL){ return ERR_MEM; }
 	node->id = strdup(id);
@@ -89,13 +96,40 @@ err insert_node(Graph *graph, const char * const id, const room_type room){
 	return ERR_OK;
 }
 
-err modify_node(Graph *graph, const char * const id, const room_type room);
-err remove_node(Graph *graph, const char * const id);
+err modify_node(Graph *graph, const char * const id, const room_type room){
+	Node *node = find_node(graph, id);
+	if(node == NULL){ return ERR_NO_ELEM; }
+	node->room = room;
+	return ERR_OK;
+}
 
-err insert_edge(Graph *graph, const char * const id1, const char * const id2, const unsigned edge);
-err modify_edge(Graph *graph, const char * const id1, const char * const id2, const unsigned edge);
-err remove_edge(Graph *graph, const char * const id1, const char * const id2);
+err remove_node(Graph *graph, const char * const id){
+	// pass
+}
 
+err insert_edge(Graph *graph, const char * const id_from, const char * const id_to, const unsigned length){
+	if(graph == NULL || graph->array == NULL || id_from == NULL || id_to == NULL){ return ERR_NULL; }
+	if(find_edge(graph, id_from, id_to) != NULL){ return ERR_VAL; }
+
+	Node *node_from = find_node(graph, id_from);
+	Node *node_to = find_node(graph, id_to);
+	Edge *edge = create_edge();
+	edge->length = length;
+	edge->node = node_to;
+	edge->next = node_from->edges;
+	node_from->edges = edge;
+}
+
+err modify_edge(Graph *graph, const char * const id_from, const char * const id_to, const unsigned length){
+	Edge *edge = find_edge(graph, id_from, id_to);
+	if(edge == NULL){ return ERR_NO_ELEM; }
+	edge->length = length;
+	return ERR_OK;
+}
+
+err remove_edge(Graph *graph, const char * const id_from, const char * const id_to){
+	// pass
+}
 
 /*----------------ADDITIONAL FUNCTIONS----------------*/
 err resize(Graph *graph){
@@ -108,11 +142,23 @@ err resize(Graph *graph){
 	return ERR_OK;
 }
 
-char *find_id(Graph *graph, const char * const id){
+Node *find_node(Graph *graph, const char * const id){
 	for(size_t i = 0; i < graph->size; i++){
 		if(strcmp(graph->array[i]->id, id) == 0){
-			return graph->array[i]->id;
+			return graph->array[i];
 		}
+	}
+	return NULL;
+}
+
+Node *find_edge(Graph *graph, const char * const id_from, const char * const id_to){
+	Node *node_from = find_node(graph, id_from);
+	Edge *edge = node->edges;
+	while(edge != NULL){
+		if(strcmp(edge->node->id, id_to) == 0){
+			return edge;
+		}
+		edge = edge->next;
 	}
 	return NULL;
 }

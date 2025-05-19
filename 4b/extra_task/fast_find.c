@@ -34,6 +34,13 @@ void add_word(Tree * const tree, char *word, unsigned offset, unsigned line_num,
 	free(buffer);
 }
 
+char is_correct_word(const char * const word){
+	for(size_t i = 0; i < strlen(word); i++){
+		if(!isalpha(word[i])){ return 0; }
+	}
+	return 1;
+}
+
 Tree *parse_file(FILE *file, char *file_name){
 	Tree *tree = create_tree();
 
@@ -76,15 +83,10 @@ int main(int argc, char **argv){
 	while(word != NULL){
 		Node *node = find(tree, word);
 		if(node != NULL){
-			if(strcmp(word, node->key[0]) == 0){
-				printf("\n%s\n\n", node->info[0]);
-			}
-			else{
-				printf("\n%s\n\n", node->info[1]);
-			}
+			printf("\n%s\n\n", (strcmp(word, node->key[0]) == 0) ? (node->info[0]) : (node->info[1]));
 		}
 		else{
-			printf("Нет такого слова.\n\n");
+			printf((is_correct_word(word)) ? ("Нет такого слова.\n\n") : ("Введите слово в нижнем регистре.\n\n"));
 		}
 		free(word);
 		word = readline("Введите слово: ");

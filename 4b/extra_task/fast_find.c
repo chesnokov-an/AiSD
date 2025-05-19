@@ -16,15 +16,6 @@ void prepare_line(char * const line){
 	}
 }
 
-unsigned get_offset(const char * const line, const char * const word){
-	for(size_t i = 0; i < strlen(line); i++){
-		if(strncmp(line + i, word, strlen(word)) == 0){
-			return (unsigned)i;
-		}
-	}
-	return 0;
-}
-
 void add_word(Tree * const tree, char *word, unsigned offset, unsigned line_num, char *file_name){
 	if(find(tree, word) != NULL){ return; }
 	char *buffer = calloc(strlen(word) + 25 + strlen(file_name), sizeof(char));
@@ -54,9 +45,8 @@ Tree *parse_file(FILE *file, char *file_name){
 		char *line_cpy = strdup(line);
 		char *word = strtok(line, "\t ");
 		while(word != NULL){
-			offset = get_offset(line_cpy, word);
+			offset = strstr(line_cpy, word) - line_cpy;
 			add_word(tree, word, offset, line_num, file_name);
-			//offset += strlen(word) + 1;
 			word = strtok(NULL, "\t ");
 		}
 		free(line);

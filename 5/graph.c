@@ -11,6 +11,7 @@
 
 #define GREEN "\033[38;2;0;255;0m"
 #define BLUE "\033[38;2;0;191;255m"
+#define YELLOW "\033[38;2;255;255;0m"
 #define RESET "\033[0;0m"
 
 
@@ -173,7 +174,8 @@ err remove_node(Graph *graph, const char * const id){
 	int index = index_in_graph(graph, id);
 	if(index == -1){ return ERR_NO_ELEM; }
 	free_node(graph->array[index]);
-	graph->array[index] = NULL;
+	graph->array[index] = graph->array[graph->size-1];
+	graph->array[graph->size-1] = NULL;
 	graph->size -= 1;
 	return ERR_OK;
 }
@@ -226,10 +228,11 @@ void show(Graph *graph){
 	Edge *edge = NULL;
 	for(size_t i = 0; i < graph->size; i++){
 		node = graph->array[i];
-		printf(GREEN"\n\"%s\","BLUE" type: %d "RESET"edges:\n", node->id, node->room);
+		printf(GREEN"\n\"%s\""RESET","BLUE" type: %d"RESET, node->id, node->room);
+		printf((node->edges != NULL) ? (", edges:\n") : ("\n"));
 		edge = node->edges;
 		while(edge != NULL){
-			printf(GREEN"\t\"%s\""RESET, (*edge->node)->id);
+			printf(GREEN"\t\"%s\""RESET", "YELLOW"length: %d\n"RESET, (*edge->node)->id, edge->length);
 			edge = edge->next;
 		}
 	}

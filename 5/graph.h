@@ -9,23 +9,11 @@ typedef enum room_type{
 	PASS = 0,
 }room_type;
 
-typedef struct Edge{
-	const char * const * node;
-	unsigned length;
-	struct Edge *next;
-}Edge;
+typedef struct Edge Edge;
 
-typedef struct Node{
-	char *id;
-	room_type room;
-	Edge *edges;
-}Node;
+typedef struct Node Node;
 
-typedef struct Graph{
-	size_t capacity;
-	size_t size;
-	Node **array;
-}Graph;
+typedef struct Graph Graph;
 
 Graph *create_graph(const size_t capacity);
 Node *create_node();
@@ -33,7 +21,7 @@ Edge *create_edge();
 
 void clear_graph(Graph *graph);
 void clear_node(Node *node);
-void clear_edge(Node *edge);
+void clear_edge(Edge *edge);
 
 void free_graph(Graph *graph);
 void free_node(Node *node);

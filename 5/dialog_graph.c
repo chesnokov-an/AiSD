@@ -206,13 +206,13 @@ err D_show(Graph *graph){
 }
 
 err D_draw(Graph *graph){
-	/*FILE *file = fopen("graph.dot", "wb");
+	FILE *file = fopen("graph.dot", "wb");
 	draw(graph, file);
 	fclose(file);
 	file = fopen("graph.dot", "rb");
 	system("dot -Tx11 -Gdpi=500 -Gsize=100,100 graph.dot");
 	fclose(file);
-	return ERR_OK;*/
+	return ERR_OK;
 	return ERR_OK;
 }
 /*

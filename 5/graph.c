@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <graphviz/cgraph.h>
+#include <graphviz/gvc.h>
 #include "graph.h"
 
 #ifdef DEBUG
@@ -238,6 +240,47 @@ void show(Graph *graph){
 	}
 }
 
-void draw(Graph *graph){
-	// pass
+void draw_node(Agraph_t *G, const Node * const node){
+	if(node == NULL){ return; }
+	Agnode_t __attribute__((unused)) *vertex = agnode(G, node->id, TRUE);
+}
+
+void draw_edge(Agraph_t *G, const Node * const node){
+	if(node == NULL){ return; }
+	Agnode_t *vertex1 = agnode(G, node->id, FALSE);
+	Agnode_t *vertex2 = NULL;
+	Edge *edge = node->edges;
+	while(edge != NULL){
+		vertex2 = agnode(G, (*edge->node)->id, FALSE);
+		char *name = (char *)calloc(strlen(node->id) + strlen((*edge->node)->id) + 1, sizeof(char));
+		strcat(name, node->id);
+		strcat(name, (*edge->node)->id);
+		Agedge_t __attribute__((unused)) *edge_for_draw = agedge(G, vertex1, vertex2, name, TRUE);
+		edge = edge->next;
+	}
+}
+
+void draw(Graph *graph, FILE * const file){
+	if(graph == NULL){ return; }
+	Agraph_t *G = agopen("G", Agdirected, NULL);
+
+	agsafeset(G, "layout", "neato", "");
+    agsafeset(G, "K", "0.5", "");        // Увеличиваем расстояние
+    agsafeset(G, "overlap", "false", ""); // Запрещаем наложения
+    agsafeset(G, "sep", "+10", "");       // Минимальный отступ
+
+	if(graph->array != NULL){
+		for(size_t i = 0; i < graph->size; i++){
+			draw_node(G, graph->array[i]);
+		}
+		for(size_t i = 0; i < graph->size; i++){
+			draw_edge(G, graph->array[i]);
+		}
+	}
+	GVC_t *gvc = gvContext();
+	gvLayout(gvc, G, "neato");
+	gvRender(gvc, G, "dot", file);
+	gvFreeLayout(gvc, G);
+	agclose(G);
+	gvFreeContext(gvc);
 }

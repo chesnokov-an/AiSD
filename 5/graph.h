@@ -36,6 +36,6 @@ err modify_edge(Graph *graph, const char * const id_from, const char * const id_
 err remove_edge(Graph *graph, const char * const id_from, const char * const id_to);
 
 void show(Graph *graph);
-void draw(Graph *graph);
+void draw(Graph *graph, FILE * const);
 
 #endif

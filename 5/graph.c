@@ -242,7 +242,10 @@ void show(Graph *graph){
 
 void draw_node(Agraph_t *G, const Node * const node){
 	if(node == NULL){ return; }
-	Agnode_t __attribute__((unused)) *vertex = agnode(G, node->id, TRUE);
+	Agnode_t *vertex = agnode(G, node->id, TRUE);
+	if(node->room == ENTRY){ agsafeset(vertex, "shape", "square", ""); }
+	else if(node->room == EXIT){ agsafeset(vertex, "shape", "star", ""); }
+	else{ agsafeset(vertex, "shape", "circle", ""); }
 }
 
 void draw_edge(Agraph_t *G, const Node * const node){
@@ -255,7 +258,10 @@ void draw_edge(Agraph_t *G, const Node * const node){
 		char *name = (char *)calloc(strlen(node->id) + strlen((*edge->node)->id) + 1, sizeof(char));
 		strcat(name, node->id);
 		strcat(name, (*edge->node)->id);
-		Agedge_t __attribute__((unused)) *edge_for_draw = agedge(G, vertex1, vertex2, name, TRUE);
+		Agedge_t *edge_for_draw = agedge(G, vertex1, vertex2, name, TRUE);
+		char length[11] = "";
+		sprintf(length, "%d", edge->length);
+		agsafeset(edge_for_draw, "label", length , "");
 		edge = edge->next;
 	}
 }
@@ -265,9 +271,9 @@ void draw(Graph *graph, FILE * const file){
 	Agraph_t *G = agopen("G", Agdirected, NULL);
 
 	agsafeset(G, "layout", "neato", "");
-    agsafeset(G, "K", "0.5", "");        // Увеличиваем расстояние
-    agsafeset(G, "overlap", "false", ""); // Запрещаем наложения
-    agsafeset(G, "sep", "+10", "");       // Минимальный отступ
+    agsafeset(G, "K", "0.5", "");
+    agsafeset(G, "overlap", "false", "");
+    agsafeset(G, "sep", "+10", "");
 
 	if(graph->array != NULL){
 		for(size_t i = 0; i < graph->size; i++){

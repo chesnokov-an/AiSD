@@ -47,7 +47,7 @@ void message(err flag){
 }
 
 void Dialog(int capacity){
-	err (*func_array[])(Graph *) = {D_insert_node, D_insert_edge, D_remove_node, D_remove_edge, D_modify_node, D_modify_edge, D_show, D_draw, D_import};
+	err (*func_array[])(Graph *) = {D_insert_node, D_insert_edge, D_remove_node, D_remove_edge, D_modify_node, D_modify_edge, D_show, D_draw, D_import, D_generate};
 	Graph *graph = create_graph(capacity);
 	int option = -1;
 	err flag = ERR_OK;
@@ -61,10 +61,11 @@ void Dialog(int capacity){
 		printf(YELLOW"6: изменение данных, ассоциированных с заданным ребром\n"RESET);
 		printf(BLUE"7: вывод графа в виде списков смежности\n"RESET);
 		printf(BLUE"8: графический вывод графа\n"RESET);
-		printf(ORANGE"\n9: импорт графа из текстового файла\n"RESET);
+		printf(ORANGE"9: импорт графа из текстового файла\n"RESET);
+		printf(ORANGE"10: генерация рандомного графа\n"RESET);
 		printf(RED"\n0: Завершение программы\n\n"RESET);
 		printf(MAGENTA"Выберите опцию: "RESET);
-		flag = input_int(&option, 0, 9);
+		flag = input_int(&option, 0, 10);
 		printf("\n");
 		if(flag == ERR_EOF || option == 0){ goto end_program; }
 		flag = func_array[option-1](graph);
@@ -179,6 +180,7 @@ err D_modify_edge(Graph *graph){
 }
 
 err D_import(Graph *graph){
+	if(graph == NULL){ return ERR_NULL; }
 	FILE *file = input_correct_file();
 	if(!file){
 		printf("Unknown file\n");
@@ -242,6 +244,44 @@ err D_import(Graph *graph){
 		free(id_to);
 	}
 	fclose(file);
+	return ERR_OK;
+}
+
+err D_generate(Graph *graph){
+	if(graph == NULL){ return ERR_NULL; }
+	int node_count = 0;
+	printf("Введите число вершин: ");
+	err flag = input_int(&node_count, 0, INT_MAX);
+	if(flag != ERR_OK){ return flag; }
+	int edge_count = 0;
+	printf("Введите число рёбер: ");
+	flag = input_int(&edge_count, 0, node_count * node_count);
+	if(flag != ERR_OK){ return flag; }
+
+	char **id_array = (char **)calloc(node_count, sizeof(char *));
+	int room = 0;
+	for(int i = 0; i < node_count; i++){
+		int id_len = rand() % 12 + 2;
+		id_array[i] = (char *)calloc(id_len, sizeof(char));
+		for(int j = 0; j < id_len - 1; j++){
+			id_array[i][j] = (rand() % 26) + 97;
+		}
+		room = (rand() % 3) - 1;
+		insert_node(graph, id_array[i], (room_type)room);
+	}
+	char *id_from = NULL;
+	char *id_to = NULL;
+	int length = 0;
+	for(int i = 0; i < edge_count; i++){
+		id_from = id_array[rand() % node_count];
+		id_to = id_array[rand() % node_count];
+		length = (rand() % (1000 - 1)) + 1;
+		insert_edge(graph, id_from, id_to, length);
+	}
+	for(int i = 0; i < node_count; i++){
+		free(id_array[i]);
+	}
+	free(id_array);
 	return ERR_OK;
 }
 

@@ -1,12 +1,17 @@
 CC = cc
 CFLAGS = -c -Wall -Wextra -g
-TARGET = prog
+TARGET ?= prog
 LIB = graph
 DFLAGS ?= -DDEBUG
 OBJDIR = build
 LIBDIR = ../libs/ld
 LDFLAGS = -l$(LIB) -lreadline -linput -lmy_readline -lm -lcgraph -lgvc
-OBJ = $(addprefix $(OBJDIR)/, $(patsubst %.c, %.o, $(filter-out $(LIB).c, $(wildcard *.c))))
+
+ifeq ($(TARGET), generate)
+	OBJ = $(addprefix $(OBJDIR)/, $(patsubst %.c, %.o, $(filter-out $(LIB).c prog.c, $(wildcard *.c))))
+else
+	OBJ = $(addprefix $(OBJDIR)/, $(patsubst %.c, %.o, $(filter-out $(LIB).c generate.c, $(wildcard *.c))))
+endif
 HDIR = ../libs
 
 all: $(MAKE) $(OBJDIR) $(OBJDIR)/lib$(LIB).so $(TARGET)

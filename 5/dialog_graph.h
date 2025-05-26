@@ -13,5 +13,6 @@ err D_modify_node(Graph *);
 err D_modify_edge(Graph *);
 err D_show(Graph *);
 err D_draw(Graph *);
+err D_import(Graph *);
 
 #endif

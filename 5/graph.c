@@ -3,6 +3,7 @@
 #include <string.h>
 #include <graphviz/cgraph.h>
 #include <graphviz/gvc.h>
+#include "err.h"
 #include "graph.h"
 
 #ifdef DEBUG
@@ -274,6 +275,7 @@ void draw(Graph *graph, FILE * const file){
     agsafeset(G, "K", "0.5", "");
     agsafeset(G, "overlap", "false", "");
     agsafeset(G, "sep", "+10", "");
+	agsafeset(G, "overlap", "false", "");
 
 	if(graph->array != NULL){
 		for(size_t i = 0; i < graph->size; i++){

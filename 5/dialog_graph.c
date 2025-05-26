@@ -47,7 +47,7 @@ void message(err flag){
 }
 
 void Dialog(int capacity){
-	err (*func_array[])(Graph *) = {D_insert_node, D_insert_edge, D_remove_node, D_remove_edge, D_modify_node, D_modify_edge, D_show, D_draw};
+	err (*func_array[])(Graph *) = {D_insert_node, D_insert_edge, D_remove_node, D_remove_edge, D_modify_node, D_modify_edge, D_show, D_draw, D_import};
 	Graph *graph = create_graph(capacity);
 	int option = -1;
 	err flag = ERR_OK;
@@ -61,9 +61,10 @@ void Dialog(int capacity){
 		printf(YELLOW"6: изменение данных, ассоциированных с заданным ребром\n"RESET);
 		printf(BLUE"7: вывод графа в виде списков смежности\n"RESET);
 		printf(BLUE"8: графический вывод графа\n"RESET);
+		printf(ORANGE"\n9: импорт графа из текстового файла\n"RESET);
 		printf(RED"\n0: Завершение программы\n\n"RESET);
 		printf(MAGENTA"Выберите опцию: "RESET);
-		flag = input_int(&option, 0, 8);
+		flag = input_int(&option, 0, 9);
 		printf("\n");
 		if(flag == ERR_EOF || option == 0){ goto end_program; }
 		flag = func_array[option-1](graph);
@@ -177,29 +178,73 @@ err D_modify_edge(Graph *graph){
 	return flag;
 }
 
-
-
-/*
-err D_spec_find(Graph *graph){
-	printf("Введите значение: ");
-	char *key = readline("Введите ключ: ");
-	if(key == NULL){
-		return ERR_EOF;
+err D_import(Graph *graph){
+	FILE *file = input_correct_file();
+	if(!file){
+		printf("Unknown file\n");
+		return ERR_VAL;
 	}
-	Node *node = spec_find(graph, key);
-	free(key);
-	if(node == NULL){
-		return ERR_MEM;
+	char *magic_word = txt_readline(file);
+	if(magic_word == NULL){ return ERR_VAL; }
+	if(strcmp("DWRF", magic_word) != 0){
+		free(magic_word);
+		return ERR_VAL;
 	}
-
-	printf("\n╔══════════════════════════╦═════════════════╗\n");
-	printf("║           Ключ           ║     Значение    ║\n");
-	printf("║══════════════════════════║═════════════════║\n");
-	printf("║  %22s  ║  %14u ║\n", node->key, *node->info);
-	printf("╚══════════════════════════╩═════════════════╝\n\n");
+	free(magic_word);
+	int node_count = 0;
+	char *word = NULL;
+	char *id = NULL;
+	room_type room = PASS;
+	err flag = txt_input_int(file, &node_count, 1, INT_MAX);
+	char *line = NULL;
+	if(flag != ERR_OK){
+		fclose(file);
+		return ERR_VAL;
+	}
+	for(int i = 0; i < node_count; i++){
+		line = txt_readline(file);
+		if(line == NULL){
+			fclose(file);
+			return ERR_VAL;
+		}
+		word = strtok(line, "\t ");
+		id = strdup(word);
+		word = strtok(NULL, "\t ");
+		room = (room_type)atoi(word);
+		insert_node(graph, id, room);
+		free(line);
+		free(id);
+	}
+	int edge_count = 0;
+	flag = txt_input_int(file, &edge_count, 1, INT_MAX);
+	if(flag != ERR_OK){
+		fclose(file);
+		return ERR_VAL;
+	}
+	char *id_from = NULL;
+	char *id_to = NULL;
+	int length = 0;
+	for(int i = 0; i < edge_count; i++){
+		line = txt_readline(file);
+		if(line == NULL){
+			fclose(file);
+			return ERR_VAL;
+		}
+		word = strtok(line, "\t ");
+		id_from = strdup(word);
+		word = strtok(NULL, "\t ");
+		id_to = strdup(word);
+		word = strtok(NULL, "\t ");
+		length = atoi(word);
+		insert_edge(graph, id_from, id_to, length);
+		free(line);
+		free(id_from);
+		free(id_to);
+	}
+	fclose(file);
 	return ERR_OK;
 }
-*/
+
 err D_show(Graph *graph){
 	show(graph);
 	return ERR_OK;
@@ -215,6 +260,9 @@ err D_draw(Graph *graph){
 	return ERR_OK;
 	return ERR_OK;
 }
+
+
+
 /*
 err D_traversal(graph *graph){
 	traversal(graph);

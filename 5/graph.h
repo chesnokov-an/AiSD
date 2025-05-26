@@ -38,4 +38,8 @@ err remove_edge(Graph *graph, const char * const id_from, const char * const id_
 void show(Graph *graph);
 void draw(Graph *graph, FILE * const);
 
+char traversal(Graph *graph, const char * const id_from);
+unsigned shortest_path(Graph *graph, const char * const id_from, const char * const id_to);
+Node *nearest_exit(Graph *graph, const char * const id_from);
+
 #endif

@@ -261,7 +261,7 @@ void draw_edge(Agraph_t *G, const Node * const node){
 		strcat(name, (*edge->node)->id);
 		Agedge_t *edge_for_draw = agedge(G, vertex1, vertex2, name, TRUE);
 		char length[11] = "";
-		sprintf(length, "%d", edge->length);
+		sprintf(length, "%u", edge->length);
 		agsafeset(edge_for_draw, "label", length , "");
 		edge = edge->next;
 	}

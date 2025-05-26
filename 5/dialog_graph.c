@@ -102,9 +102,9 @@ err D_insert_edge(Graph *graph){
 		free(id_from);
 		return ERR_EOF;
 	}
-	int length = 0;
+	unsigned length = 0;
 	printf("Введите длинну ребра: ");
-	err flag = input_int(&length, 1, INT_MAX);
+	err flag = input_uint(&length, 1, UINT_MAX);
 	if(flag != ERR_OK){
 		free(id_from);
 		free(id_to);
@@ -165,9 +165,9 @@ err D_modify_edge(Graph *graph){
 		free(id_from);
 		return ERR_EOF;
 	}
-	int length = 0;
+	unsigned length = 0;
 	printf("Введите длинну ребра: ");
-	err flag = input_int(&length, 1, INT_MAX);
+	err flag = input_uint(&length, 1, UINT_MAX);
 	if(flag != ERR_OK){
 		free(id_from);
 		free(id_to);
@@ -225,7 +225,7 @@ err D_import(Graph *graph){
 	}
 	char *id_from = NULL;
 	char *id_to = NULL;
-	int length = 0;
+	unsigned length = 0;
 	for(int i = 0; i < edge_count; i++){
 		line = txt_readline(file);
 		if(line == NULL){
@@ -271,7 +271,7 @@ err D_generate(Graph *graph){
 	}
 	char *id_from = NULL;
 	char *id_to = NULL;
-	int length = 0;
+	unsigned length = 0;
 	for(int i = 0; i < edge_count; i++){
 		id_from = id_array[rand() % node_count];
 		id_to = id_array[rand() % node_count];

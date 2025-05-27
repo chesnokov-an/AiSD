@@ -327,7 +327,41 @@ unsigned **value_matrix(const Graph * const graph){
 	return v_mat;
 }
 
+void DFS(Graph *graph, const char * const id_from, int * const visited){
+	if(graph == NULL){ return; }
+	if(graph->size == 0){ return; }
+	int index = index_in_graph(graph, id_from);
+	visited[index] = 1;
+	Edge *edge = graph->array[index]->edges;
+	while(edge != NULL){
+		if(visited[index_in_graph(graph, (*edge->node)->id)] == 0){
+			DFS(graph, (*edge->node)->id, visited);
+		}
+		edge = edge->next;
+	}
+}
+
+err traversal(Graph *graph, const char * const id_from){
+	if(graph == NULL){ return ERR_NULL; }
+	if(graph->size == 0){ return ERR_EMPTY; }
+	int index = index_in_graph(graph, id_from);
+	if((index == -1) || (graph->array[index]->room != ENTRY)){ return ERR_NO_ELEM; }
+	int *visited = (int *)calloc(graph->size, sizeof(int));
+	DFS(graph, id_from, visited);
+	err flag = ERR_NO_ELEM;
+	for(size_t i = 0; i < graph->size; i++){
+		if((graph->array[i]->room == EXIT) && (visited[i] == 1)){
+			flag = ERR_OK;
+			break;
+		}
+	}
+	free(visited);
+	return flag;
+}
+
 Node *nearest_exit(Graph *graph, const char * const id_from, unsigned *length){
+	if(graph == NULL){ return NULL; }
+	if(graph->size == 0){ return NULL; }
 	Node *node = find_node(graph, id_from);
 	if((node == NULL) || (node->room != ENTRY)){ return NULL; }
 	unsigned **v_mat = value_matrix(graph);

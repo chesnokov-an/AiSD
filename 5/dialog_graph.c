@@ -47,7 +47,7 @@ void message(err flag){
 }
 
 void Dialog(int capacity){
-	err (*func_array[])(Graph *) = {D_insert_node, D_insert_edge, D_remove_node, D_remove_edge, D_modify_node, D_modify_edge, D_show, D_draw, D_import, D_generate, D_nearest_exit};
+	err (*func_array[])(Graph *) = {D_insert_node, D_insert_edge, D_remove_node, D_remove_edge, D_modify_node, D_modify_edge, D_show, D_draw, D_import, D_generate, D_traversal, D_nearest_exit};
 	Graph *graph = create_graph(capacity);
 	int option = -1;
 	err flag = ERR_OK;
@@ -63,10 +63,11 @@ void Dialog(int capacity){
 		printf(BLUE"8: графический вывод графа\n"RESET);
 		printf(ORANGE"9: импорт графа из текстового файла\n"RESET);
 		printf(ORANGE"10: генерация рандомного графа\n"RESET);
-		printf(ORANGE"\n11: Определение ближайшего, к указанному входу, выхода и расстояния до него\n"RESET);
+		printf(YELLOW"\n11: Проверка достижимости хотя бы одного из выходов из указанной точки входа\n"RESET);
+		printf(YELLOW"12: Определение ближайшего, к указанному входу, выхода и расстояния до него\n"RESET);
 		printf(RED"\n0: Завершение программы\n\n"RESET);
 		printf(MAGENTA"Выберите опцию: "RESET);
-		flag = input_int(&option, 0, 11);
+		flag = input_int(&option, 0, 12);
 		printf("\n");
 		if(flag == ERR_EOF || option == 0){ goto end_program; }
 		flag = func_array[option-1](graph);
@@ -303,6 +304,18 @@ err D_draw(Graph *graph){
 	return ERR_OK;
 }
 
+err D_traversal(Graph *graph){
+	if(graph == NULL){ return ERR_NULL; }
+	char *id_from = readline("Введите вход (type 1): ");
+	if(id_from == NULL){ return ERR_EOF; }
+	err flag = traversal(graph, id_from);
+	free(id_from);
+	if(flag == ERR_OK){
+		printf(GREEN"\nЕсть достижимые выходы!\n"RESET);
+	}
+	return flag;
+}
+
 err D_nearest_exit(Graph *graph){
 	if(graph == NULL){ return ERR_NULL; }
 	char *id_from = readline("Введите вход (type 1): ");
@@ -316,23 +329,3 @@ err D_nearest_exit(Graph *graph){
 	free(exit_id);
 	return ERR_OK;
 }
-
-/*
-err D_traversal(graph *graph){
-	traversal(graph);
-	return ERR_OK;
-}
-
-err D_input(graph *graph){
-	FILE *file = input_correct_file();
-	if(!file){
-		return ERR_VAL;
-	}
-	if(!file){
-		printf("Unknown file\n");
-		return ERR_VAL;
-	}
-	err flag = import_graph(graph, file);
-	fclose(file);
-	return flag;
-}*/

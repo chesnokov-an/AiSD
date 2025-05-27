@@ -27,6 +27,12 @@ void free_graph(Graph *graph);
 void free_node(Node *node);
 void free_edge(Edge *edge);
 
+size_t get_size(Graph *graph);
+char *get_id(Node *node);
+room_type get_room(Node *node);
+unsigned get_length(Edge *edge);
+char *get_id_to(Edge *edge);
+
 err insert_node(Graph *graph, const char * const id, const room_type room);
 err modify_node(Graph *graph, const char * const id, const room_type room);
 err remove_node(Graph *graph, const char * const id);
@@ -40,6 +46,6 @@ void draw(Graph *graph, FILE * const);
 
 char traversal(Graph *graph, const char * const id_from);
 unsigned shortest_path(Graph *graph, const char * const id_from, const char * const id_to);
-Node *nearest_exit(Graph *graph, const char * const id_from);
+Node *nearest_exit(Graph *graph, const char * const id_from, unsigned *length);
 
 #endif

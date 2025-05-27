@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <limits.h>
 #include <graphviz/cgraph.h>
 #include <graphviz/gvc.h>
 #include "err.h"
@@ -102,6 +103,22 @@ void free_edge(Edge *edge){
 	if(edge == NULL){ return; }
 	clear_edge(edge);
 	free(edge);
+}
+/*----------------GETTER----------------*/
+size_t get_size(Graph *graph){
+	return graph->size;
+}
+char *get_id(Node *node){
+	return strdup(node->id);
+}
+room_type get_room(Node *node){
+	return node->room;
+}
+unsigned get_length(Edge *edge){
+	return edge->length;
+}
+char *get_id_to(Edge *edge){
+	return strdup((*edge->node)->id);
 }
 
 /*----------------ADDITIONAL FUNCTIONS----------------*/
@@ -291,4 +308,52 @@ void draw(Graph *graph, FILE * const file){
 	gvFreeLayout(gvc, G);
 	agclose(G);
 	gvFreeContext(gvc);
+}
+
+/*----------------INDIVIDUAL FUNCTIONS----------------*/
+unsigned **value_matrix(const Graph * const graph){
+	unsigned **v_mat = (unsigned **)calloc(graph->size, sizeof(unsigned*));
+	for(size_t i = 0; i < graph->size; i++){
+		v_mat[i] = (unsigned *)calloc(graph->size, sizeof(unsigned));
+		for(size_t j = 0; j < graph->size; j++){ v_mat[i][j] = UINT_MAX / 3; }
+	}
+	for(size_t i = 0; i < graph->size; i++){
+		Edge *edge = graph->array[i]->edges;
+		while(edge != NULL){
+			v_mat[i][index_in_graph(graph, (*edge->node)->id)] = edge->length;
+			edge = edge->next;
+		}
+	}
+	return v_mat;
+}
+
+Node *nearest_exit(Graph *graph, const char * const id_from, unsigned *length){
+	Node *node = find_node(graph, id_from);
+	if((node == NULL) || (node->room != ENTRY)){ return NULL; }
+	unsigned **v_mat = value_matrix(graph);
+	for(size_t k = 0; k < graph->size; k++){
+		for(size_t i = 0; i < graph->size; i++){
+			for(size_t j = 0; j < graph->size; j++){
+				if(v_mat[i][j] > v_mat[i][k] + v_mat[k][j]){
+					v_mat[i][j] = v_mat[i][k] + v_mat[k][j];
+				}
+			}
+		}
+	}
+	int index_from = index_in_graph(graph, id_from);
+	unsigned min_path = UINT_MAX / 3;
+	int min_index = -1;
+	for(size_t j = 0; j < graph->size; j++){
+		if((min_path > v_mat[index_from][j]) && (graph->array[j]->room == EXIT)){
+			min_path = v_mat[index_from][j];
+			min_index = j;
+		}
+	}
+	for(size_t i = 0; i < graph->size; i++){
+		free(v_mat[i]);
+	}
+	free(v_mat);
+	if(min_index == -1){ return NULL; }
+	*length = min_path;
+	return graph->array[min_index];
 }

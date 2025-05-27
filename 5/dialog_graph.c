@@ -47,7 +47,7 @@ void message(err flag){
 }
 
 void Dialog(int capacity){
-	err (*func_array[])(Graph *) = {D_insert_node, D_insert_edge, D_remove_node, D_remove_edge, D_modify_node, D_modify_edge, D_show, D_draw, D_import, D_generate};
+	err (*func_array[])(Graph *) = {D_insert_node, D_insert_edge, D_remove_node, D_remove_edge, D_modify_node, D_modify_edge, D_show, D_draw, D_import, D_generate, D_nearest_exit};
 	Graph *graph = create_graph(capacity);
 	int option = -1;
 	err flag = ERR_OK;
@@ -63,9 +63,10 @@ void Dialog(int capacity){
 		printf(BLUE"8: графический вывод графа\n"RESET);
 		printf(ORANGE"9: импорт графа из текстового файла\n"RESET);
 		printf(ORANGE"10: генерация рандомного графа\n"RESET);
+		printf(ORANGE"\n11: Определение ближайшего, к указанному входу, выхода и расстояния до него\n"RESET);
 		printf(RED"\n0: Завершение программы\n\n"RESET);
 		printf(MAGENTA"Выберите опцию: "RESET);
-		flag = input_int(&option, 0, 10);
+		flag = input_int(&option, 0, 11);
 		printf("\n");
 		if(flag == ERR_EOF || option == 0){ goto end_program; }
 		flag = func_array[option-1](graph);
@@ -291,6 +292,7 @@ err D_show(Graph *graph){
 }
 
 err D_draw(Graph *graph){
+	if(graph == NULL){ return ERR_NULL; }
 	FILE *file = fopen("graph.dot", "wb");
 	draw(graph, file);
 	fclose(file);
@@ -301,7 +303,19 @@ err D_draw(Graph *graph){
 	return ERR_OK;
 }
 
-
+err D_nearest_exit(Graph *graph){
+	if(graph == NULL){ return ERR_NULL; }
+	char *id_from = readline("Введите вход (type 1): ");
+	if(id_from == NULL){ return ERR_EOF; }
+	unsigned length = 0;
+	Node *exit = nearest_exit(graph, id_from, &length);
+	free(id_from);
+	if(exit == NULL){ return ERR_NO_ELEM; }
+	char *exit_id = get_id(exit);
+	printf(GREEN"\nБлижайший выход: %s\nРасстояние до него: %d\n"RESET, exit_id, length);
+	free(exit_id);
+	return ERR_OK;
+}
 
 /*
 err D_traversal(graph *graph){

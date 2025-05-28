@@ -47,7 +47,7 @@ void message(err flag){
 }
 
 void Dialog(int capacity){
-	err (*func_array[])(Graph *) = {D_insert_node, D_insert_edge, D_remove_node, D_remove_edge, D_modify_node, D_modify_edge, D_show, D_draw, D_import, D_generate, D_traversal, D_nearest_exit};
+	err (*func_array[])(Graph *) = {D_insert_node, D_insert_edge, D_remove_node, D_remove_edge, D_modify_node, D_modify_edge, D_show, D_draw, D_import, D_generate, D_traversal, D_shortest_path, D_nearest_exit};
 	Graph *graph = create_graph(capacity);
 	int option = -1;
 	err flag = ERR_OK;
@@ -64,10 +64,11 @@ void Dialog(int capacity){
 		printf(ORANGE"9: импорт графа из текстового файла\n"RESET);
 		printf(ORANGE"10: генерация рандомного графа\n"RESET);
 		printf(YELLOW"\n11: Проверка достижимости хотя бы одного из выходов из указанной точки входа\n"RESET);
-		printf(YELLOW"12: Определение ближайшего, к указанному входу, выхода и расстояния до него\n"RESET);
+		printf(YELLOW"12: Поиск кратчайшего пути между указанным входом и указанным выходом\n"RESET);
+		printf(YELLOW"13: Определение ближайшего, к указанному входу, выхода и расстояния до него\n"RESET);
 		printf(RED"\n0: Завершение программы\n\n"RESET);
 		printf(MAGENTA"Выберите опцию: "RESET);
-		flag = input_int(&option, 0, 12);
+		flag = input_int(&option, 0, 13);
 		printf("\n");
 		if(flag == ERR_EOF || option == 0){ goto end_program; }
 		flag = func_array[option-1](graph);
@@ -314,6 +315,33 @@ err D_traversal(Graph *graph){
 		printf(GREEN"\nЕсть достижимые выходы!\n"RESET);
 	}
 	return flag;
+}
+
+err D_shortest_path(Graph *graph){
+	if(graph == NULL){ return ERR_NULL; }
+	char *id_from = readline("Введите вход (type 1): ");
+	if(id_from == NULL){ return ERR_EOF; }
+	char *id_to = readline("Введите выход (type -1): ");
+	if(id_to == NULL){
+		free(id_from);
+		return ERR_EOF;
+	}
+	unsigned length = 0;
+	char **path = shortest_path(graph, id_from, id_to, &length);
+	free(id_from);
+	free(id_to);
+	if(path == NULL){ return ERR_NO_ELEM; }
+	printf(GREEN"Длина пути: %u\n"RESET, length);
+	printf(GREEN"Путь: "RESET);
+	size_t size = get_size(graph);
+	for(size_t i = 0; i < size; i++){
+		if(path[i] == NULL){ break; }
+		printf("%s", path[i]);
+		if((i < (size - 1)) && (path[i + 1] != NULL)){ printf(" <- "); }
+		free(path[i]);
+	}
+	free(path);
+	return ERR_OK;
 }
 
 err D_nearest_exit(Graph *graph){

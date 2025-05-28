@@ -45,7 +45,8 @@ void show(Graph *graph);
 void draw(Graph *graph, FILE * const);
 
 err traversal(Graph *graph, const char * const id_from);
-unsigned shortest_path(Graph *graph, const char * const id_from, const char * const id_to);
+char **shortest_path(Graph *graph, const char * const id_from, const char * const id_to, unsigned *path_length);
+
 Node *nearest_exit(Graph *graph, const char * const id_from, unsigned *length);
 
 #endif

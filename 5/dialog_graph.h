@@ -16,5 +16,6 @@ err D_draw(Graph *);
 err D_import(Graph *);
 err D_generate(Graph *);
 err D_traversal(Graph *);
+err D_shortest_path(Graph *);
 err D_nearest_exit(Graph *);
 #endif

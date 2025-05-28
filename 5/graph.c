@@ -154,13 +154,13 @@ Edge *find_edge(const Graph * const graph, const char * const id_from, const cha
 	return NULL;
 }
 
-int index_in_graph(const Graph * const graph, const char * const id){
+size_t index_in_graph(const Graph * const graph, const char * const id){
 	for(size_t i = 0; i < graph->size; i++){
 		if(strcmp(graph->array[i]->id, id) == 0){
-			return (int)i;
+			return i;
 		}
 	}
-	return -1;
+	return 0;
 }
 
 /*----------------MAIN FUNCTIONS----------------*/
@@ -191,8 +191,8 @@ err modify_node(Graph *graph, const char * const id, const room_type room){
 err remove_node(Graph *graph, const char * const id){
 	if(graph == NULL || id == NULL){ return ERR_NULL; }
 	if(graph->size == 0){ return ERR_EMPTY; }
-	int index = index_in_graph(graph, id);
-	if(index == -1){ return ERR_NO_ELEM; }
+	if(find_node(graph, id) == NULL){ return ERR_NO_ELEM; }
+	size_t index = index_in_graph(graph, id);
 	free_node(graph->array[index]);
 	graph->array[index] = graph->array[graph->size-1];
 	graph->array[graph->size-1] = NULL;
@@ -327,10 +327,10 @@ unsigned **value_matrix(const Graph * const graph){
 	return v_mat;
 }
 
-void DFS(Graph *graph, const char * const id_from, int * const visited){
+void DFS(Graph *graph, const char * const id_from, size_t * const visited){
 	if(graph == NULL){ return; }
 	if(graph->size == 0){ return; }
-	int index = index_in_graph(graph, id_from);
+	size_t index = index_in_graph(graph, id_from);
 	visited[index] = 1;
 	Edge *edge = graph->array[index]->edges;
 	while(edge != NULL){
@@ -344,9 +344,10 @@ void DFS(Graph *graph, const char * const id_from, int * const visited){
 err traversal(Graph *graph, const char * const id_from){
 	if(graph == NULL){ return ERR_NULL; }
 	if(graph->size == 0){ return ERR_EMPTY; }
-	int index = index_in_graph(graph, id_from);
-	if((index == -1) || (graph->array[index]->room != ENTRY)){ return ERR_NO_ELEM; }
-	int *visited = (int *)calloc(graph->size, sizeof(int));
+	if(find_node(graph, id_from) == NULL){ return ERR_NO_ELEM; }
+	size_t index = index_in_graph(graph, id_from);
+	if(graph->array[index]->room != ENTRY){ return ERR_NO_ELEM; }
+	size_t *visited = (size_t *)calloc(graph->size, sizeof(size_t));
 	DFS(graph, id_from, visited);
 	err flag = ERR_NO_ELEM;
 	for(size_t i = 0; i < graph->size; i++){
@@ -357,6 +358,64 @@ err traversal(Graph *graph, const char * const id_from){
 	}
 	free(visited);
 	return flag;
+}
+
+size_t extract_min(unsigned *dist, char *visited, size_t size){
+	size_t res = 0;
+	unsigned cur_min = UINT_MAX;
+	for(size_t i = 0; i < size; i++){
+		if((dist[i] < cur_min) && (visited[i] == 0)){
+			cur_min = dist[i];
+			res = i;
+		}
+	}
+	return res;
+}
+
+char **shortest_path(Graph *graph, const char * const id_from, const char * const id_to, unsigned *path_length){
+	if(graph == NULL){ return NULL; }
+	if(graph->size == 0){ return NULL; }
+	if(find_node(graph, id_from) == NULL){ return NULL; }
+	size_t from = index_in_graph(graph, id_from);
+	if(graph->array[from]->room != ENTRY){ return NULL; }
+	if(find_node(graph, id_to) == NULL){ return NULL; }
+	size_t to = index_in_graph(graph, id_to);
+	if(graph->array[to]->room != EXIT){ return NULL; }
+	unsigned *dist = (unsigned *)calloc(graph->size, sizeof(unsigned));
+	size_t *prev = (size_t *)calloc(graph->size, sizeof(size_t));
+	char *visited = (char *)calloc(graph->size, sizeof(char));
+	size_t visited_count = 0;
+	for(size_t i = 0; i < graph->size; i++){ dist[i] = UINT_MAX; }
+	dist[from] = 0;
+	while(visited_count != graph->size){
+		size_t u = extract_min(dist, visited, graph->size);
+		Edge *edge = graph->array[u]->edges;
+		while(edge != NULL){
+			size_t v = index_in_graph(graph, (*edge->node)->id);
+			unsigned w = find_edge(graph, graph->array[u]->id, graph->array[v]->id)->length;
+			if(dist[v] > dist[u] + w){
+				dist[v] = dist[u] + w;
+				prev[v] = u;
+			}
+			edge = edge->next;
+		}
+		visited[u] = 1;
+		visited_count += 1;
+	}
+	*path_length = dist[to];
+	char **path = (char **)calloc(graph->size, sizeof(char *));
+	path[0] = strdup(id_to);
+	size_t cur_prev = prev[index_in_graph(graph, id_to)];
+	for(size_t i = 1; i < graph->size; i++){
+		path[i] = strdup(graph->array[cur_prev]->id);
+		if(cur_prev == from){ break; }
+		cur_prev = prev[cur_prev];
+	}
+	free(visited);
+	free(dist);
+	free(prev);
+	return path;
+
 }
 
 Node *nearest_exit(Graph *graph, const char * const id_from, unsigned *length){
@@ -374,9 +433,9 @@ Node *nearest_exit(Graph *graph, const char * const id_from, unsigned *length){
 			}
 		}
 	}
-	int index_from = index_in_graph(graph, id_from);
+	size_t index_from = index_in_graph(graph, id_from);
 	unsigned min_path = UINT_MAX / 3;
-	int min_index = -1;
+	size_t min_index = 0;
 	for(size_t j = 0; j < graph->size; j++){
 		if((min_path > v_mat[index_from][j]) && (graph->array[j]->room == EXIT)){
 			min_path = v_mat[index_from][j];
@@ -387,7 +446,7 @@ Node *nearest_exit(Graph *graph, const char * const id_from, unsigned *length){
 		free(v_mat[i]);
 	}
 	free(v_mat);
-	if(min_index == -1){ return NULL; }
+	if(min_path == (UINT_MAX / 3)){ return NULL; }
 	*length = min_path;
 	return graph->array[min_index];
 }

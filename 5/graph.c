@@ -208,8 +208,9 @@ err insert_edge(Graph *graph, const char * const id_from, const char * const id_
 	if(from == NULL || to == NULL){ return ERR_NO_ELEM; }
 	Edge *edge = create_edge();
 	if(edge == NULL){ return ERR_MEM; }
-	edge->length = length;
 	edge->node = (Node **)calloc(1, sizeof(Node *));
+	if(edge->node == NULL){ return ERR_MEM; }
+	edge->length = length;
 	*edge->node = to;
 	edge->next = from->edges;
 	from->edges = edge;
@@ -274,6 +275,7 @@ void draw_edge(Agraph_t *G, const Node * const node){
 	while(edge != NULL){
 		vertex2 = agnode(G, (*edge->node)->id, FALSE);
 		char *name = (char *)calloc(strlen(node->id) + strlen((*edge->node)->id) + 1, sizeof(char));
+		if(name == NULL){ return; }
 		strcat(name, node->id);
 		strcat(name, (*edge->node)->id);
 		Agedge_t *edge_for_draw = agedge(G, vertex1, vertex2, name, TRUE);
@@ -313,8 +315,14 @@ void draw(Graph *graph, FILE * const file){
 /*----------------INDIVIDUAL FUNCTIONS----------------*/
 unsigned **value_matrix(const Graph * const graph){
 	unsigned **v_mat = (unsigned **)calloc(graph->size, sizeof(unsigned*));
+	if(v_mat == NULL){ return NULL; }
 	for(size_t i = 0; i < graph->size; i++){
 		v_mat[i] = (unsigned *)calloc(graph->size, sizeof(unsigned));
+		if(v_mat[i] == NULL){
+			for(size_t j = 0; j < i; j++){ free(v_mat[j]); }
+			free(v_mat);
+			return NULL;
+		}
 		for(size_t j = 0; j < graph->size; j++){ v_mat[i][j] = UINT_MAX / 3; }
 	}
 	for(size_t i = 0; i < graph->size; i++){
@@ -348,6 +356,7 @@ err traversal(Graph *graph, const char * const id_from){
 	size_t index = index_in_graph(graph, id_from);
 	if(graph->array[index]->room != ENTRY){ return ERR_NO_ELEM; }
 	size_t *visited = (size_t *)calloc(graph->size, sizeof(size_t));
+	if(visited == NULL){ return ERR_MEM; }
 	DFS(graph, id_from, visited);
 	err flag = ERR_NO_ELEM;
 	for(size_t i = 0; i < graph->size; i++){
@@ -382,10 +391,20 @@ char **shortest_path(Graph *graph, const char * const id_from, const char * cons
 	size_t to = index_in_graph(graph, id_to);
 	if(graph->array[to]->room != EXIT){ return NULL; }
 	unsigned *dist = (unsigned *)calloc(graph->size, sizeof(unsigned));
+	if(dist == NULL){ return NULL; }
 	size_t *prev = (size_t *)calloc(graph->size, sizeof(size_t));
+	if(prev == NULL){
+		free(dist);
+		return NULL;
+	}
 	char *visited = (char *)calloc(graph->size, sizeof(char));
+	if(visited == NULL){
+		free(prev);
+		free(dist);
+		return NULL;
+	}
 	size_t visited_count = 0;
-	for(size_t i = 0; i < graph->size; i++){ dist[i] = UINT_MAX; }
+	for(size_t i = 0; i < graph->size; i++){ dist[i] = UINT_MAX / 3; }
 	dist[from] = 0;
 	while(visited_count != graph->size){
 		size_t u = extract_min(dist, visited, graph->size);
@@ -404,6 +423,12 @@ char **shortest_path(Graph *graph, const char * const id_from, const char * cons
 	}
 	*path_length = dist[to];
 	char **path = (char **)calloc(graph->size, sizeof(char *));
+	if(path == NULL){
+		free(visited);
+		free(dist);
+		free(prev);
+		return NULL;
+	}
 	path[0] = strdup(id_to);
 	size_t cur_prev = prev[index_in_graph(graph, id_to)];
 	for(size_t i = 1; i < graph->size; i++){
@@ -415,7 +440,6 @@ char **shortest_path(Graph *graph, const char * const id_from, const char * cons
 	free(dist);
 	free(prev);
 	return path;
-
 }
 
 Node *nearest_exit(Graph *graph, const char * const id_from, unsigned *length){

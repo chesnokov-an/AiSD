@@ -42,11 +42,10 @@ err modify_edge(Graph *graph, const char * const id_from, const char * const id_
 err remove_edge(Graph *graph, const char * const id_from, const char * const id_to);
 
 void show(Graph *graph);
-void draw(Graph *graph, FILE * const);
+void draw(Graph *graph, FILE * const file, char **path);
 
 err traversal(Graph *graph, const char * const id_from);
 char **shortest_path(Graph *graph, const char * const id_from, const char * const id_to, unsigned *path_length);
-
 Node *nearest_exit(Graph *graph, const char * const id_from, unsigned *length);
 
 #endif

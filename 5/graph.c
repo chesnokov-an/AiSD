@@ -286,7 +286,7 @@ void draw_edge(Agraph_t *G, const Node * const node){
 	}
 }
 
-void draw(Graph *graph, FILE * const file){
+void draw(Graph *graph, FILE * const file, char **path){
 	if(graph == NULL){ return; }
 	Agraph_t *G = agopen("G", Agdirected, NULL);
 
@@ -304,6 +304,25 @@ void draw(Graph *graph, FILE * const file){
 			draw_edge(G, graph->array[i]);
 		}
 	}
+	/*----------------FOR ADDITIONAL TASK----------------*/
+	if((path != NULL) && (path[0] != NULL)){
+		Agnode_t *start_vertex = agnode(G, path[0], FALSE);
+		agsafeset(start_vertex, "color", "green", "");
+		size_t i = 1;
+		while((i < graph->size) && (path[i] != NULL)){
+			if(path[i] == NULL){ break; }
+			Agnode_t *vertex1 = agnode(G, path[i-1], FALSE);
+			Agnode_t *vertex2 = agnode(G, path[i], FALSE);
+			Agedge_t *edge = agedge(G, vertex2, vertex1, "edge2", TRUE);
+			agsafeset(edge, "constraint", "false", "");
+			agsafeset(edge, "color", "blue", "");
+			if(i != graph->size-1){ agsafeset(vertex2, "color", "blue", ""); }
+			i++;
+		}
+		Agnode_t *finish_vertex = agnode(G, path[i-1], FALSE);
+		agsafeset(finish_vertex, "color", "red", "");
+	}
+	/*--------------------------------*/
 	GVC_t *gvc = gvContext();
 	gvLayout(gvc, G, "neato");
 	gvRender(gvc, G, "dot", file);

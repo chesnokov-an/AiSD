@@ -182,6 +182,7 @@ err insert_node(Graph *graph, const char * const id, const room_type room){
 }
 
 err modify_node(Graph *graph, const char * const id, const room_type room){
+	if(graph == NULL || graph->array == NULL || id == NULL){ return ERR_NULL; }
 	Node *node = find_node(graph, id);
 	if(node == NULL){ return ERR_NO_ELEM; }
 	node->room = room;
@@ -189,7 +190,7 @@ err modify_node(Graph *graph, const char * const id, const room_type room){
 }
 
 err remove_node(Graph *graph, const char * const id){
-	if(graph == NULL || id == NULL){ return ERR_NULL; }
+	if(graph == NULL || graph->array == NULL || id == NULL){ return ERR_NULL; }
 	if(graph->size == 0){ return ERR_EMPTY; }
 	Node *node = find_node(graph, id);
 	if(node == NULL){ return ERR_NO_ELEM; }
@@ -223,6 +224,7 @@ err insert_edge(Graph *graph, const char * const id_from, const char * const id_
 }
 
 err modify_edge(Graph *graph, const char * const id_from, const char * const id_to, const unsigned length){
+	if(graph == NULL || graph->array == NULL || id_from == NULL || id_to == NULL){ return ERR_NULL; }
 	Edge *edge = find_edge(graph, id_from, id_to);
 	if(edge == NULL){ return ERR_NO_ELEM; }
 	edge->length = length;
@@ -230,7 +232,7 @@ err modify_edge(Graph *graph, const char * const id_from, const char * const id_
 }
 
 err remove_edge(Graph *graph, const char * const id_from, const char * const id_to){
-	if(graph == NULL || id_from == NULL || id_to == NULL){ return ERR_NULL; }
+	if(graph == NULL || graph->array == NULL || id_from == NULL || id_to == NULL){ return ERR_NULL; }
 	if(graph->size == 0){ return ERR_EMPTY; }
 	Node *from = find_node(graph, id_from);
 	Node *to = find_node(graph, id_to);
@@ -268,7 +270,7 @@ void show(Graph *graph){
 }
 
 void draw_node(Agraph_t *G, const Node * const node){
-	if(node == NULL){ return; }
+	if(G == NULL || node == NULL){ return; }
 	Agnode_t *vertex = agnode(G, node->id, TRUE);
 	if(node->room == ENTRY){ agsafeset(vertex, "shape", "square", ""); }
 	else if(node->room == EXIT){ agsafeset(vertex, "shape", "star", ""); }
@@ -276,7 +278,7 @@ void draw_node(Agraph_t *G, const Node * const node){
 }
 
 void draw_edge(Agraph_t *G, const Node * const node){
-	if(node == NULL){ return; }
+	if(G == NULL || node == NULL){ return; }
 	Agnode_t *vertex1 = agnode(G, node->id, FALSE);
 	Agnode_t *vertex2 = NULL;
 	Edge *edge = node->edges;
@@ -295,7 +297,7 @@ void draw_edge(Agraph_t *G, const Node * const node){
 }
 
 void draw(Graph *graph, FILE * const file, char **path){
-	if(graph == NULL){ return; }
+	if(graph == NULL || file == NULL){ return; }
 	Agraph_t *G = agopen("G", Agdirected, NULL);
 
 	agsafeset(G, "layout", "neato", "");
@@ -449,6 +451,8 @@ char **shortest_path(Graph *graph, const char * const id_from, const char * cons
 		visited_count += 1;
 	}
 	*path_length = dist[to];
+
+	// Restore the path
 	char **path = (char **)calloc(graph->size, sizeof(char *));
 	if(path == NULL){
 		free(visited);
@@ -470,7 +474,7 @@ char **shortest_path(Graph *graph, const char * const id_from, const char * cons
 }
 
 Node *nearest_exit(Graph *graph, const char * const id_from, unsigned *length){
-	if(graph == NULL){ return NULL; }
+	if(graph == NULL || id_from == NULL || length == NULL){ return NULL; }
 	if(graph->size == 0){ return NULL; }
 	Node *node = find_node(graph, id_from);
 	if((node == NULL) || (node->room != ENTRY)){ return NULL; }

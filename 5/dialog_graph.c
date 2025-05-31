@@ -379,11 +379,16 @@ err D_additional_shortest_path(Graph *graph){
 	file = fopen("graph.dot", "rb");
 	system("dot -Tx11 -Gdpi=500 -Gsize=100,100 graph.dot");
 	fclose(file);
+
 	size_t size = get_size(graph);
+	file = fopen("res.txt", "w");
+	fprintf(file, "%u\n", length);
 	for(size_t i = 0; i < size; i++){
 		if(path[i] == NULL){ break; }
+		fprintf(file, "%s ", path[i]);
 		free(path[i]);
 	}
 	free(path);
+	fclose(file);
 	return ERR_OK;
 }

@@ -191,12 +191,36 @@ err modify_node(Graph *graph, const char * const id, const room_type room){
 err remove_node(Graph *graph, const char * const id){
 	if(graph == NULL || id == NULL){ return ERR_NULL; }
 	if(graph->size == 0){ return ERR_EMPTY; }
-	if(find_node(graph, id) == NULL){ return ERR_NO_ELEM; }
+	Node *node = find_node(graph, id);
+	if(node == NULL){ return ERR_NO_ELEM; }
+	Edge *edge = NULL;
+	Edge *prev_edge = NULL;
+	for(size_t i = 0; i < graph->size; i++){
+		edge = graph->array[i]->edges;
+		prev_edge = NULL;
+		while(edge != NULL){
+			if(*(edge->node) == node){
+				if(prev_edge == NULL){
+					graph->array[i]->edges = edge->next;
+					free_edge(edge);
+					edge = graph->array[i]->edges;
+				}
+				else{
+					prev_edge->next = edge->next;
+					free_edge(edge);
+					edge = prev_edge;
+				}
+			}
+			prev_edge = edge;
+			if(edge != NULL){ edge = edge->next; }
+		}
+	}
 	size_t index = index_in_graph(graph, id);
 	free_node(graph->array[index]);
 	graph->array[index] = graph->array[graph->size-1];
 	graph->array[graph->size-1] = NULL;
 	graph->size -= 1;
+
 	return ERR_OK;
 }
 

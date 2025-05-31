@@ -372,7 +372,7 @@ err D_additional_shortest_path(Graph *graph){
 	free(id_from);
 	free(id_to);
 	if(path == NULL){ return ERR_NO_ELEM; }
-
+	printf(GREEN"Длина пути: %u\n"RESET, length);
 	FILE *file = fopen("graph.dot", "wb");
 	draw(graph, file, path);
 	fclose(file);

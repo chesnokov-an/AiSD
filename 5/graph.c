@@ -379,7 +379,7 @@ err traversal(Graph *graph, const char * const id_from){
 
 size_t extract_min(unsigned *dist, char *visited, size_t size){
 	size_t res = 0;
-	unsigned cur_min = UINT_MAX;
+	unsigned cur_min = UINT_MAX / 3;
 	for(size_t i = 0; i < size; i++){
 		if((dist[i] < cur_min) && (visited[i] == 0)){
 			cur_min = dist[i];
@@ -429,7 +429,15 @@ char **shortest_path(Graph *graph, const char * const id_from, const char * cons
 		visited[u] = 1;
 		visited_count += 1;
 	}
-	*path_length = dist[to];
+	if(dist[to] != UINT_MAX / 3){
+		*path_length = dist[to];
+	}
+	else{
+		free(visited);
+		free(dist);
+		free(prev);
+		return NULL;
+	}
 
 	// Restore the path
 	char **path = (char **)calloc(graph->size, sizeof(char *));

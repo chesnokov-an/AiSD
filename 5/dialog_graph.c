@@ -4,6 +4,7 @@
 #include <readline/readline.h>
 #include <limits.h>
 #include <ctype.h>
+#include <time.h>
 #include "err.h"
 #include "input.h"
 #include "graph.h"
@@ -261,7 +262,7 @@ err D_generate(Graph *graph){
 	printf("Введите число рёбер: ");
 	flag = input_int(&edge_count, 0, node_count * node_count);
 	if(flag != ERR_OK){ return flag; }
-
+	srand(time(0));
 	char **id_array = (char **)calloc(node_count, sizeof(char *));
 	int room = 0;
 	for(int i = 0; i < node_count; i++){

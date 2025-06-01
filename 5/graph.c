@@ -342,27 +342,6 @@ void draw(Graph *graph, FILE * const file, char **path){
 }
 
 /*----------------INDIVIDUAL FUNCTIONS----------------*/
-unsigned **value_matrix(const Graph * const graph){
-	unsigned **v_mat = (unsigned **)calloc(graph->size, sizeof(unsigned*));
-	if(v_mat == NULL){ return NULL; }
-	for(size_t i = 0; i < graph->size; i++){
-		v_mat[i] = (unsigned *)calloc(graph->size, sizeof(unsigned));
-		if(v_mat[i] == NULL){
-			for(size_t j = 0; j < i; j++){ free(v_mat[j]); }
-			free(v_mat);
-			return NULL;
-		}
-		for(size_t j = 0; j < graph->size; j++){ v_mat[i][j] = UINT_MAX / 3; }
-	}
-	for(size_t i = 0; i < graph->size; i++){
-		Edge *edge = graph->array[i]->edges;
-		while(edge != NULL){
-			v_mat[i][index_in_graph(graph, (*edge->node)->id)] = edge->length;
-			edge = edge->next;
-		}
-	}
-	return v_mat;
-}
 
 void DFS(Graph *graph, const char * const id_from, size_t * const visited){
 	if(graph == NULL){ return; }
@@ -471,6 +450,28 @@ char **shortest_path(Graph *graph, const char * const id_from, const char * cons
 	free(dist);
 	free(prev);
 	return path;
+}
+
+unsigned **value_matrix(const Graph * const graph){
+	unsigned **v_mat = (unsigned **)calloc(graph->size, sizeof(unsigned*));
+	if(v_mat == NULL){ return NULL; }
+	for(size_t i = 0; i < graph->size; i++){
+		v_mat[i] = (unsigned *)calloc(graph->size, sizeof(unsigned));
+		if(v_mat[i] == NULL){
+			for(size_t j = 0; j < i; j++){ free(v_mat[j]); }
+			free(v_mat);
+			return NULL;
+		}
+		for(size_t j = 0; j < graph->size; j++){ v_mat[i][j] = UINT_MAX / 3; }
+	}
+	for(size_t i = 0; i < graph->size; i++){
+		Edge *edge = graph->array[i]->edges;
+		while(edge != NULL){
+			v_mat[i][index_in_graph(graph, (*edge->node)->id)] = edge->length;
+			edge = edge->next;
+		}
+	}
+	return v_mat;
 }
 
 Node *nearest_exit(Graph *graph, const char * const id_from, unsigned *length){
